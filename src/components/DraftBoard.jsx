@@ -7,14 +7,16 @@ function Logo() {
 function SelectionGrid({ items, selected, onPick, disabled, kind }) {
   return <div className={`dx-selection-grid is-${kind}`}>{items.map((item) => {
     const banned = selected.includes(item.uuid);
-    return <button key={item.uuid} className={banned ? "is-banned" : ""} disabled={disabled || banned} onClick={() => onPick(item.uuid)}><img src={item.image} alt="" loading="lazy" /><span>{item.name}</span>{banned && <small>Banned</small>}</button>;
+    return <button type="button" key={item.uuid} className={banned ? "is-banned" : ""} disabled={disabled || banned} aria-label={banned ? `${item.name}, banned` : `Ban ${item.name}`} onClick={() => onPick(item.uuid)}><img src={item.image} alt="" loading="lazy" /><span>{item.name}</span>{banned && <small>Locked out</small>}</button>;
   })}</div>;
 }
 
 export default function DraftBoard({ session, client, connection }) {
   const [seconds, setSeconds] = useState(null);
   const [message, setMessage] = useState("");
+  const [musicMuted, setMusicMuted] = useState(false);
   const previousPhase = useRef(session.phase);
+  const musicRef = useRef(null);
   const send = (event, payload = {}) => client?.socket.emit(event, { code: session.code, ...payload });
   const maps = session.catalog?.maps || [];
   const agents = session.catalog?.agents || [];
@@ -48,6 +50,55 @@ export default function DraftBoard({ session, client, connection }) {
       oscillator.stop(context.currentTime + 0.08);
     } catch { /* Audio can be blocked until the first user interaction. */ }
     previousPhase.current = session.phase;
+  }, [session.phase]);
+
+  useEffect(() => {
+    if (musicRef.current) musicRef.current.muted = musicMuted;
+  }, [musicMuted]);
+
+  useEffect(() => {
+    const audio = new Audio("/music/bg-music.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0.24;
+    musicRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      musicRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = musicRef.current;
+    if (!audio) return undefined;
+
+    const isBanPhase = session.phase === "map_ban" || session.phase === "agent_ban";
+    if (!isBanPhase) {
+      audio.pause();
+      return undefined;
+    }
+
+    let waitingForInteraction = false;
+    const retryPlayback = () => {
+      audio.play().then(removeRetryListeners).catch(() => {});
+    };
+    const removeRetryListeners = () => {
+      if (!waitingForInteraction) return;
+      waitingForInteraction = false;
+      window.removeEventListener("pointerdown", retryPlayback);
+      window.removeEventListener("keydown", retryPlayback);
+    };
+
+    audio.play().catch(() => {
+      waitingForInteraction = true;
+      window.addEventListener("pointerdown", retryPlayback, { once: true });
+      window.addEventListener("keydown", retryPlayback, { once: true });
+    });
+
+    return removeRetryListeners;
   }, [session.phase]);
 
   function leave() {
@@ -86,6 +137,9 @@ export default function DraftBoard({ session, client, connection }) {
   const pool = session.phase === "agent_ban" ? agents : maps;
   const selected = session.phase === "agent_ban" ? selectedAgents : selectedMaps;
   const kind = session.phase === "agent_ban" ? "agents" : "maps";
+  const phases = ["map_ban", "side_pick", "agent_ban", "done"];
+  const phaseIndex = phases.indexOf(session.phase);
+  const isBanPhase = session.phase === "map_ban" || session.phase === "agent_ban";
 
-  return <main className="dx-app"><header className="dx-appbar"><Logo /><div className="dx-phase"><strong>{phaseLabel}</strong><span>Room {session.code}</span></div><div className="dx-app-actions"><span className={`dx-live is-${connection}`}><i />{connection}</span>{session.ops?.canUndo && <button onClick={() => send("undoDraftAction")}>Undo</button>}{session.ops?.canResetToLobby && <button onClick={() => send("resetDraftToLobby")}>Reset</button>}{session.phase === "done" && <button onClick={downloadSummary}>Export</button>}<button onClick={leave}>Leave</button></div></header><div className="dx-draft-shell"><section className="dx-draft-main"><header className="dx-turn"><div><h1>{status}</h1><p>{canPick ? "Choose one option to continue the draft." : "The board updates for everyone in real time."}</p></div>{seconds !== null && <time>{String(seconds).padStart(2, "0")}</time>}</header>{session.phase === "side_pick" && <section className="dx-side-pick"><h2>Choose the opening side on {session.selectedMap?.name}</h2><div><button className="dx-button dx-button-primary" disabled={!session.me?.isCaptain || session.me.myTeam !== session.sidePickerTeam} onClick={() => send("pickSide", { side: "attack" })}>Attack</button><button className="dx-button dx-button-secondary" disabled={!session.me?.isCaptain || session.me.myTeam !== session.sidePickerTeam} onClick={() => send("pickSide", { side: "defense" })}>Defense</button></div></section>}{["map_ban", "agent_ban"].includes(session.phase) && <section className="dx-pool"><header><h2>{session.phase === "map_ban" ? "Choose a map to ban" : "Choose an agent to ban"}</h2><p>{selected.length} locked</p></header><SelectionGrid items={pool} selected={selected} disabled={!canPick} kind={kind} onPick={(uuid) => send(session.phase === "map_ban" ? "banMap" : "banAgent", { uuid })} /></section>}{session.phase === "done" && <section className="dx-complete"><div><h2>{session.selectedMap?.name || "Map decided"}</h2><p>{session.selectedSide ? `Opening side: ${session.selectedSide}` : "The draft is locked."}</p></div><div><button className="dx-button dx-button-secondary" onClick={downloadSummary}>Export result</button>{session.ops?.canRematch && <button className="dx-button dx-button-primary" onClick={() => send("rematchDraft")}>Run it back</button>}</div></section>}</section><aside className="dx-chat"><header><h2>Room chat</h2><span>{session.chat?.length || 0}/50</span></header><div className="dx-chat-log">{session.chat?.length ? session.chat.map((item) => <article key={item.id} className={item.fromId === session.me?.id ? "is-mine" : ""}><strong>{item.fromName}</strong><p>{item.text}</p></article>) : <p className="dx-chat-empty">Messages stay inside this room.</p>}</div><form onSubmit={sendChat}><input value={message} maxLength={240} onChange={(event) => setMessage(event.target.value)} placeholder="Write a message" aria-label="Room message" /><button type="submit">Send</button></form></aside></div></main>;
+  return <main className={`dx-app dx-phase-${session.phase}${canPick ? " is-my-turn" : ""}`}><header className="dx-appbar"><Logo /><div className="dx-phase"><strong>{phaseLabel}</strong><span>Room {session.code}</span></div><div className="dx-app-actions"><span className={`dx-live is-${connection}`}><i />{connection}</span>{isBanPhase && <button className="dx-audio-toggle" aria-pressed={musicMuted} onClick={() => setMusicMuted((value) => !value)}>{musicMuted ? "Sound off" : "Sound on"}</button>}{session.ops?.canUndo && <button onClick={() => send("undoDraftAction")}>Undo</button>}{session.ops?.canResetToLobby && <button onClick={() => send("resetDraftToLobby")}>Reset</button>}{session.phase === "done" && <button onClick={downloadSummary}>Export</button>}<button onClick={leave}>Leave</button></div></header><nav className="dx-phase-rail" aria-label="Draft progress">{[["Map veto","map_ban"],["Side","side_pick"],["Agents","agent_ban"],["Match ready","done"]].map(([label, phase], index) => <span key={phase} className={index === phaseIndex ? "is-active" : index < phaseIndex ? "is-complete" : ""}><i>{String(index + 1).padStart(2,"0")}</i>{label}</span>)}</nav><div className="dx-draft-shell"><section className="dx-draft-main"><header className="dx-turn"><div><span className="dx-turn-label">{canPick ? "Action required" : "Live draft"}</span><h1>{status}</h1><p>{canPick ? "Lock one option before the timer expires." : "The board updates for everyone in real time."}</p></div>{seconds !== null && <div className="dx-clock"><small>Turn timer</small><time>{String(seconds).padStart(2, "0")}</time></div>}</header>{session.phase === "side_pick" && <section className="dx-side-pick"><span>Map locked</span><h2>Open {session.selectedMap?.name} on</h2><div><button className="dx-button dx-button-primary" disabled={!session.me?.isCaptain || session.me.myTeam !== session.sidePickerTeam} onClick={() => send("pickSide", { side: "attack" })}>Attack</button><button className="dx-button dx-button-secondary" disabled={!session.me?.isCaptain || session.me.myTeam !== session.sidePickerTeam} onClick={() => send("pickSide", { side: "defense" })}>Defense</button></div></section>}{["map_ban", "agent_ban"].includes(session.phase) && <section className="dx-pool"><header><div><span>{session.phase === "map_ban" ? "Map pool" : "Agent roster"}</span><h2>{session.phase === "map_ban" ? "Choose a map to ban" : "Choose an agent to ban"}</h2></div><p><b>{selected.length}</b> locked</p></header><SelectionGrid items={pool} selected={selected} disabled={!canPick} kind={kind} onPick={(uuid) => send(session.phase === "map_ban" ? "banMap" : "banAgent", { uuid })} /></section>}{session.phase === "done" && <section className="dx-complete"><div><span>Draft complete</span><h2>{session.selectedMap?.name || "Map decided"}</h2><p>{session.selectedSide ? `Opening side: ${session.selectedSide}` : "The draft is locked."}</p></div><div><button className="dx-button dx-button-secondary" onClick={downloadSummary}>Export result</button>{session.ops?.canRematch && <button className="dx-button dx-button-primary" onClick={() => send("rematchDraft")}>Run it back</button>}</div></section>}</section><aside className="dx-chat"><header><div><small>Squad comms</small><h2>Room chat</h2></div><span>{session.chat?.length || 0}/50</span></header><div className="dx-chat-log">{session.chat?.length ? session.chat.map((item) => <article key={item.id} className={item.fromId === session.me?.id ? "is-mine" : ""}><strong>{item.fromName}</strong><p>{item.text}</p></article>) : <div className="dx-chat-empty"><span>COMMS</span><p>Messages stay inside this room.</p></div>}</div><form onSubmit={sendChat}><input value={message} maxLength={240} onChange={(event) => setMessage(event.target.value)} placeholder="Message the room" aria-label="Room message" /><button type="submit">Send</button></form></aside></div></main>;
 }

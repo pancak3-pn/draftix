@@ -1,0 +1,119 @@
+/* Draftix type system: readable UI, condensed display, tactical labels, dotted data. */
+:root {
+  --font-ui:"Inter",sans-serif;
+  --font-display:"Barlow Condensed",sans-serif;
+  --font-tactical:"Rajdhani",sans-serif;
+  --font-data:"Doto",monospace;
+}
+
+.dx-app,
+.dx-entry,
+.dr-site { font-family:var(--font-ui); }
+
+.dx-entry-copy h1,
+.dx-team h2,
+.dx-room h1,
+.dx-turn h1,
+.dx-pool h2,
+.dx-side-pick h2,
+.dx-complete h2,
+.dx-chat-empty span,
+.dr-hero h1,
+.dr-operation-intro h2,
+.dr-process h2,
+.dr-pool h2,
+.dr-final h2,
+.dr-operation-list h3,
+.dr-process-track h3,
+.dr-map-slide > span {
+  font-family:var(--font-display);
+  font-weight:800;
+}
+
+.dx-room h1 {
+  max-width:780px;
+  font-size:clamp(3rem,4vw,4.3rem);
+  line-height:.88;
+  letter-spacing:-.035em;
+  text-wrap:balance;
+}
+
+.dx-team h2 { font-size:1.6rem; line-height:1; letter-spacing:-.015em; }
+
+.dx-logo strong,
+.dx-button,
+.dx-phase strong,
+.dx-selection-grid button > span,
+.dx-field > span,
+.dx-app-actions button,
+.dx-control-group h2,
+.dx-text-button,
+.dx-phase-rail > span,
+.dx-chat h2,
+.dx-chat form button,
+.dx-kicker,
+.dx-panel-heading span,
+.dx-room-status span,
+.dx-turn-label,
+.dx-pool > header > div > span,
+.dx-side-pick > span,
+.dx-complete > div > span,
+.dx-chat > header small,
+.dx-room-code small,
+.dx-team > header > div > small,
+.dx-captain small,
+.dx-clock small,
+.dx-selection-grid button.is-banned > small,
+.dr-brand strong,
+.dr-nav-links a,
+.dr-button,
+.dr-map-controls button,
+.dr-map-controls p,
+.dr-map-error div {
+  font-family:var(--font-tactical);
+}
+
+.dx-kicker,
+.dx-panel-heading span,
+.dx-room-status span,
+.dx-turn-label,
+.dx-pool > header > div > span,
+.dx-side-pick > span,
+.dx-complete > div > span,
+.dx-chat > header small,
+.dx-room-code small,
+.dx-team > header > div > small,
+.dx-captain small,
+.dx-clock small,
+.dx-selection-grid button.is-banned > small {
+  font-weight:700;
+  letter-spacing:.14em;
+}
+
+.dx-room-code strong,
+.dx-code-input,
+.dx-turn time,
+.dx-clock time,
+.dx-phase-rail i {
+  font-family:var(--font-data) !important;
+  font-weight:700;
+}
+
+.dx-room-code strong { letter-spacing:.08em; }
+
+.dx-team header > span,
+.dx-panel-heading strong,
+.dx-room-status b,
+.dx-control-group h2 span,
+.dx-pool > header > p {
+  font-family:var(--font-tactical);
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+
+.dx-copy-notice strong,
+.dx-copy-notice small { font-family:var(--font-ui); }
+
+@media (min-width:1051px) and (max-height:760px) {
+  .dx-lobby .dx-room h1 { font-size:2.8rem; }
+}

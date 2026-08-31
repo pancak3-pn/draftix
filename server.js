@@ -177,6 +177,7 @@ function randomCode() {
 // can never accidentally join a different session.
 const DATA_DIR = path.join(__dirname, "data");
 const CODE_LOG_PATH = path.join(DATA_DIR, "codes.log");
+const CATALOG_CACHE_PATH = path.join(DATA_DIR, "catalog-cache.json");
 const usedCodes = new Set();
 
 async function loadUsedCodes() {
@@ -347,39 +348,70 @@ function performAutoBan(session) {
 }
 
 async function loadCatalog() {
-  const [aJson, mJson] = await Promise.all([getJson(VAL_AGENTS), getJson(VAL_MAPS)]);
-  catalog.agents = (aJson.data || [])
-    .filter((a) => a.uuid && a.displayName && a.fullPortrait)
-    .map((a) => ({
-      uuid: a.uuid,
-      name: a.displayName,
-      image: a.fullPortrait,
-      icon: a.displayIcon || a.displayIconSmall || a.fullPortrait,
-    }))
-    .sort((x, y) => x.name.localeCompare(y.name));
-  catalog.maps = (mJson.data || [])
-    .filter(
-      (m) =>
-        m.uuid &&
-        m.displayName &&
-        m.splash &&
-        ALLOWED_MAP_NAMES.has(String(m.displayName).trim().toLowerCase())
-    )
-    .map((m) => ({
-      uuid: m.uuid,
-      name: m.displayName,
-      image: m.splash,
-    }))
-    .sort(function (a, b) {
-      const ia = MAP_POOL_ORDER.findIndex(
-        (n) => n.toLowerCase() === String(a.name).trim().toLowerCase()
-      );
-      const ib = MAP_POOL_ORDER.findIndex(
-        (n) => n.toLowerCase() === String(b.name).trim().toLowerCase()
-      );
-      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-    });
-  console.log(`Catalog: ${catalog.maps.length} maps, ${catalog.agents.length} agents`);
+  if (process.env.DRAFTIX_TEST_CATALOG === "1") {
+    catalog.maps = ["Ascent", "Bind", "Haven"].map((name) => ({
+      uuid: `test-map-${name.toLowerCase()}`,
+      name,
+      image: `/images/maps/${name.toLowerCase()}.png`,
+    }));
+    catalog.agents = ["Brimstone", "Jett", "Killjoy", "Omen", "Sage", "Sova"].map((name) => ({
+      uuid: `test-agent-${name.toLowerCase()}`,
+      name,
+      image: "/images/draftix.png",
+      icon: "/images/draftix.png",
+    }));
+    console.log(`Catalog: ${catalog.maps.length} maps, ${catalog.agents.length} agents (test fixture)`);
+    return;
+  }
+  try {
+    const [aJson, mJson] = await Promise.all([getJson(VAL_AGENTS), getJson(VAL_MAPS)]);
+    const nextCatalog = {
+      agents: (aJson.data || [])
+        .filter((a) => a.uuid && a.displayName && a.fullPortrait)
+        .map((a) => ({
+          uuid: a.uuid,
+          name: a.displayName,
+          image: a.fullPortrait,
+          icon: a.displayIcon || a.displayIconSmall || a.fullPortrait,
+        }))
+        .sort((x, y) => x.name.localeCompare(y.name)),
+      maps: (mJson.data || [])
+        .filter(
+          (m) =>
+            m.uuid &&
+            m.displayName &&
+            ALLOWED_MAP_NAMES.has(String(m.displayName).trim().toLowerCase())
+        )
+        .map((m) => ({
+          uuid: m.uuid,
+          name: m.displayName,
+          image: `/images/maps/${String(m.displayName).trim().toLowerCase()}.png`,
+        }))
+        .sort(function (a, b) {
+          const ia = MAP_POOL_ORDER.findIndex((n) => n.toLowerCase() === String(a.name).trim().toLowerCase());
+          const ib = MAP_POOL_ORDER.findIndex((n) => n.toLowerCase() === String(b.name).trim().toLowerCase());
+          return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        }),
+    };
+    if (nextCatalog.maps.length < 2 || nextCatalog.agents.length < 2) {
+      throw new Error("Valorant API returned an incomplete catalog");
+    }
+    catalog = nextCatalog;
+    await fsp.mkdir(DATA_DIR, { recursive: true });
+    await fsp.writeFile(CATALOG_CACHE_PATH, JSON.stringify(catalog), "utf8");
+    console.log(`Catalog: ${catalog.maps.length} maps, ${catalog.agents.length} agents`);
+  } catch (upstreamError) {
+    try {
+      const cached = JSON.parse(await fsp.readFile(CATALOG_CACHE_PATH, "utf8"));
+      if (!Array.isArray(cached.maps) || cached.maps.length < 2 || !Array.isArray(cached.agents) || cached.agents.length < 2) {
+        throw new Error("Catalog cache is incomplete");
+      }
+      catalog = cached;
+      console.warn(`Valorant API unavailable; using cached catalog (${catalog.maps.length} maps, ${catalog.agents.length} agents).`);
+    } catch (_) {
+      throw upstreamError;
+    }
+  }
 }
 
 function nick(session, socketId) {
@@ -609,6 +641,7 @@ function parseAllowedOrigins() {
 async function main() {
   await loadUsedCodes();
   await loadCatalog();
+  const isProd = process.env.NODE_ENV === "production";
 
   // ─── Catalog auto-refresh ───
   // Re-fetch the Valorant API every 12h so newly-released agents/maps appear
@@ -626,6 +659,9 @@ async function main() {
   }, CATALOG_REFRESH_MS).unref();
 
   const allowedList = parseAllowedOrigins();
+  if (isProd && (!allowedList || !allowedList.length)) {
+    throw new Error("ALLOWED_ORIGINS is required when NODE_ENV=production");
+  }
   const corsOrigin =
     allowedList && allowedList.length
       ? function (origin, cb) {
@@ -662,7 +698,6 @@ async function main() {
   // socket.io's client is fetched from cdn.socket.io. WebSocket upgrades to
   // the same origin are needed by socket.io; ko-fi link is permitted in
   // navigations but not framed.
-  const isProd = process.env.NODE_ENV === "production";
   const cspDirectives = {
     defaultSrc: ["'self'"],
     baseUri: ["'self'"],
@@ -740,6 +775,11 @@ async function main() {
       turnTimeoutMs: TURN_TIMEOUT_MS,
       catalog: { maps: catalog.maps.length, agents: catalog.agents.length },
     });
+  });
+
+  app.get("/readyz", (_req, res) => {
+    const ready = catalog.maps.length >= 2 && catalog.agents.length >= 2 && !shuttingDown;
+    res.status(ready ? 200 : 503).json({ ok: ready, catalog: { maps: catalog.maps.length, agents: catalog.agents.length } });
   });
 
   // ─── Public “report / feedback” → Discord (no form, no webhook) ───

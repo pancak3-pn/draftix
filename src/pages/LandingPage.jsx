@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Sunset"].map((displayName) => ({
   displayName,
@@ -12,22 +12,34 @@ function Brand() {
 function Navigation() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
-  return <nav className="dr-nav" aria-label="Primary navigation"><a href="#top" onClick={close} aria-label="Draftix home"><Brand /></a><button className="dr-menu" type="button" aria-expanded={open} aria-controls="dr-nav-links" onClick={() => setOpen((value) => !value)}><span /><span /><span /><b className="sr-only">Toggle navigation</b></button><div id="dr-nav-links" className={`dr-nav-links ${open ? "is-open" : ""}`}><a href="#product" onClick={close}>Product</a><a href="#process" onClick={close}>How it works</a><a href="/team-balance.html" onClick={close}>Team balancer</a><a href="/app" className="dr-nav-cta" onClick={close}>Open Draftix</a></div></nav>;
+  return <nav className="dr-nav" aria-label="Primary navigation">
+    <a href="#top" onClick={close} aria-label="Draftix home"><Brand /></a>
+    <button className="dr-menu" type="button" aria-expanded={open} aria-controls="dr-nav-links" onClick={() => setOpen((value) => !value)}><span /><span /><span /><b className="sr-only">Toggle navigation</b></button>
+    <div id="dr-nav-links" className={`dr-nav-links ${open ? "is-open" : ""}`}>
+      <a href="#product" onClick={close}>Product</a>
+      <a href="#process" onClick={close}>How it works</a>
+      <a href="/team-balance.html" onClick={close}>Team balancer</a>
+      <a href="/app" className="dr-nav-cta" onClick={close}>Open Draftix</a>
+    </div>
+  </nav>;
 }
 
 function MapCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const select = (index) => {
-    setActiveIndex((index + mapPool.length) % mapPool.length);
-  };
-
+  const pointerStart = useRef(null);
+  const select = (index) => setActiveIndex((index + mapPool.length) % mapPool.length);
   const handleKeyDown = (event) => {
     if (event.key === "ArrowLeft") select(activeIndex - 1);
     if (event.key === "ArrowRight") select(activeIndex + 1);
   };
+  const finishSwipe = (event) => {
+    if (pointerStart.current === null) return;
+    const distance = event.clientX - pointerStart.current;
+    pointerStart.current = null;
+    if (Math.abs(distance) >= 45) select(activeIndex + (distance < 0 ? 1 : -1));
+  };
 
-  return <div className="dr-map-carousel" tabIndex="0" onKeyDown={handleKeyDown} aria-label="Valorant map carousel">
+  return <div className="dr-map-carousel" tabIndex="0" onKeyDown={handleKeyDown} onPointerDown={(event) => { pointerStart.current = event.clientX; }} onPointerUp={finishSwipe} onPointerCancel={() => { pointerStart.current = null; }} aria-label="Valorant map carousel">
     <div className="dr-map-stage">
       {mapPool.map((map, index) => {
         const offset = (index - activeIndex + mapPool.length) % mapPool.length;
@@ -49,7 +61,7 @@ function MapCarousel() {
 export default function LandingPage() {
   useEffect(() => {
     document.body.classList.add("dr-page");
-    const nodes = document.querySelectorAll("[data-reveal]");
+    const nodes = document.querySelectorAll("[data-reveal], [data-flow]");
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       nodes.forEach((node) => node.classList.add("is-visible"));
       return () => document.body.classList.remove("dr-page");
@@ -63,5 +75,31 @@ export default function LandingPage() {
     return () => { observer.disconnect(); document.body.classList.remove("dr-page"); };
   }, []);
 
-  return <main className="dr-site"><Navigation /><section className="dr-hero" id="top"><div className="dr-hero-copy" data-reveal><h1>Settle the draft.<br /><span>Start ready.</span></h1><p>One shared room for map vetoes, agent bans, and the decisions that shape the match.</p><div className="dr-actions"><a href="/app" className="dr-button dr-button-primary">Start a draft</a><a href="#process" className="dr-button dr-button-secondary">See the flow</a></div></div><figure className="dr-hero-visual" data-reveal><img src="/images/draftix-tactical-hero.png" alt="Abstract tactical arena map with red and blue draft markers" fetchPriority="high" /></figure></section><section className="dr-operations" id="product" data-reveal><div className="dr-operation-intro"><h2>Everything happens in one room.</h2><p>The host sets the format. Captains make the calls. Everyone sees the same state.</p></div><div className="dr-operation-list"><article><h3>Create the lobby</h3><p>Share a short code. No account or install is required.</p></article><article><h3>Run the veto</h3><p>Server-controlled turns and timers keep every decision fair.</p></article><article><h3>Lock the match</h3><p>Pick the opening side, finish agent bans, and export the result.</p></article></div></section><section className="dr-process" id="process"><header data-reveal><h2>From room code to ready.</h2></header><div className="dr-process-track"><article data-reveal><h3>Open</h3><p>Create a room and send the code to both teams.</p></article><article data-reveal><h3>Claim</h3><p>Captains take their seats and confirm team names.</p></article><article data-reveal><h3>Veto</h3><p>Ban maps, choose a side, then finish agent bans.</p></article><article data-reveal><h3>Play</h3><p>Save the final draft and move into the match.</p></article></div></section><section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Explore every arena available in Draftix.</p></header><MapCarousel /></section><section className="dr-final" data-reveal><h2>Your next draft takes seconds.</h2><a href="/app" className="dr-button dr-button-primary">Open Draftix</a></section><footer className="dr-footer"><Brand /><p>Real-time drafting for Valorant teams.</p><nav aria-label="Footer navigation"><a href="/status.html">Status</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav><small>© {new Date().getFullYear()} DRAFTIX</small></footer></main>;
+  return <main className="dr-site">
+    <Navigation />
+    <section className="dr-hero" id="top">
+      <div className="dr-hero-copy" data-reveal><h1>Settle the draft.<br /><span>Start ready.</span></h1><p>Map vetoes, agent bans, one shared room.</p><div className="dr-actions"><a href="/app" className="dr-button dr-button-primary">Start a draft</a><a href="#process" className="dr-button dr-button-secondary">See the flow</a></div></div>
+      <figure className="dr-hero-visual" data-reveal><img src="/images/draftix-tactical-hero.png" alt="Abstract tactical arena map with red and blue draft markers" fetchPriority="high" /></figure>
+    </section>
+    <section className="dr-operations" id="product" data-reveal>
+      <header className="dr-operation-intro"><h2>One room. Every call.</h2><p>Set the format, run the veto, lock the match.</p></header>
+      <div className="dr-operation-list">
+        <article><img src="/images/maps/ascent.png" alt="Ascent map" loading="lazy" /><div><h3>Open the room</h3><p>Share one code.</p></div></article>
+        <article><img src="/images/maps/bind.png" alt="Bind map" loading="lazy" /><div><h3>Control the veto</h3><p>Captains take turns.</p></div></article>
+        <article><img src="/images/maps/icebox.png" alt="Icebox map" loading="lazy" /><div><h3>Lock the result</h3><p>Export and play.</p></div></article>
+      </div>
+    </section>
+    <section className="dr-process" id="process" data-flow>
+      <header data-reveal><h2>Four calls. Match ready.</h2></header>
+      <div className="dr-process-track">
+        <article data-reveal><img src="/images/maps/ascent.png" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
+        <article data-reveal><img src="/images/maps/lotus.png" alt="" loading="lazy" /><div><strong>02</strong><h3>Claim</h3><p>Seat the captains.</p></div></article>
+        <article data-reveal><img src="/images/maps/bind.png" alt="" loading="lazy" /><div><strong>03</strong><h3>Veto</h3><p>Ban. Pick. Lock.</p></div></article>
+        <article data-reveal><img src="/images/maps/sunset.png" alt="" loading="lazy" /><div><strong>04</strong><h3>Play</h3><p>Take the result.</p></div></article>
+      </div>
+    </section>
+    <section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Choose the arena before the match begins.</p></header><MapCarousel /></section>
+    <section className="dr-final" data-reveal><h2>Your next draft takes seconds.</h2><a href="/app" className="dr-button dr-button-primary">Open Draftix</a></section>
+    <footer className="dr-footer" data-reveal><Brand /><p>Real-time drafting for Valorant teams.</p><nav aria-label="Footer navigation"><a href="/status.html">Status</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav><small>© {new Date().getFullYear()} DRAFTIX</small></footer>
+  </main>;
 }
