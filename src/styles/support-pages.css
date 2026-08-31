@@ -1,0 +1,57 @@
+.sp-page { --sp-line:#252c38; --sp-panel:#0c1119; --sp-muted:#929aaa; --sp-red:#e83f4e; min-height:100dvh; background:#070a10; color:#f2f3f5; }
+.sp-header { display:flex; align-items:center; justify-content:space-between; width:min(1320px,calc(100% - 48px)); min-height:76px; margin:auto; border-bottom:1px solid var(--sp-line); }
+.sp-logo { display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none; }
+.sp-logo img { width:34px; height:34px; object-fit:contain; }
+.sp-logo strong { font:700 1.2rem "Saira Condensed",sans-serif; letter-spacing:.14em; }
+.sp-logo strong span { color:var(--sp-red); }
+.sp-header nav { display:flex; align-items:center; gap:26px; }
+.sp-header nav a { color:var(--sp-muted); font:700 .82rem "Rajdhani",sans-serif; text-decoration:none; }
+.sp-header nav a:hover { color:#fff; }
+.sp-header .sp-open { padding:10px 14px; border:1px solid #5a2229; background:#31151a; color:#fff; }
+.sp-intro,.status-head { width:min(1180px,calc(100% - 48px)); margin:auto; padding:90px 0 58px; }
+.sp-intro h1,.status-head h1,.legal-page h1 { margin:0; font:800 clamp(3.6rem,7vw,6.4rem)/.88 "Saira Condensed",sans-serif; letter-spacing:-.035em; text-transform:uppercase; }
+.sp-intro p,.status-head p { max-width:560px; margin:22px 0 0; color:var(--sp-muted); font-size:1.05rem; line-height:1.6; }
+.tb-layout { display:grid; grid-template-columns:300px minmax(0,1fr); gap:1px; width:min(1180px,calc(100% - 48px)); margin:auto; border:1px solid var(--sp-line); background:var(--sp-line); }
+.tb-controls,.tb-roster { background:var(--sp-panel); padding:28px; }
+.tb-controls section + section { margin-top:34px; padding-top:28px; border-top:1px solid var(--sp-line); }
+.tb-controls h2,.tb-roster h2,.tb-results h2 { margin:0; font:700 1rem "Rajdhani",sans-serif; }
+.tb-controls section > p,.tb-roster header p,.tb-results header p { color:var(--sp-muted); font-size:.82rem; line-height:1.5; }
+.tb-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.tb-options button,.tb-roster header button,.tb-clear,.tb-results header button { min-height:42px; border:1px solid #343c49; border-radius:4px; background:#101722; color:#c7cbd3; cursor:pointer; font-weight:700; }
+.tb-options button.is-active { border-color:var(--sp-red); background:#31151a; color:#fff; }
+.tb-run { width:100%; min-height:48px; margin-top:32px; border:0; border-radius:4px; background:var(--sp-red); color:#fff; font-weight:700; cursor:pointer; }
+.tb-error { color:#ff929c; }
+.tb-roster > header,.tb-results > header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:20px; }
+.tb-roster header p,.tb-results header p { margin:5px 0 0; }
+.tb-roster header button,.tb-results header button { padding:0 14px; }
+.tb-rows { display:grid; }
+.tb-row { display:grid; grid-template-columns:34px minmax(150px,1fr) minmax(130px,190px) 76px; align-items:center; gap:10px; min-height:58px; border-top:1px solid rgba(255,255,255,.055); }
+.tb-row > span { color:#5f6877; font:600 .78rem "Share Tech Mono",monospace; }
+.tb-row input,.tb-row select { width:100%; min-height:40px; padding:0 11px; border:1px solid #303846; border-radius:4px; background:#080c12; color:#eef0f4; }
+.tb-row button { border:0; background:transparent; color:#7f8794; cursor:pointer; font-size:.76rem; }
+.tb-row button:disabled { opacity:.3; }
+.tb-clear { margin-top:20px; padding:0 14px; background:transparent; }
+.tb-results { width:min(1180px,calc(100% - 48px)); margin:48px auto 0; padding-top:34px; border-top:1px solid var(--sp-line); }
+.tb-results > div { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--sp-line); }
+.tb-team { padding:26px; background:var(--sp-panel); }
+.tb-team > header { display:flex; justify-content:space-between; gap:20px; margin-bottom:20px; }
+.tb-team h3 { margin:0; font:700 1.3rem "Rajdhani",sans-serif; }
+.tb-team.is-a h3 { color:var(--sp-red); }.tb-team.is-b h3 { color:#6798e8; }
+.tb-team header p { margin:4px 0 0; color:var(--sp-muted); font-size:.78rem; }
+.tb-team header > strong { font:700 1.5rem "Share Tech Mono",monospace; }
+.tb-team ol { margin:0; padding:0; list-style:none; }
+.tb-team li { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-top:1px solid rgba(255,255,255,.06); }
+.tb-team li span { display:grid; gap:2px; }.tb-team li small { color:var(--sp-muted); }.tb-team li em { color:#77808f; font:normal .8rem "Share Tech Mono",monospace; }
+.tb-bench { padding:22px 0; }.tb-bench h3 { margin:0 0 6px; }.tb-bench p { margin:0; color:var(--sp-muted); }
+.status-head { display:flex; align-items:center; gap:24px; }
+.status-signal { width:18px; height:18px; border-radius:50%; background:#687181; box-shadow:0 0 0 8px rgba(104,113,129,.1); }
+.status-signal.is-online { background:#44c184; box-shadow:0 0 0 8px rgba(68,193,132,.12); }.status-signal.is-offline { background:var(--sp-red); }
+.status-grid { display:grid; grid-template-columns:repeat(3,1fr); width:min(1180px,calc(100% - 48px)); margin:auto; border-top:1px solid var(--sp-line); border-left:1px solid var(--sp-line); }
+.status-grid article { min-height:190px; padding:28px; border-right:1px solid var(--sp-line); border-bottom:1px solid var(--sp-line); }
+.status-grid span { color:var(--sp-muted); font-size:.78rem; }.status-grid strong { display:block; margin-top:34px; font:700 2rem "Rajdhani",sans-serif; }.status-grid p { color:var(--sp-muted); }
+.status-updated { width:min(1180px,calc(100% - 48px)); margin:20px auto; color:var(--sp-muted); font-size:.78rem; }
+.legal-page { width:min(780px,calc(100% - 48px)); margin:auto; padding:90px 0; }
+.legal-page header { padding-bottom:36px; border-bottom:1px solid var(--sp-line); }.legal-page header p { color:var(--sp-muted); }.legal-lead { margin:40px 0 60px; font-size:1.2rem; line-height:1.65; }
+.legal-page section { margin-top:42px; }.legal-page h2 { margin:0 0 14px; font:700 1.25rem "Rajdhani",sans-serif; color:#fff; }.legal-page section p,.legal-page li { color:#b9bec8; line-height:1.75; }.legal-page a { color:#ff7b86; }
+.sp-footer { display:flex; gap:24px; width:min(1180px,calc(100% - 48px)); margin:90px auto 0; padding:30px 0; border-top:1px solid var(--sp-line); }.sp-footer a { color:var(--sp-muted); text-decoration:none; }
+@media (max-width:760px) { .sp-header { width:calc(100% - 32px); }.sp-header nav a:not(.sp-open) { display:none; }.sp-intro,.status-head,.tb-layout,.tb-results,.status-grid,.status-updated,.legal-page,.sp-footer { width:calc(100% - 32px); }.tb-layout { grid-template-columns:1fr; }.tb-row { grid-template-columns:28px minmax(0,1fr) 115px; padding:8px 0; }.tb-row button { grid-column:2 / -1; justify-self:end; }.tb-results > div,.status-grid { grid-template-columns:1fr; }.status-head { align-items:flex-start; }.status-grid article { min-height:150px; }.sp-intro { padding-top:64px; } }
