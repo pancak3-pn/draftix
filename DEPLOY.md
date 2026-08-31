@@ -4,6 +4,16 @@ Draftix is a Node.js 22 application serving a Vite-built React client and a
 Socket.IO server from the same origin. The production host must support
 long-lived WebSocket connections.
 
+## Recommended split deployment
+
+The React frontend can be deployed to Vercel while the persistent Node and
+Socket.IO backend runs on a container host. Set `VITE_SOCKET_URL` in Vercel to
+the backend's public HTTPS origin. On the backend, include every Vercel preview
+and production frontend origin you intend to allow in `ALLOWED_ORIGINS`.
+
+Local development does not require `VITE_SOCKET_URL`; the client uses its own
+origin by default.
+
 ## 1. Verify the release locally
 
 ```powershell

@@ -2,7 +2,8 @@ import { io } from "socket.io-client";
 import { getResumeToken, saveResumeToken } from "../state/draftReducer";
 
 export function createDraftSocket({ onState, onChat, onConnection, onError }) {
-  const socket = io({ transports: ["websocket", "polling"] });
+  const configuredUrl = String(import.meta.env.VITE_SOCKET_URL || "").trim().replace(/\/$/, "");
+  const socket = io(configuredUrl || undefined, { transports: ["websocket", "polling"] });
   socket.on("connect", () => onConnection?.("online"));
   socket.on("disconnect", () => onConnection?.("offline"));
   socket.on("connect_error", () => onConnection?.("offline"));
