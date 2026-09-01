@@ -116,6 +116,21 @@ Keep the previous container image or deployment revision. If post-deployment
 checks fail, route traffic back to that revision and preserve the `/app/data`
 volume.
 
+## Supabase room retention
+
+Run every SQL migration in `supabase/migrations` in filename order. Rooms renew
+their expiry for two hours whenever a member performs a room action. The
+`draftix-delete-expired-rooms` Cron job runs at minute 17 of every hour and
+deletes up to 1,000 expired rooms. Related players and chat messages are removed
+automatically through foreign-key cascades.
+
+Check recent cleanup runs in the Supabase Cron job history. To test the cleanup
+function without waiting for the schedule, run:
+
+```sql
+select public.draftix_delete_expired_rooms(1000);
+```
+
 ## Known scaling boundary
 
 Draft rooms are currently in process memory. Before running more than one

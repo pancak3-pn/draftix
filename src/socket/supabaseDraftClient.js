@@ -41,7 +41,8 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     if (!code) return null;
     const { data, error } = await supabase.rpc("draftix_room_state", { p_code: code });
     if (error) throw error;
-    return data;
+    const logoResult = await supabase.rpc("draftix_team_logos", { p_code: code });
+    return { ...data, teamLogos: logoResult.error ? { A: null, B: null } : logoResult.data };
   }
 
   async function refresh() {
@@ -109,9 +110,9 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
         const code = String(payload.code || roomCode).trim().toUpperCase();
         const actionPayload = { ...payload };
         delete actionPayload.code;
-        const specialRpc = event === "undoDraftAction" ? "draftix_undo" : event === "expireTurn" ? "draftix_expire_turn" : event === "leaveSession" ? "draftix_leave_room" : null;
+        const specialRpc = event === "undoDraftAction" ? "draftix_undo" : event === "expireTurn" ? "draftix_expire_turn" : event === "leaveSession" ? "draftix_leave_room" : event === "setTeamLogos" ? "draftix_set_team_logos" : null;
         const result = specialRpc
-          ? await supabase.rpc(specialRpc, { p_code: code })
+          ? await supabase.rpc(specialRpc, event === "setTeamLogos" ? { p_code: code, p_logos: actionPayload } : { p_code: code })
           : await supabase.rpc("draftix_action", { p_code: code, p_action: event, p_payload: actionPayload });
         if (!result.error && event !== "leaveSession") await refresh();
         if (!result.error && event === "leaveSession") {

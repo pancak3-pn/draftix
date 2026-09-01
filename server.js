@@ -371,8 +371,13 @@ async function loadCatalog() {
         .map((a) => ({
           uuid: a.uuid,
           name: a.displayName,
+          description: a.description || "",
           image: a.fullPortrait,
           icon: a.displayIcon || a.displayIconSmall || a.fullPortrait,
+          background: a.background || null,
+          colors: a.backgroundGradientColors || [],
+          role: a.role ? { name: a.role.displayName, description: a.role.description, icon: a.role.displayIcon } : null,
+          abilities: (a.abilities || []).map((ability) => ({ slot: ability.slot, name: ability.displayName, description: ability.description, icon: ability.displayIcon })),
         }))
         .sort((x, y) => x.name.localeCompare(y.name)),
       maps: (mJson.data || [])
@@ -456,6 +461,7 @@ function sessionView(session, forSocketId) {
     sidePickerTeam: session.sidePickerTeam || null,
     hostId: session.hostId,
     teamNames: session.teamNames || { A: "Team A", B: "Team B" },
+    teamLogos: session.teamLogos || { A: null, B: null },
     settings: settingsFor(session),
     captainNames: {
       A: captainA ? nick(session, captainA) : null,
@@ -519,6 +525,7 @@ function createSession(hostId, roomCode) {
     nicks: new Map(),
     teamMembers: new Map(),
     teamNames: { A: "Team A", B: "Team B" },
+    teamLogos: { A: null, B: null },
     settings: { ...DEFAULT_GAME_SETTINGS },
     chat: [],                  // [{ id, ts, fromId, fromName, team, text }]
     mapBans: [],
@@ -1431,6 +1438,23 @@ async function main() {
       const a = clean(payload && payload.A, MAX_NICK_LEN) || "Team A";
       const b = clean(payload && payload.B, MAX_NICK_LEN) || "Team B";
       session.teamNames = { A: a, B: b };
+      broadcastSession(io, session);
+      if (typeof cb === "function") cb({ ok: true });
+    }));
+
+    socket.on("setTeamLogos", (payload, cb) => withLimit(socket, "setTeamNames", cb, () => {
+      const code = payload && String(payload.code).toUpperCase();
+      const session = sessions.get(code);
+      if (!session || session.hostId !== socket.id) {
+        if (typeof cb === "function") cb({ ok: false, error: "Host only" });
+        return;
+      }
+      if (session.phase !== "lobby") {
+        if (typeof cb === "function") cb({ ok: false, error: "Logos lock at draft start" });
+        return;
+      }
+      const cleanLogo = (value) => typeof value === "string" && value.length <= 100000 && /^data:image\/(webp|png|jpeg);base64,/.test(value) ? value : null;
+      session.teamLogos = { A: cleanLogo(payload?.A), B: cleanLogo(payload?.B) };
       broadcastSession(io, session);
       if (typeof cb === "function") cb({ ok: true });
     }));

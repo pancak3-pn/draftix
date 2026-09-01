@@ -1,5 +1,5 @@
 const MAP_POOL = ["Ascent","Abyss","Bind","Breeze","Fracture","Haven","Icebox","Lotus","Pearl","Split","Sunset"];
-const CACHE_KEY = "draftix:catalog:v2";
+const CACHE_KEY = "draftix:catalog:v3";
 const CACHE_TTL = 12 * 60 * 60 * 1000;
 
 function readCache() {
@@ -14,14 +14,25 @@ export async function getValorantCatalog() {
   if (cached && Date.now() - cached.savedAt < CACHE_TTL) return cached.catalog;
   try {
     const [agentsResponse, mapsResponse] = await Promise.all([
-      fetch("https://valorant-api.com/v1/agents?isPlayableCharacter=true&language=en-US"),
+      fetch("/data/valorant-agents.json"),
       fetch("https://valorant-api.com/v1/maps?language=en-US"),
     ]);
     if (!agentsResponse.ok || !mapsResponse.ok) throw new Error("Valorant catalog request failed");
     const [agentsJson, mapsJson] = await Promise.all([agentsResponse.json(), mapsResponse.json()]);
-    const agents = (agentsJson.data || [])
-      .filter((agent) => agent.uuid && agent.displayName && agent.fullPortrait)
-      .map((agent) => ({ uuid: agent.uuid, name: agent.displayName, image: agent.fullPortrait, icon: agent.displayIcon || agent.fullPortrait }))
+    const agentRows = Array.isArray(agentsJson) ? agentsJson : agentsJson.data || [];
+    const agents = agentRows
+      .filter((agent) => agent.uuid && (agent.name || agent.displayName) && (agent.image || agent.fullPortrait))
+      .map((agent) => ({
+        uuid: agent.uuid,
+        name: agent.name || agent.displayName,
+        description: agent.description || "",
+        image: agent.image || agent.fullPortrait,
+        icon: agent.icon || agent.displayIcon || agent.image || agent.fullPortrait,
+        background: agent.background || null,
+        colors: agent.colors || agent.backgroundGradientColors || [],
+        role: agent.role || null,
+        abilities: agent.abilities || [],
+      }))
       .sort((a, b) => a.name.localeCompare(b.name));
     const maps = (mapsJson.data || [])
       .filter((map) => MAP_POOL.includes(map.displayName))

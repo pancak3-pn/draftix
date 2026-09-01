@@ -7,6 +7,30 @@ function Logo() {
   return <a className="dx-logo" href="/" aria-label="Draftix home"><img src="/images/draftix.png" alt="" /><strong>DRAFT<span>IX</span></strong></a>;
 }
 
+function prepareTeamLogo(file) {
+  return new Promise((resolve, reject) => {
+    if (!file?.type.startsWith("image/")) return reject(new Error("Choose an image file."));
+    if (file.size > 5 * 1024 * 1024) return reject(new Error("Logo must be smaller than 5 MB."));
+    const image = new Image();
+    const source = URL.createObjectURL(file);
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 160;
+      canvas.height = 160;
+      const context = canvas.getContext("2d");
+      context.clearRect(0, 0, 160, 160);
+      const scale = Math.min(144 / image.width, 144 / image.height);
+      const width = image.width * scale;
+      const height = image.height * scale;
+      context.drawImage(image, (160 - width) / 2, (160 - height) / 2, width, height);
+      URL.revokeObjectURL(source);
+      resolve(canvas.toDataURL("image/webp", .82));
+    };
+    image.onerror = () => { URL.revokeObjectURL(source); reject(new Error("That image could not be opened.")); };
+    image.src = source;
+  });
+}
+
 export default function SessionGate() {
   const [state, dispatch] = useReducer(draftReducer, { connection: "connecting", session: null, error: "", pending: false });
   const [nickname, setNickname] = useState(getNickname());
@@ -70,11 +94,46 @@ export default function SessionGate() {
 }
 
 function TeamPanel({ side, session, send }) {
-  const name = session.teamNames?.[side] || `Team ${side}`;
+  const [previewName, setPreviewName] = useState(session.teamNames?.[side] || `Team ${side}`);
+  const name = previewName.trim() || `Team ${side}`;
   const captain = session.captainNames?.[side];
   const roster = session.teamRosters?.[side] || [];
   const isOnTeam = session.me?.myTeam === side;
-  return <aside className={`dx-team dx-team-${side.toLowerCase()}${isOnTeam ? " is-my-team" : ""}`}><header><div><small>Squad {side}</small><h2>{name}</h2><p>{captain ? "Command seat locked" : "Captain seat open"}</p></div><span>{side}</span></header><div className="dx-captain"><small>Captain</small><strong>{captain || "Unassigned"}</strong><i className={captain ? "is-ready" : ""} /></div><ul className="dx-roster">{roster.length ? roster.map((player) => <li key={player.id}><span>{player.nickname}</span>{player.isCaptain && <small>Captain</small>}</li>) : <li className="is-empty">Awaiting players</li>}</ul><div className="dx-team-actions"><button onClick={() => send("claimCaptain", { team: side })}>{captain ? "Captain locked" : "Claim captain"}</button><button className="is-quiet" onClick={() => send("setTeam", { team: side })}>{isOnTeam ? "Your squad" : "Join squad"}</button></div></aside>;
+  const teamLogo = session.teamLogos?.[side] || null;
+
+  useEffect(() => {
+    setPreviewName(session.teamNames?.[side] || `Team ${side}`);
+  }, [session.teamNames?.[side], side]);
+
+  useEffect(() => {
+    const updatePreview = (event) => setPreviewName(event.detail?.[side] || "");
+    window.addEventListener("draftix:team-name-preview", updatePreview);
+    return () => window.removeEventListener("draftix:team-name-preview", updatePreview);
+  }, [side]);
+
+  async function changeLogo(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const logo = await prepareTeamLogo(file);
+      send("setTeamLogos", { ...(session.teamLogos || { A: null, B: null }), [side]: logo });
+    } catch (error) {
+      window.alert(error.message);
+    }
+  }
+
+  function removeLogo() {
+    send("setTeamLogos", { ...(session.teamLogos || { A: null, B: null }), [side]: null });
+  }
+
+  return <aside className={`dx-team dx-team-${side.toLowerCase()}${isOnTeam ? " is-my-team" : ""}`}>
+    <header><div><small>Squad {side}</small><h2>{name}</h2><p>{captain ? "Command seat locked" : "Captain seat open"}</p></div><span className={`dx-team-mark${teamLogo ? " has-logo" : ""}`}>{teamLogo ? <img src={teamLogo} alt={`${name} logo`} /> : side}</span></header>
+    {session.me?.isHost && <div className="dx-team-logo-tools"><label><input type="file" accept="image/png,image/jpeg,image/webp" onChange={changeLogo} /><span>{teamLogo ? "Replace logo" : "Upload logo"}</span></label>{teamLogo && <button type="button" onClick={removeLogo}>Remove</button>}</div>}
+    <div className="dx-captain"><small>Captain</small><strong>{captain || "Unassigned"}</strong><i className={captain ? "is-ready" : ""} /></div>
+    <ul className="dx-roster">{roster.length ? roster.map((player) => <li key={player.id}><span>{player.nickname}</span>{player.isCaptain && <small>Captain</small>}</li>) : <li className="is-empty">Awaiting players</li>}</ul>
+    <div className="dx-team-actions"><button onClick={() => send("claimCaptain", { team: side })}>{captain ? "Captain locked" : "Claim captain"}</button><button className="is-quiet" onClick={() => send("setTeam", { team: side })}>{isOnTeam ? "Your squad" : "Join squad"}</button></div>
+  </aside>;
 }
 
 function Lobby({ session, client, connection }) {
@@ -82,6 +141,14 @@ function Lobby({ session, client, connection }) {
   const [settings, setSettings] = useState(session.settings || { draftPreset: "competitive", agentBanCount: 6, turnTimeoutMs: 30000, sidePickEnabled: true, autoBanEnabled: true });
   const send = (event, payload = {}) => client?.socket.emit(event, { code: session.code, ...payload });
   const bothCaptains = Boolean(session.captainNames?.A && session.captainNames?.B);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("draftix:team-name-preview", { detail: names }));
+  }, [names]);
+
+  useEffect(() => {
+    setNames(session.teamNames || { A: "Team A", B: "Team B" });
+  }, [session.teamNames?.A, session.teamNames?.B]);
 
   function leave() {
     client?.socket.emit("leaveSession", { code: session.code }, () => { window.location.href = "/app"; });
