@@ -17,6 +17,7 @@ export default function DraftBoard({ session, client, connection }) {
   const [musicMuted, setMusicMuted] = useState(false);
   const previousPhase = useRef(session.phase);
   const musicRef = useRef(null);
+  const expiredTurnRef = useRef(null);
   const send = (event, payload = {}) => client?.socket.emit(event, { code: session.code, ...payload });
   const maps = session.catalog?.maps || [];
   const agents = session.catalog?.agents || [];
@@ -35,6 +36,13 @@ export default function DraftBoard({ session, client, connection }) {
     const timer = window.setInterval(tick, 250);
     return () => window.clearInterval(timer);
   }, [session.turnEndsAt, session.phase]);
+
+  useEffect(() => {
+    if (seconds !== 0 || !session.turnEndsAt || !["map_ban", "agent_ban"].includes(session.phase)) return;
+    if (expiredTurnRef.current === session.turnEndsAt) return;
+    expiredTurnRef.current = session.turnEndsAt;
+    send("expireTurn");
+  }, [seconds, session.turnEndsAt, session.phase]);
 
   useEffect(() => {
     if (previousPhase.current === session.phase) return;

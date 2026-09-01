@@ -14,7 +14,8 @@
     "dev:react": "vite --host 127.0.0.1 --port 5173",
     "build": "vite build --configLoader runner",
     "preview": "vite preview",
-    "test": "node test/test-resume.js && node test/test-draft-ops.js"
+    "test": "node test/test-resume.js && node test/test-draft-ops.js",
+    "test:supabase": "node scripts/supabase-smoke.js"
   },
   "keywords": [
     "valorant",
@@ -25,6 +26,7 @@
     "socket.io"
   ],
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.1",

@@ -1,7 +1,13 @@
 import { io } from "socket.io-client";
 import { getResumeToken, saveResumeToken } from "../state/draftReducer";
+import { createSupabaseDraftClient } from "./supabaseDraftClient";
 
 export function createDraftSocket({ onState, onChat, onConnection, onError }) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const supabaseKey = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
+  if (supabaseUrl && supabaseKey) {
+    return createSupabaseDraftClient({ url: supabaseUrl, key: supabaseKey, onState, onChat, onConnection, onError });
+  }
   const configuredUrl = String(import.meta.env.VITE_SOCKET_URL || "").trim().replace(/\/$/, "");
   const socket = io(configuredUrl || undefined, { transports: ["websocket", "polling"] });
   socket.on("connect", () => onConnection?.("online"));
