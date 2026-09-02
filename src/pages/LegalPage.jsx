@@ -7,7 +7,7 @@ const privacy = [
   ["How long data lives", <p>Sessions and chat live only in server memory. They are removed when the host closes the room or after two hours of inactivity. Anonymous session codes remain on disk to preserve uniqueness.</p>],
   ["Third-party services", <p>Valorant map and agent metadata is requested server-side. Google Fonts provides typography, and Ko-fi processes voluntary donations when users follow that external link.</p>],
   ["Children", <p>DRAFTIX has no age gate and does not require personal information. Use of the service remains subject to local law.</p>],
-  ["Contact", <p>Questions or concerns can be sent through <a href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer">Ko-fi</a>.</p>],
+  ["Contact", <p>Questions or concerns can be sent to <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech&su=Draftix%20privacy%20question" target="_blank" rel="noreferrer">support@draftix.tech</a>.</p>],
 ];
 
 const terms = [
@@ -19,7 +19,7 @@ const terms = [
   ["6. Disclaimer", <p>DRAFTIX is provided “as is” and “as available.” To the maximum extent permitted by law, its maintainers disclaim implied and statutory warranties.</p>],
   ["7. Limitation of liability", <p>To the maximum extent permitted by law, DRAFTIX and its maintainers are not liable for indirect, incidental, consequential, or punitive damages or loss of session data.</p>],
   ["8. Changes", <p>These terms may be updated. Continued use after an update constitutes acceptance of the revised terms.</p>],
-  ["9. Contact", <p>Questions can be sent through <a href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer">Ko-fi</a>.</p>],
+  ["9. Contact", <p>Questions can be sent to <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech&su=Draftix%20terms%20question" target="_blank" rel="noreferrer">support@draftix.tech</a>.</p>],
 ];
 
 const slug = (title) => title.toLowerCase().replace(/^\d+\.\s*/, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
