@@ -84,9 +84,9 @@ export default function StatusPage() {
     const check = async () => {
       try {
         const data = await runHealthCheck();
-        if (active) setStatus({ state: data.state, data, updated: new Date(), error: data.errors[0] });
-      } catch (error) {
-        if (active) setStatus({ state: "offline", data: null, updated: new Date(), error: error.message });
+        if (active) setStatus({ state: data.state, data, updated: new Date(), error: data.errors.length ? "One or more service checks could not complete." : "" });
+      } catch {
+        if (active) setStatus({ state: "offline", data: null, updated: new Date(), error: "The status check could not complete. Please try again shortly." });
       }
     };
     check();

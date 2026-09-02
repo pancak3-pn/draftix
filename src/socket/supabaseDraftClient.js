@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { friendlyDraftError } from "./draftErrors";
 import { getValorantCatalog } from "../lib/valorantCatalog";
 
 function messageView(row) {
@@ -33,7 +34,7 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     if (!closed) onConnection?.("online");
   })().catch((error) => {
     onConnection?.("offline");
-    onError?.(error.message || "Could not connect to Supabase.");
+    onError?.(friendlyDraftError(error, "connect"));
     throw error;
   });
 
@@ -51,7 +52,7 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
       if (state && !closed) onState?.(state);
       return state;
     } catch (error) {
-      if (!closed) onError?.(error.message || "Room synchronization failed.");
+      if (!closed) onError?.(friendlyDraftError(error, "sync"));
       return null;
     }
   }
@@ -88,7 +89,7 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     return state;
   }
 
-  async function rpcResult(work, callback) {
+  async function rpcResult(work, callback, context = "action") {
     try {
       await ready;
       const result = await work();
@@ -97,7 +98,7 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
       callback?.(value);
       return value;
     } catch (error) {
-      const value = { ok: false, error: error.message || "The action failed." };
+      const value = { ok: false, error: friendlyDraftError(error, context) };
       onError?.(value.error);
       callback?.(value);
       return value;
@@ -124,7 +125,7 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
           channel = null;
         }
         return result;
-      }, callback);
+      }, callback, event);
     },
   };
 
@@ -135,13 +136,13 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
       const result = await supabase.rpc("draftix_create_room", { p_nickname: nickname, p_catalog: catalog });
       if (!result.error && result.data?.code) await openRoom(result.data.code);
       return result;
-    }, callback),
+    }, callback, "create"),
     join: (code, nickname, callback) => rpcResult(async () => {
       const normalized = String(code || "").trim().toUpperCase();
       const result = await supabase.rpc("draftix_join_room", { p_code: normalized, p_nickname: nickname });
       if (!result.error) await openRoom(normalized);
       return result;
-    }, callback),
+    }, callback, "join"),
     close: async () => {
       closed = true;
       window.clearTimeout(refreshTimer);

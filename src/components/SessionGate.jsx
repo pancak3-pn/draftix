@@ -214,7 +214,8 @@ function TeamPanel({ side, session, send }) {
         [side]: logo,
       });
     } catch (error) {
-      window.alert(error.message);
+      const expected = ["Choose an image file.", "Logo must be smaller than 5 MB.", "That image could not be opened."];
+      window.alert(expected.includes(error?.message) ? error.message : "That team logo could not be prepared. Try another image.");
     }
   }
 

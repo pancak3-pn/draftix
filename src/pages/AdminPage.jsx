@@ -246,7 +246,7 @@ export default function AdminPage() {
   async function loadStats(t) {
     const cfg = supabaseConfig();
     if (!cfg) {
-      setError("Supabase is not configured (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY missing).");
+      setError("Admin services are not configured for this deployment.");
       return;
     }
     setLoading(true);
@@ -271,14 +271,16 @@ export default function AdminPage() {
           setToken("");
           sessionStorage.removeItem(TOKEN_KEY);
         }
-        setError(payload?.message || `Request failed (HTTP ${res.status}).`);
+        if (unauthorized) setError("That admin token is invalid or expired.");
+        else if (res.status === 429) setError("Too many sign-in attempts. Please wait 15 minutes and try again.");
+        else setError("Admin metrics are temporarily unavailable. Please try again.");
         return;
       }
       setStats(payload);
       setUpdatedAt(Date.now());
       sessionStorage.setItem(TOKEN_KEY, t);
-    } catch (e) {
-      setError(e?.message || "Network error: could not reach Supabase.");
+    } catch {
+      setError("Could not reach the admin service. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

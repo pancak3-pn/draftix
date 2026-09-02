@@ -1220,7 +1220,9 @@ async function main() {
     if (isParse || isEntityParse) {
       return res.status(400).json({ ok: false, error: "Invalid JSON body" });
     }
-    next(err);
+    console.error("[HTTP] Unexpected request failure:", err && err.stack ? err.stack : err);
+    if (res.headersSent) return next(err);
+    return res.status(500).json({ ok: false, error: "The service could not complete that request. Please try again." });
   });
 
   const server = http.createServer(app);

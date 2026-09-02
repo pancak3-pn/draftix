@@ -1,5 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
+.app-error-boundary { min-height:100dvh; padding:clamp(24px,5vw,72px); display:grid; grid-template-rows:auto 1fr; background:#f4f1eb; color:#0f1923; font-family:Inter,system-ui,sans-serif; }
+.app-error-boundary > img { width:76px; height:auto; }
+.app-error-boundary > section { width:min(540px,100%); place-self:center; padding:clamp(30px,5vw,54px); border:1px solid #d5d0c8; background:#fff; box-shadow:0 24px 70px rgba(15,25,35,.1); }
+.app-error-boundary span { color:#ff4655; font-size:.75rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.app-error-boundary h1 { margin:14px 0 12px; font-size:clamp(2rem,6vw,3.5rem); line-height:.95; }
+.app-error-boundary p { margin:0; color:#626b73; line-height:1.65; }
+.app-error-boundary section div { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+.app-error-boundary button,.app-error-boundary a { min-height:46px; padding:0 18px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #0f1923; border-radius:4px; font:700 .85rem/1 Inter,system-ui,sans-serif; text-decoration:none; cursor:pointer; }
+.app-error-boundary button { background:#ff4655; border-color:#ff4655; color:#fff; }
+.app-error-boundary a { background:#fff; color:#0f1923; }
+
 :root {
   --nav-surface-solid:#ffffff;
   --nav-surface:rgba(255,255,255,.88);

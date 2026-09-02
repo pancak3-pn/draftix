@@ -89,12 +89,13 @@ begin
     raise sqlstate 'PGRST' using
       message = jsonb_build_object(
         'code', 'rate_limit_exceeded',
-        'message', 'Too many requests. Try again shortly.'
+        'message', 'Too many requests. Try again shortly.',
+        'details', null,
+        'hint', null
       )::text,
       detail = jsonb_build_object(
         'status', 429,
-        'status_text', 'Too Many Requests',
-        'headers', jsonb_build_object('Retry-After', greatest(1, extract(epoch from window_length)::integer))
+        'headers', jsonb_build_object('Retry-After', greatest(1, extract(epoch from window_length)::integer)::text)
       )::text;
   end if;
 
