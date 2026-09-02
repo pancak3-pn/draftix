@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { createDraftSocket } from "../socket/draftSocket";
 import {
   draftReducer,
+  getNickname,
   saveNickname,
   sessionCodeFromUrl,
 } from "../state/draftReducer";
@@ -51,9 +52,11 @@ export default function SessionGate() {
     error: "",
     pending: false,
   });
-  const [nickname, setNickname] = useState("");
-  const [code, setCode] = useState(sessionCodeFromUrl());
+  const [nickname, setNickname] = useState(getNickname);
+  const [inviteCode, setInviteCode] = useState(sessionCodeFromUrl);
+  const [code, setCode] = useState(inviteCode);
   const clientRef = useRef(null);
+  const isInvitation = Boolean(inviteCode);
 
   useEffect(() => {
     document.body.classList.add("page-app");
@@ -82,7 +85,12 @@ export default function SessionGate() {
   }
 
   function submit(mode) {
-    const name = nickname.trim() || (mode === "create" ? "Host" : "Player");
+    const enteredName = nickname.trim();
+    if (mode === "join" && isInvitation && !enteredName) {
+      dispatch({ type: "error", value: "Enter your name to join this room." });
+      return;
+    }
+    const name = enteredName || (mode === "create" ? "Host" : "Player");
     const roomCode = code.trim().toUpperCase();
     if (mode === "join" && !roomCode) {
       dispatch({ type: "error", value: "Enter a session code." });
@@ -99,6 +107,13 @@ export default function SessionGate() {
     dispatch({ type: "pending", value: true });
     if (mode === "create") clientRef.current?.create(name, finish);
     else clientRef.current?.join(roomCode, name, finish);
+  }
+
+  function leaveInvitation() {
+    setInviteCode("");
+    setCode("");
+    dispatch({ type: "error", value: "" });
+    window.history.replaceState({}, "", "/draft");
   }
 
   if (state.session && !state.session.closed) {
@@ -123,58 +138,91 @@ export default function SessionGate() {
       <div className="dx-entry-layout">
         <section className="dx-entry-copy">
           <h1>
-            Set up
+            {isInvitation ? "Join" : "Set up"}
             <br />
             the room.
           </h1>
         </section>
         <section className="dx-entry-panel" aria-label="Draft access">
-          <header className="dx-panel-heading">
-            <span>Room access</span>
-            <strong>01 / Connect</strong>
-          </header>
-          <label className="dx-field">
-            <span>Your name</span>
-            <input
-              value={nickname}
-              maxLength={24}
-              onChange={(event) => setNickname(event.target.value)}
-              placeholder="Player name"
-              autoComplete="username"
-            />
-          </label>
-          <button
-            className="dx-button dx-button-primary"
-            disabled={state.pending || state.connection !== "online"}
-            onClick={() => submit("create")}
-          >
-            {state.pending ? "Working..." : "Create a room"}
-          </button>
-          <div className="dx-divider">
-            <span>or join the briefing</span>
-          </div>
-          <label className="dx-field">
-            <span>Room code</span>
-            <input
-              className="dx-code-input"
-              value={code}
-              maxLength={8}
-              onChange={(event) => setCode(event.target.value.toUpperCase())}
-              placeholder="ABC12X"
-              autoComplete="off"
-            />
-          </label>
-          <button
-            className="dx-button dx-button-secondary"
-            disabled={state.pending || state.connection !== "online"}
-            onClick={() => submit("join")}
-          >
-            Join room
-          </button>
-          {state.error && (
-            <p className="dx-error" role="alert">
-              {state.error}
-            </p>
+          {isInvitation ? (
+            <>
+              <header className="dx-panel-heading">
+                <span>Room invitation</span>
+                <strong>{inviteCode}</strong>
+              </header>
+              <div className="dx-invite-context">
+                <strong>You’ve been invited</strong>
+                <p>Enter your display name to join the room.</p>
+              </div>
+              <form className="dx-invite-form" onSubmit={(event) => { event.preventDefault(); submit("join"); }}>
+                <label className="dx-field">
+                  <span>Your name</span>
+                  <input
+                    value={nickname}
+                    maxLength={24}
+                    onChange={(event) => setNickname(event.target.value)}
+                    placeholder="Player name"
+                    autoComplete="username"
+                    autoFocus
+                  />
+                </label>
+                <button
+                  className="dx-button dx-button-primary"
+                  type="submit"
+                  disabled={state.pending || state.connection !== "online"}
+                >
+                  {state.pending ? "Joining..." : state.connection !== "online" ? "Connecting..." : "Join room"}
+                </button>
+              </form>
+              <button className="dx-invite-exit" type="button" onClick={leaveInvitation}>
+                Create a different room
+              </button>
+              {state.error && <p className="dx-error" role="alert">{state.error}</p>}
+            </>
+          ) : (
+            <>
+              <header className="dx-panel-heading">
+                <span>Room access</span>
+                <strong>01 / Connect</strong>
+              </header>
+              <label className="dx-field">
+                <span>Your name</span>
+                <input
+                  value={nickname}
+                  maxLength={24}
+                  onChange={(event) => setNickname(event.target.value)}
+                  placeholder="Player name"
+                  autoComplete="username"
+                />
+              </label>
+              <button
+                className="dx-button dx-button-primary"
+                disabled={state.pending || state.connection !== "online"}
+                onClick={() => submit("create")}
+              >
+                {state.pending ? "Working..." : "Create a room"}
+              </button>
+              <div className="dx-divider"><span>or join the briefing</span></div>
+              <label className="dx-field">
+                <span>Room code</span>
+                <input
+                  className="dx-code-input"
+                  value={code}
+                  maxLength={8}
+                  onChange={(event) => setCode(event.target.value.toUpperCase())}
+                  placeholder="ABC12X"
+                  autoComplete="off"
+                />
+              </label>
+              <button
+                className="dx-button dx-button-secondary"
+                disabled={state.pending || state.connection !== "online"}
+                onClick={() => submit("join")}
+              >
+                Join room
+              </button>
+              {state.error && <p className="dx-error" role="alert">{state.error}</p>}
+            </>
           )}
         </section>
       </div>

@@ -1657,3 +1657,19 @@
   .dx-entry-copy h1 { font-size:clamp(2.35rem,14vw,3.3rem); }
   .dx-entry-panel { padding:20px 15px; }
 }
+
+/* Invitation entry: one clear task when a room code is already in the URL. */
+.dx-invite-context { margin:0 0 26px; }
+.dx-invite-context strong { display:block; color:#0f1923; font-family:var(--font-display); font-size:clamp(1.8rem,3vw,2.45rem); line-height:1; letter-spacing:-.025em; }
+.dx-invite-context p { max-width:32ch; margin:12px 0 0; color:#626b73; line-height:1.55; }
+.dx-invite-form { display:grid; gap:14px; }
+.dx-invite-form .dx-button { width:100%; margin:0; }
+.dx-invite-exit { width:100%; margin-top:18px; padding:8px; border:0; background:transparent; color:#626b73; font:600 .8rem/1.35 var(--font-ui); text-decoration:underline; text-decoration-color:#c9c5be; text-underline-offset:4px; cursor:pointer; }
+.dx-invite-exit:hover { color:#0f1923; text-decoration-color:#ff4655; }
+.dx-invite-exit:active { transform:translateY(1px); }
+
+@media (max-width:720px) {
+  .dx-entry:has(.dx-invite-form) .dx-entry-copy { padding-bottom:0; }
+  .dx-entry:has(.dx-invite-form) .dx-entry-copy h1 { max-width:280px; }
+  .dx-invite-context { margin-bottom:22px; }
+}
