@@ -292,9 +292,9 @@ export default function AdminPage() {
             </div>
           </header>
           <div className="ax-content">
-            <form className="ax-signin" onSubmit={signIn}>
+            <form className="ax-signin" onSubmit={signIn} aria-label="Draftix admin sign-in">
               <img className="ax-minimal-brand" src="/images/draftix.png" alt="Draftix" />
-              <span className="ax-kicker">Operator sign-in</span>
+              <span className="ax-kicker">Private access</span>
               <h2>Admin access</h2>
               <p className="ax-signin-intro">Enter the private admin token to continue.</p>
               <label>
@@ -313,7 +313,7 @@ export default function AdminPage() {
                   </button>
                 </div>
               </label>
-              <button type="submit" className="ax-button" disabled={!input.trim() || loading}>
+              <button type="submit" className="ax-button" disabled={!input.trim() || loading} aria-busy={loading}>
                 {loading ? "Checking…" : "Unlock dashboard"}
               </button>
               {error ? <p className="ax-error" role="alert">{error}</p> : null}
