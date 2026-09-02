@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 Allow: /index.html
 
-# The app shell is a session-only page — no content for crawlers.
+# The app shell is a session-only page with no content for crawlers.
 Disallow: /app
 Disallow: /app.html
 Disallow: /img
@@ -23,4 +23,4 @@ Allow: /
 User-agent: facebookcatalog
 Allow: /
 
-Sitemap: https://draftix.tech/sitemap.xml
+Sitemap: https://www.draftix.tech/sitemap.xml

@@ -9,13 +9,13 @@ export default function App() {
   const path = window.location.pathname.replace(/\/$/, "") || "/";
   useEffect(() => {
     const titles = {
-      "/app": "Draft Room | DRAFTIX",
-      "/team-balance": "Team Balancer | DRAFTIX",
-      "/status": "System Status | DRAFTIX",
-      "/privacy": "Privacy | DRAFTIX",
-      "/terms": "Terms | DRAFTIX",
+      "/app": "Draft Room | Draftix",
+      "/team-balance": "Valorant Team Balancer by Rank | Draftix",
+      "/status": "Draftix System Status",
+      "/privacy": "Privacy Policy | Draftix",
+      "/terms": "Terms of Service | Draftix",
     };
-    document.title = titles[path] || "DRAFTIX | Valorant Draft Platform";
+    document.title = titles[path] || "Valorant Map Veto & Agent Draft Tool | Draftix";
   }, [path]);
   if (path === "/app") return <SessionGate />;
   if (path === "/team-balance") return <TeamBalancerPage />;

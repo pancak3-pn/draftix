@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://draftix.tech/</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.draftix.tech/</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://draftix.tech/team-balance</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.draftix.tech/team-balance</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://draftix.tech/status</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.draftix.tech/status</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://draftix.tech/privacy</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.draftix.tech/privacy</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://draftix.tech/terms</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://www.draftix.tech/terms</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
