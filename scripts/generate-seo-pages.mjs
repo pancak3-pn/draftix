@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist-react");
 const template = await readFile(path.join(output, "index.html"), "utf8");
 const origin = "https://www.draftix.tech";
-const image = `${origin}/images/Homepage/result.png`;
+const image = `${origin}/images/og-1200x630.jpg`;
 
 const pages = [
   {
@@ -18,6 +18,7 @@ const pages = [
       "@context": "https://schema.org",
       "@type": "WebApplication",
       name: "Draftix",
+      alternateName: "Draftix Valorant Draft Tool",
       url: `${origin}/`,
       description: "A free real-time Valorant map veto and agent draft tool for competitive teams.",
       applicationCategory: "GameApplication",
@@ -81,13 +82,16 @@ function seoBlock(page) {
   const description = escapeHtml(page.description);
   const socialDescription = escapeHtml(page.socialDescription);
   const robots = page.robots || "index,follow,max-image-preview:large";
+  const brandSchema = `\n    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Draftix","url":"${origin}/","logo":"${origin}/images/draftix.png"}</script>\n    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Draftix","alternateName":"Draftix","url":"${origin}/"}</script>`;
   const schema = page.schema
     ? `\n    <script type="application/ld+json">${JSON.stringify(page.schema).replaceAll("<", "\\u003c")}</script>`
     : "";
   return `<!-- SEO:START -->
     <title>${title}</title>
     <meta name="description" content="${description}" />
+    <meta name="keywords" content="draftix, valorant draft, valorant map veto, valorant agent ban, map ban tool, valorant team balancer, valorant custom match tool" />
     <meta name="robots" content="${robots}" />
+    <meta name="author" content="Draftix" />
     <link rel="canonical" href="${url}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Draftix" />
@@ -96,13 +100,15 @@ function seoBlock(page) {
     <meta property="og:description" content="${socialDescription}" />
     <meta property="og:url" content="${url}" />
     <meta property="og:image" content="${image}" />
-    <meta property="og:image:width" content="1600" />
-    <meta property="og:image:height" content="1000" />
-    <meta property="og:image:alt" content="Draftix completed Valorant draft and match result" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${socialDescription}" />
-    <meta name="twitter:image" content="${image}" />${schema}
+    <meta name="twitter:image" content="${image}" />
+    <meta name="twitter:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />${schema}${brandSchema}
     <!-- SEO:END -->`;
 }
 
