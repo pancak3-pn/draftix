@@ -698,8 +698,11 @@ async function main() {
   const ANALYTICS_MAX_VISITOR_IDS = 500_000; // safety cap for the all-time set
   const ANALYTICS_PAGES = new Set([
     "/",
-    "/app",
+    "/draft",
     "/team-balance",
+    "/valorant-map-veto",
+    "/valorant-agent-ban",
+    "/valorant-draft-tool",
     "/status",
     "/privacy",
     "/terms",
@@ -949,7 +952,7 @@ async function main() {
     if (req.method === "GET") {
       const p = req.path || "";
       if (p === "/" || p === "/index.html") traffic.landingViews++;
-      else if (p === "/app") traffic.appShellViews++;
+      else if (p === "/draft") traffic.appShellViews++;
 
       // ── Visit analytics (page views + unique visitors) ──
       if (ANALYTICS_PAGES.has(p)) {
@@ -1124,21 +1127,27 @@ async function main() {
   const reactBuildPath = path.join(__dirname, "dist-react");
   const appHtmlPath = path.join(reactBuildPath, "index.html");
 
-  // ─── Draft app at clean URL /app (file on disk is still app.html) ───
+  // Draft room at the canonical clean URL /draft.
   function appendQuery(req) {
     const i = req.url.indexOf("?");
     return i >= 0 ? req.url.slice(i) : "";
   }
-  app.get("/app", (_req, res) => {
+  app.get("/draft", (_req, res) => {
     res.type("html");
     res.sendFile(appHtmlPath);
   });
-  app.get("/app/", (req, res) => {
-    res.redirect(301, "/app" + appendQuery(req));
+  app.get("/draft/", (req, res) => {
+    res.redirect(301, "/draft" + appendQuery(req));
   });
-  // Old bookmarks / shared links → canonical /app
+  app.get("/app", (req, res) => {
+    res.redirect(301, "/draft" + appendQuery(req));
+  });
+  app.get("/app/", (req, res) => {
+    res.redirect(301, "/draft" + appendQuery(req));
+  });
+  // Old bookmarks and shared links redirect to /draft.
   app.get("/app.html", (req, res) => {
-    res.redirect(301, "/app" + appendQuery(req));
+    res.redirect(301, "/draft" + appendQuery(req));
   });
 
   const legacyPageRoutes = {
@@ -1151,20 +1160,28 @@ async function main() {
     app.get(legacyPath, (req, res) => res.redirect(301, canonicalPath + appendQuery(req)));
   }
 
-  const reactPageRoutes = ["/team-balance", "/status", "/privacy", "/terms"];
+  const reactPageRoutes = [
+    "/team-balance",
+    "/valorant-map-veto",
+    "/valorant-agent-ban",
+    "/valorant-draft-tool",
+    "/status",
+    "/privacy",
+    "/terms",
+  ];
   app.get(reactPageRoutes, (_req, res) => {
     res.type("html");
     res.sendFile(appHtmlPath);
   });
 
-  // ─── Legacy redirect: /?code=XXX → /app?code=XXX ───
+  // Legacy room links on the home page redirect to /draft.
   app.get("/", (req, res, next) => {
     if (req.query && req.query.code) {
       const params = new URLSearchParams();
       for (const [k, v] of Object.entries(req.query)) {
         if (typeof v === "string") params.set(k, v);
       }
-      return res.redirect(302, "/app?" + params.toString());
+      return res.redirect(302, "/draft?" + params.toString());
     }
     next();
   });

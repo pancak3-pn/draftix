@@ -31,7 +31,7 @@ function MatchFoundOverlay({ countdown, map }) {
       className="dx-match-found"
       role="status"
       aria-live="assertive"
-      aria-label={`Match found. Ready in ${countdown} seconds.`}
+      aria-label={`Match ready in ${countdown} seconds.`}
     >
       {map?.image && (
         <img className="dx-match-found-map" src={map.image} alt="" />
@@ -39,7 +39,7 @@ function MatchFoundOverlay({ countdown, map }) {
       <div className="dx-match-found-shutter" aria-hidden="true" />
       <div className="dx-match-found-content">
         <div className="dx-match-found-title">
-          <span>MATCH FOUND</span>
+          <span>MATCH READY</span>
         </div>
         <div className="dx-match-found-counter" key={countdown}>
           {countdown}
@@ -773,7 +773,7 @@ export default function DraftBoard({ session, client, connection }) {
 
   function leave() {
     client?.socket.emit("leaveSession", { code: session.code }, () => {
-      window.location.href = "/app";
+      window.location.href = "/draft";
     });
   }
 

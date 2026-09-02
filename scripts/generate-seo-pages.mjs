@@ -42,6 +42,57 @@ const pages = [
     socialDescription: "Build balanced Valorant teams by rank or random draw in seconds.",
   },
   {
+    path: "/valorant-map-veto",
+    title: "Free Valorant Map Veto Tool | Draftix",
+    description: "Run a live Valorant map veto with both captains. Ban maps, select the final map, choose starting sides, and share the result. Free, no signup.",
+    socialDescription: "Run a synchronized Valorant map veto with both team captains.",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebPage", name: "Valorant Map Veto Tool", url: `${origin}/valorant-map-veto`, description: "A free shared tool for running Valorant map bans and starting-side selection." },
+        { "@type": "SoftwareApplication", name: "Draftix Valorant Map Veto Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+        { "@type": "FAQPage", mainEntity: [
+          { "@type": "Question", name: "Do players need an account?", acceptedAnswer: { "@type": "Answer", text: "No. Everyone joins with the same room code." } },
+          { "@type": "Question", name: "Does the veto update live?", acceptedAnswer: { "@type": "Answer", text: "Yes. Connected players see each confirmed choice immediately." } },
+        ] },
+      ],
+    },
+  },
+  {
+    path: "/valorant-agent-ban",
+    title: "Free Valorant Agent Ban Tool | Draftix",
+    description: "Run a synchronized Valorant agent ban with configurable ban counts and captain-controlled turns. Create a free room and share the final matchup.",
+    socialDescription: "Ban Valorant agents together in a live captain-controlled draft.",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebPage", name: "Valorant Agent Ban Tool", url: `${origin}/valorant-agent-ban`, description: "A free real-time tool for organized Valorant agent bans." },
+        { "@type": "SoftwareApplication", name: "Draftix Valorant Agent Ban Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+        { "@type": "FAQPage", mainEntity: [
+          { "@type": "Question", name: "Can the host choose the ban count?", acceptedAnswer: { "@type": "Answer", text: "Yes. The limit is configured before the draft starts." } },
+          { "@type": "Question", name: "Can both teams follow the bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. The room stays synchronized for every connected player." } },
+        ] },
+      ],
+    },
+  },
+  {
+    path: "/valorant-draft-tool",
+    title: "Free Valorant Draft Tool for Teams | Draftix",
+    description: "Use one real-time Valorant draft tool for map vetoes, side picks, agent bans, team captains, and match-ready results. Free with no signup.",
+    socialDescription: "Prepare a Valorant match with map vetoes, side picks, and agent bans in one room.",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebPage", name: "Valorant Draft Tool", url: `${origin}/valorant-draft-tool`, description: "A complete real-time drafting tool for Valorant teams and custom matches." },
+        { "@type": "SoftwareApplication", name: "Draftix Valorant Draft Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+        { "@type": "FAQPage", mainEntity: [
+          { "@type": "Question", name: "What does Draftix include?", acceptedAnswer: { "@type": "Answer", text: "Map vetoes, side selection, agent bans, and a final match result." } },
+          { "@type": "Question", name: "Is Draftix free?", acceptedAnswer: { "@type": "Answer", text: "Yes. You can create a room without an account." } },
+        ] },
+      ],
+    },
+  },
+  {
     path: "/status",
     title: "Draftix System Status",
     description: "Check the current availability of Draftix rooms, real-time draft synchronization, and Valorant game data.",
@@ -60,7 +111,7 @@ const pages = [
     socialDescription: "Terms for using the Draftix Valorant drafting platform.",
   },
   {
-    path: "/app",
+    path: "/draft",
     title: "Draft Room | Draftix",
     description: "Create or join a private Draftix room for your Valorant map veto and agent draft.",
     socialDescription: "Create or join a private Draftix room.",

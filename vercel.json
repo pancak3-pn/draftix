@@ -11,6 +11,16 @@
       "permanent": true
     },
     {
+      "source": "/app",
+      "destination": "/draft",
+      "permanent": true
+    },
+    {
+      "source": "/app.html",
+      "destination": "/draft",
+      "permanent": true
+    },
+    {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "draftix.tech" }],
       "destination": "https://www.draftix.tech/$1",

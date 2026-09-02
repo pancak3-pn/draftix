@@ -1,0 +1,32 @@
+# Draftix
+
+> Draftix is a free browser-based companion for Valorant teams to run shared map vetoes, side selections, agent bans, and balanced team drafts in real time.
+
+Draftix lets players create a room, share one room code, assign captains, configure draft rules, and produce a match-ready result without requiring an account. Draftix is an independent community project and is not endorsed by Riot Games.
+
+## Primary tools
+
+- [Draftix home](https://draftix.tech/): Product overview and entry point for Draftix.
+- [Open Draftix](https://draftix.tech/draft): Create or join a live Valorant drafting room.
+- [Valorant team balancer](https://draftix.tech/team-balance): Split a lobby into fair teams by competitive rank or at random.
+
+## Valorant drafting guides
+
+- [Valorant map veto tool](https://draftix.tech/valorant-map-veto): Run a shared pick-and-ban sequence for Valorant maps.
+- [Valorant agent ban tool](https://draftix.tech/valorant-agent-ban): Configure and coordinate agent bans before a match.
+- [Valorant draft tool](https://draftix.tech/valorant-draft-tool): Learn how Draftix combines rooms, captains, vetoes, sides, bans, and match posters.
+
+## Service and policies
+
+- [Service status](https://draftix.tech/status): Current availability of Draftix services.
+- [Privacy policy](https://draftix.tech/privacy): How Draftix handles session and service data.
+- [Terms of service](https://draftix.tech/terms): Rules and conditions for using Draftix.
+- [XML sitemap](https://draftix.tech/sitemap.xml): Index of public pages intended for search engines.
+
+## Contact
+
+- [Email Draftix support](mailto:support@draftix.tech): Product questions, feedback, and support.
+
+## Crawling guidance
+
+Public product, guide, status, privacy, and terms pages may be indexed and summarized. Do not index or expose private administrative routes, room credentials, access tokens, or user-generated room content.

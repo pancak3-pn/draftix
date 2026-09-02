@@ -7,6 +7,7 @@ import {
 } from "../state/draftReducer";
 import DraftBoard from "./DraftBoard.jsx";
 import AppNav from "./AppNav.jsx";
+import SiteHeader from "./SiteHeader.jsx";
 
 function prepareTeamLogo(file) {
   return new Promise((resolve, reject) => {
@@ -77,7 +78,7 @@ export default function SessionGate() {
       return;
     }
     if (result.code)
-      window.history.replaceState({}, "", `/app?code=${result.code}`);
+      window.history.replaceState({}, "", `/draft?code=${result.code}`);
   }
 
   function submit(mode) {
@@ -118,7 +119,7 @@ export default function SessionGate() {
 
   return (
     <main className="dx-entry">
-      <AppNav variant="entry" actions={<a href="/">Back to home</a>} />
+      <SiteHeader draftEntry />
       <div className="dx-entry-layout">
         <section className="dx-entry-copy">
           <h1>
@@ -420,12 +421,12 @@ function Lobby({ session, client, connection }) {
 
   function leave() {
     client?.socket.emit("leaveSession", { code: session.code }, () => {
-      window.location.href = "/app";
+      window.location.href = "/draft";
     });
   }
 
   async function copyCode() {
-    const url = `${window.location.origin}/app?code=${session.code}`;
+    const url = `${window.location.origin}/draft?code=${session.code}`;
     try {
       await navigator.clipboard.writeText(url);
       document.querySelector(".dx-copy-notice")?.remove();

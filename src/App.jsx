@@ -10,6 +10,7 @@ const TeamBalancerPage = lazy(() => import("./pages/TeamBalancerPage.jsx"));
 const StatusPage = lazy(() => import("./pages/StatusPage.jsx"));
 const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
 const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
+const SeoTopicPage = lazy(() => import("./pages/SeoTopicPage.jsx"));
 
 function RouteFallback() {
   return (
@@ -33,12 +34,15 @@ export default function App() {
   const path = window.location.pathname.replace(/\/$/, "") || "/";
   useEffect(() => {
     const titles = {
-      "/app": "Draft Room | Draftix",
+      "/draft": "Draft Room | Draftix",
       "/team-balance": "Valorant Team Balancer by Rank | Draftix",
       "/status": "Draftix System Status",
       "/privacy": "Privacy Policy | Draftix",
       "/terms": "Terms of Service | Draftix",
       "/r": "Draftix Admin",
+      "/valorant-map-veto": "Valorant Map Veto Tool | Draftix",
+      "/valorant-agent-ban": "Valorant Agent Ban Tool | Draftix",
+      "/valorant-draft-tool": "Free Valorant Draft Tool | Draftix",
     };
     document.title = titles[path] || "Valorant Map Veto & Agent Draft Tool | Draftix";
     // First-party analytics: one pageview per route change.
@@ -46,12 +50,13 @@ export default function App() {
   }, [path]);
 
   let page;
-  if (path === "/app") page = <SessionGate />;
+  if (path === "/draft") page = <SessionGate />;
   else if (path === "/team-balance") page = <TeamBalancerPage />;
   else if (path === "/status") page = <StatusPage />;
   else if (path === "/privacy") page = <LegalPage type="privacy" />;
   else if (path === "/terms") page = <LegalPage type="terms" />;
   else if (path === "/r") page = <AdminPage />;
+  else if (["/valorant-map-veto", "/valorant-agent-ban", "/valorant-draft-tool"].includes(path)) page = <SeoTopicPage path={path} />;
   else page = <LandingPage />;
 
 

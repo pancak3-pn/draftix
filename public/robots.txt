@@ -2,7 +2,8 @@ User-agent: *
 Allow: /
 Allow: /index.html
 
-# The app shell is a session-only page with no content for crawlers.
+# The draft shell is a session-only page with no content for crawlers.
+Disallow: /draft
 Disallow: /app
 Disallow: /app.html
 Disallow: /r

@@ -135,7 +135,7 @@
     grid.appendChild(section("Traffic (this instance)"));
     const tr = data.traffic || {};
     grid.appendChild(card("GET / (landing)", String(tr.landingViews ?? "—"), "Since process start"));
-    grid.appendChild(card("GET /app", String(tr.appShellViews ?? "—"), "App shell loads"));
+    grid.appendChild(card("GET /draft", String(tr.appShellViews ?? "—"), "Draft shell loads"));
     grid.appendChild(card("Counters since", fmtTime(tr.since), "Resets on deploy / restart"));
 
     grid.appendChild(section("Visitors & page views"));

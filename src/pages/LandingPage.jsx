@@ -20,7 +20,7 @@ const navigationLinks = [
   { href: "#product", label: "Product" },
   { href: "#process", label: "How it works" },
   { href: "/team-balance", label: "Team balancer" },
-  { href: "/app", label: "Open Draftix", className: "dr-nav-cta" },
+  { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
 ];
 
 function HeroSlideshow() {
@@ -119,7 +119,7 @@ export default function LandingPage() {
   return <main className="dr-site">
     <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
-      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>A shared command room for map vetoes, side picks, and agent bans.</p><div className="dr-actions"><a href="/app" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
+      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>A shared command room for map vetoes, side picks, and agent bans.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
       <HeroSlideshow />
     </section>
     <section className="dr-agents" id="agents" data-reveal>
@@ -137,7 +137,7 @@ export default function LandingPage() {
       <header className="dr-operation-intro">
         <h2>One room.<br />Every decision.</h2>
         <p>Create the room, run the draft, share the final matchup.</p>
-        <a href="/app" className="dr-button dr-button-primary">Open a room</a>
+        <a href="/draft" className="dr-button dr-button-primary">Open a room</a>
       </header>
       <figure className="dr-banner-media">
         <img src="/images/Homepage/section-banner.png" alt="Draftix squad key art" loading="lazy" />
@@ -153,7 +153,7 @@ export default function LandingPage() {
       </div>
     </section>
     <section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Choose the arena before the match begins.</p></header><MapCarousel /></section>
-    <section className="dr-final" data-reveal><p className="dr-final-eyebrow">// Final call</p><h2>Your next draft takes seconds.</h2><p className="dr-final-sub">No account needed. Create a room, share the code, and lock in your comp.</p><a href="/app" className="dr-button dr-button-primary">Open Draftix</a></section>
+    <section className="dr-final" data-reveal><p className="dr-final-eyebrow">// Final call</p><h2>Your next draft takes seconds.</h2><p className="dr-final-sub">No account needed. Create a room, share the code, and lock in your comp.</p><a href="/draft" className="dr-button dr-button-primary">Open Draftix</a></section>
     <PublicFooter reveal />
     {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
     <BackToTop />
