@@ -133,7 +133,7 @@ function getJson(url) {
 const explicitPortEnv = process.env.PORT != null && String(process.env.PORT).trim() !== "";
 const DEFAULT_AGENT_BAN_COUNT = 6;
 const MIN_AGENT_BAN_COUNT = 0;
-const MAX_AGENT_BAN_COUNT = 12;
+const MAX_AGENT_BAN_COUNT = 64;
 const ALLOWED_TURN_TIMEOUTS_MS = new Set([15_000, 30_000, 45_000, 60_000]);
 const DEFAULT_GAME_SETTINGS = {
   draftPreset: "competitive",
@@ -1471,9 +1471,10 @@ async function main() {
         return;
       }
       const currentSettings = settingsFor(session);
+      const playableAgentLimit = catalog.agents.length - (catalog.agents.length % 2);
       session.settings = {
         draftPreset: normalizeDraftPreset(payload && payload.draftPreset),
-        agentBanCount: normalizeAgentBanCount(payload && payload.agentBanCount),
+        agentBanCount: Math.min(playableAgentLimit, normalizeAgentBanCount(payload && payload.agentBanCount)),
         turnTimeoutMs: normalizeTurnTimeoutMs(payload && payload.turnTimeoutMs),
         autoBanEnabled: normalizeBool(payload && payload.autoBanEnabled, currentSettings.autoBanEnabled),
         sidePickEnabled: normalizeBool(payload && payload.sidePickEnabled, currentSettings.sidePickEnabled),

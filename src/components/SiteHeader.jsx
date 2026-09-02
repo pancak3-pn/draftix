@@ -1,3 +1,12 @@
+import AppNav from "./AppNav.jsx";
+
+const links = [
+  { href: "/#product", label: "Product" },
+  { href: "/#process", label: "How it works" },
+  { href: "/team-balance.html", label: "Team balancer" },
+  { href: "/app", label: "Open Draftix", className: "sp-open" },
+];
+
 export default function SiteHeader() {
-  return <header className="sp-header"><a className="sp-logo" href="/" aria-label="Draftix home"><img src="/images/draftix.png" alt="" /><strong>DRAFT<span>IX</span></strong></a><nav aria-label="Page navigation"><a href="/team-balance.html">Team balancer</a><a href="/status.html">Status</a><a className="sp-open" href="/app">Open Draftix</a></nav></header>;
+  return <AppNav variant="support" links={links} />;
 }

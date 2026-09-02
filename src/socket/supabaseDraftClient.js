@@ -110,10 +110,13 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
         const code = String(payload.code || roomCode).trim().toUpperCase();
         const actionPayload = { ...payload };
         delete actionPayload.code;
-        const specialRpc = event === "undoDraftAction" ? "draftix_undo" : event === "expireTurn" ? "draftix_expire_turn" : event === "leaveSession" ? "draftix_leave_room" : event === "setTeamLogos" ? "draftix_set_team_logos" : null;
-        const result = specialRpc
-          ? await supabase.rpc(specialRpc, event === "setTeamLogos" ? { p_code: code, p_logos: actionPayload } : { p_code: code })
+        const specialRpc = event === "undoDraftAction" ? "draftix_undo" : event === "expireTurn" ? "draftix_expire_turn" : event === "leaveSession" ? "draftix_leave_room" : event === "setTeamLogos" ? "draftix_set_team_logos" : event === "setGameSettings" ? "draftix_set_game_settings" : null;
+        let result = specialRpc
+          ? await supabase.rpc(specialRpc, event === "setTeamLogos" ? { p_code: code, p_logos: actionPayload } : event === "setGameSettings" ? { p_code: code, p_settings: actionPayload } : { p_code: code })
           : await supabase.rpc("draftix_action", { p_code: code, p_action: event, p_payload: actionPayload });
+        if (event === "setGameSettings" && result.error && ["PGRST202", "42883"].includes(result.error.code)) {
+          result = await supabase.rpc("draftix_action", { p_code: code, p_action: event, p_payload: actionPayload });
+        }
         if (!result.error && event !== "leaveSession") await refresh();
         if (!result.error && event === "leaveSession") {
           roomCode = "";

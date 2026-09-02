@@ -23,6 +23,7 @@ desktop.ini
 dist/
 dist-react/
 build/
+out/
 .cache/
 *.tgz
 favicon.zip

@@ -1,4 +1,5 @@
 import SiteHeader from "../components/SiteHeader.jsx";
+import PublicFooter from "../components/PublicFooter.jsx";
 
 const privacy = [
   ["What we collect", <ul><li><strong>Nicknames and chat messages</strong> remain in server memory for the lifetime of a session.</li><li><strong>Connection metadata</strong> is used for rate limiting and abuse defense.</li><li><strong>Session codes</strong> are logged to guarantee that each code remains unique. The log contains no chat, picks, nicknames, or IP addresses.</li></ul>],
@@ -21,7 +22,39 @@ const terms = [
   ["9. Contact", <p>Questions can be sent through <a href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer">Ko-fi</a>.</p>],
 ];
 
+const slug = (title) => title.toLowerCase().replace(/^\d+\.\s*/, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const cleanTitle = (title) => title.replace(/^\d+\.\s*/, "");
+
 export default function LegalPage({ type }) {
   const isPrivacy = type === "privacy";
-  return <main className="sp-page"><SiteHeader /><article className="legal-page"><header><h1>{isPrivacy ? "Privacy policy" : "Terms of service"}</h1><p>Last updated May 12, 2026</p></header><p className="legal-lead">{isPrivacy ? "DRAFTIX is a free, no-signup draft tool. This policy explains the limited data used to operate it." : "By using DRAFTIX, you agree to these plain-language service terms."}</p>{(isPrivacy ? privacy : terms).map(([title, body]) => <section key={title}><h2>{title}</h2>{body}</section>)}</article><footer className="sp-footer"><a href="/">Home</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></footer></main>;
+  const sections = isPrivacy ? privacy : terms;
+
+  return <main className="sp-page legal-sp-page">
+    <SiteHeader />
+    <div className="legal-shell">
+      <header className="legal-hero">
+        <span>Draftix legal</span>
+        <h1>{isPrivacy ? "Privacy policy" : "Terms of service"}</h1>
+        <p className="legal-updated">Effective May 12, 2026</p>
+        <p className="legal-lead">{isPrivacy ? "DRAFTIX is a free, no-signup draft tool. This policy explains the limited data used to operate it." : "By using DRAFTIX, you agree to these plain-language service terms."}</p>
+      </header>
+
+      <div className="legal-layout">
+        <aside className="legal-toc">
+          <span>On this page</span>
+          <nav aria-label={`${isPrivacy ? "Privacy policy" : "Terms of service"} sections`}>
+            {sections.map(([title], index) => <a href={`#${slug(title)}`} key={title}><i>{String(index + 1).padStart(2, "0")}</i>{cleanTitle(title)}</a>)}
+          </nav>
+        </aside>
+
+        <article className="legal-document">
+          {sections.map(([title, body], index) => <section id={slug(title)} key={title}>
+            <div className="legal-section-title"><span>{String(index + 1).padStart(2, "0")}</span><h2>{cleanTitle(title)}</h2></div>
+            <div className="legal-section-copy">{body}</div>
+          </section>)}
+        </article>
+      </div>
+    </div>
+    <PublicFooter />
+  </main>;
 }

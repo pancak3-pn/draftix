@@ -14,6 +14,8 @@
     "dev:react": "vite --host 127.0.0.1 --port 5173",
     "build": "vite build --configLoader runner",
     "preview": "vite preview",
+    "video:studio": "remotion studio remotion/index.jsx",
+    "video:render": "remotion render remotion/index.jsx DraftixTutorial out/draftix-tutorial.mp4",
     "sync:agents": "node scripts/sync-valorant-agents.mjs",
     "test": "node test/test-resume.js && node test/test-draft-ops.js",
     "test:supabase": "node scripts/supabase-smoke.js"
@@ -37,7 +39,9 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.520",
     "@vitejs/plugin-react": "^5.0.2",
+    "remotion": "^4.0.520",
     "socket.io-client": "^4.8.3",
     "vite": "^7.1.3"
   }

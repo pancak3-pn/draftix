@@ -1,27 +1,48 @@
 import { useEffect, useRef, useState } from "react";
+import AppNav from "../components/AppNav.jsx";
+import PublicFooter from "../components/PublicFooter.jsx";
 
 const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Sunset"].map((displayName) => ({
   displayName,
   src: `/images/maps/${displayName.toLowerCase()}.png`,
 }));
 
-function Brand() {
-  return <span className="dr-brand"><img src="/images/draftix.png" alt="" /><strong>DRAFT<span>IX</span></strong></span>;
+const heroSlides = [
+  { src: "/images/Homepage/steap1-create.png", alt: "Draftix room creation screen" },
+  { src: "/images/Homepage/step2-banmap.png", alt: "Draftix map veto screen" },
+  { src: "/images/Homepage/step3-choosteam.png", alt: "Draftix side selection screen" },
+  { src: "/images/Homepage/step4-banagent.png", alt: "Draftix agent ban screen" },
+  { src: "/images/Homepage/matchfound.png", alt: "Draftix match found screen" },
+  { src: "/images/Homepage/result.png", alt: "Draftix completed match result" },
+];
+
+const navigationLinks = [
+  { href: "#product", label: "Product" },
+  { href: "#process", label: "How it works" },
+  { href: "/team-balance.html", label: "Team balancer" },
+  { href: "/app", label: "Open Draftix", className: "dr-nav-cta" },
+];
+
+function HeroSlideshow() {
+  return <div className="dr-hero-flight">
+    <div className="dr-hero-stream" aria-hidden="true">
+      {heroSlides.map((slide, index) => <figure className="dr-hero-visual" key={slide.src} style={{ "--dr-slide-index": index }}>
+        <img src={slide.src} alt="" fetchPriority={index === 0 ? "high" : "auto"} loading={index === 0 ? "eager" : "lazy"} />
+      </figure>)}
+    </div>
+    <span className="sr-only">Animated preview of the Draftix workflow from room creation to final match result.</span>
+  </div>;
 }
 
-function Navigation() {
-  const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
-  return <nav className="dr-nav" aria-label="Primary navigation">
-    <a href="#top" onClick={close} aria-label="Draftix home"><Brand /></a>
-    <button className="dr-menu" type="button" aria-expanded={open} aria-controls="dr-nav-links" onClick={() => setOpen((value) => !value)}><span /><span /><span /><b className="sr-only">Toggle navigation</b></button>
-    <div id="dr-nav-links" className={`dr-nav-links ${open ? "is-open" : ""}`}>
-      <a href="#product" onClick={close}>Product</a>
-      <a href="#process" onClick={close}>How it works</a>
-      <a href="/team-balance.html" onClick={close}>Team balancer</a>
-      <a href="/app" className="dr-nav-cta" onClick={close}>Open Draftix</a>
-    </div>
-  </nav>;
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 520);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Back to top" title="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.png" alt="" /><span>Back to top</span></button>;
 }
 
 function MapCarousel() {
@@ -58,7 +79,27 @@ function MapCarousel() {
   </div>;
 }
 
+function TutorialModal({ onClose }) {
+  const videoRef = useRef(null);
+  useEffect(() => {
+    const onKey = (event) => { if (event.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+  return <div className="dr-tutorial-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Draftix tutorial video">
+    <div className="dr-tutorial-modal" onClick={(event) => event.stopPropagation()}>
+      <button type="button" className="dr-tutorial-close" onClick={onClose} aria-label="Close tutorial">&times;</button>
+      <video ref={videoRef} src="/videos/draftix-tutorial.mp4" controls autoPlay playsInline />
+    </div>
+  </div>;
+}
+
 export default function LandingPage() {
+  const [showTutorial, setShowTutorial] = useState(false);
   useEffect(() => {
     document.body.classList.add("dr-page");
     const nodes = document.querySelectorAll("[data-reveal], [data-flow]");
@@ -76,30 +117,46 @@ export default function LandingPage() {
   }, []);
 
   return <main className="dr-site">
-    <Navigation />
+    <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
-      <div className="dr-hero-copy" data-reveal><h1>Settle the draft.<br /><span>Start ready.</span></h1><p>Map vetoes, agent bans, one shared room.</p><div className="dr-actions"><a href="/app" className="dr-button dr-button-primary">Start a draft</a><a href="#process" className="dr-button dr-button-secondary">See the flow</a></div></div>
-      <figure className="dr-hero-visual" data-reveal><img src="/images/draftix-tactical-hero.png" alt="Abstract tactical arena map with red and blue draft markers" fetchPriority="high" /></figure>
+      <div className="dr-hero-copy" data-reveal><h1>Draft together.<br /><span>Play prepared.</span></h1><p>A shared command room for map vetoes, side picks, and agent bans.</p><div className="dr-actions"><a href="/app" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
+      <HeroSlideshow />
     </section>
-    <section className="dr-operations" id="product" data-reveal>
-      <header className="dr-operation-intro"><h2>One room. Every call.</h2><p>Set the format, run the veto, lock the match.</p></header>
-      <div className="dr-operation-list">
-        <article><img src="/images/maps/ascent.png" alt="Ascent map" loading="lazy" /><div><h3>Open the room</h3><p>Share one code.</p></div></article>
-        <article><img src="/images/maps/bind.png" alt="Bind map" loading="lazy" /><div><h3>Control the veto</h3><p>Captains take turns.</p></div></article>
-        <article><img src="/images/maps/icebox.png" alt="Icebox map" loading="lazy" /><div><h3>Lock the result</h3><p>Export and play.</p></div></article>
+    <section className="dr-agents" id="agents" data-reveal>
+      <figure className="dr-agents-media">
+        <img src="/images/Homepage/hero-agents.png" alt="Draftix agent key art" loading="lazy" />
+      </figure>
+      <div className="dr-agents-intro">
+        <h2>Your agents</h2>
+        <strong>Every lock-in changes the draft.</strong>
+        <p>Ban, pick, and counter around the agents your team actually plays. Draftix runs the full agent veto in one shared room, so your comp leaves the draft ready — not guessed.</p>
+        <a href="https://playvalorant.com/en-us/agents/" target="_blank" rel="noreferrer" className="dr-button dr-agents-cta">View all agents</a>
       </div>
     </section>
+    <section className="dr-operations" id="product" data-reveal>
+      <header className="dr-operation-intro">
+        <h2>One room.<br />Every decision.</h2>
+        <p>Create the room, run the draft, share the final matchup.</p>
+        <a href="/app" className="dr-button dr-button-primary">Open a room</a>
+      </header>
+      <figure className="dr-banner-media">
+        <img src="/images/Homepage/section-banner.png" alt="Draftix squad key art" loading="lazy" />
+      </figure>
+    </section>
     <section className="dr-process" id="process" data-flow>
-      <header data-reveal><h2>Four calls. Match ready.</h2></header>
+      <header data-reveal><h2>Four calls. Match ready.</h2><p>See the full flow in under two minutes.</p><button type="button" className="dr-button dr-button-secondary dr-tutorial-btn" onClick={() => setShowTutorial(true)}>Watch tutorial</button></header>
       <div className="dr-process-track">
-        <article data-reveal><img src="/images/maps/ascent.png" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
-        <article data-reveal><img src="/images/maps/lotus.png" alt="" loading="lazy" /><div><strong>02</strong><h3>Claim</h3><p>Seat the captains.</p></div></article>
-        <article data-reveal><img src="/images/maps/bind.png" alt="" loading="lazy" /><div><strong>03</strong><h3>Veto</h3><p>Ban. Pick. Lock.</p></div></article>
-        <article data-reveal><img src="/images/maps/sunset.png" alt="" loading="lazy" /><div><strong>04</strong><h3>Play</h3><p>Take the result.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/steap1-create.png" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step2-banmap.png" alt="" loading="lazy" /><div><strong>02</strong><h3>Veto</h3><p>Ban the map.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step3-choosteam.png" alt="" loading="lazy" /><div><strong>03</strong><h3>Claim</h3><p>Choose your team.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step4-banagent.png" alt="" loading="lazy" /><div><strong>04</strong><h3>Lock</h3><p>Ban the agent.</p></div></article>
       </div>
     </section>
     <section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Choose the arena before the match begins.</p></header><MapCarousel /></section>
-    <section className="dr-final" data-reveal><h2>Your next draft takes seconds.</h2><a href="/app" className="dr-button dr-button-primary">Open Draftix</a></section>
-    <footer className="dr-footer" data-reveal><Brand /><p>Real-time drafting for Valorant teams.</p><nav aria-label="Footer navigation"><a href="/status.html">Status</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav><small>© {new Date().getFullYear()} DRAFTIX</small></footer>
+    <section className="dr-final" data-reveal><p className="dr-final-eyebrow">// Final call</p><h2>Your next draft takes seconds.</h2><p className="dr-final-sub">No account needed. Create a room, share the code, and lock in your comp.</p><a href="/app" className="dr-button dr-button-primary">Open Draftix</a></section>
+    <PublicFooter reveal />
+    {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
+    <BackToTop />
+
   </main>;
 }
