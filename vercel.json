@@ -55,6 +55,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/t/(.*)", "destination": "/t.html" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

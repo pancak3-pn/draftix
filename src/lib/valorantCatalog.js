@@ -1,5 +1,5 @@
-const MAP_POOL = ["Ascent","Abyss","Bind","Breeze","Fracture","Haven","Icebox","Lotus","Pearl","Split","Sunset"];
-const CACHE_KEY = "draftix:catalog:v3";
+const MAP_POOL = ["Ascent","Abyss","Bind","Breeze","Corrode","Fracture","Haven","Icebox","Lotus","Pearl","Split","Summit","Sunset"];
+const CACHE_KEY = "draftix:catalog:v4";
 const CACHE_TTL = 12 * 60 * 60 * 1000;
 
 function readCache() {

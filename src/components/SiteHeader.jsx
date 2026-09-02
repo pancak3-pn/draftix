@@ -4,6 +4,7 @@ const primaryLinks = [
   { href: "/#product", label: "Product" },
   { href: "/#process", label: "How it works" },
   { href: "/team-balance", label: "Team balancer" },
+  { href: "/tournaments", label: "Tournaments" },
 ];
 
 export default function SiteHeader({ draftEntry = false }) {

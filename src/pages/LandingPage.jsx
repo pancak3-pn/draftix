@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import AppNav from "../components/AppNav.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 
-const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Sunset"].map((displayName) => ({
+const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Corrode", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Summit", "Sunset"].map((displayName) => ({
   displayName,
   src: `/images/maps/${displayName.toLowerCase()}.png`,
 }));

@@ -67,6 +67,22 @@ const pages = [
     socialDescription: "Build balanced Valorant teams by rank or random draw in seconds.",
   },
   {
+    path: "/tournaments",
+    title: "Free Tournament Bracket Maker | Draftix",
+    description: "Create a free shareable single-elimination tournament bracket for 3 to 16 teams. Automatic byes support uneven fields, with one public link for viewers.",
+    socialDescription: "Build and share a live tournament bracket with private organizer controls.",
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "Draftix Tournament Bracket Maker",
+      url: `${origin}/tournaments`,
+      applicationCategory: "GameApplication",
+      operatingSystem: "Any",
+      isAccessibleForFree: true,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  },
+  {
     path: "/valorant-map-veto",
     title: "Free Valorant Map Veto Tool | Draftix",
     description: "Run a live Valorant map veto with both captains. Ban maps, select the final map, choose starting sides, and share the result. Free, no signup.",
@@ -142,6 +158,13 @@ const pages = [
     description: "Create or join a private Draftix room for your Valorant map veto and agent draft.",
     socialDescription: "Create or join a private Draftix room.",
     robots: "noindex,nofollow,noarchive",
+  },
+  {
+    path: "/t",
+    title: "Live Tournament Bracket | Draftix",
+    description: "View a live tournament bracket hosted on Draftix.",
+    socialDescription: "Follow a live shareable tournament bracket on Draftix.",
+    robots: "noindex,follow,noarchive",
   },
 ];
 

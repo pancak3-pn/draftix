@@ -8,6 +8,7 @@ import "./styles/landing-redesign.css";
 import "./styles/app-redesign.css";
 import "./styles/support-pages.css";
 import "./styles/typography.css";
+import "./styles/tournaments.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

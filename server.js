@@ -152,12 +152,14 @@ const MAP_POOL_ORDER = [
   "Abyss",
   "Bind",
   "Breeze",
+  "Corrode",
   "Fracture",
   "Haven",
   "Icebox",
   "Lotus",
   "Pearl",
   "Split",
+  "Summit",
   "Sunset",
 ];
 const ALLOWED_MAP_NAMES = new Set(MAP_POOL_ORDER.map((n) => n.toLowerCase()));

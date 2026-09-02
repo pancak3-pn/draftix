@@ -12,7 +12,7 @@ export default function PublicFooter({ reveal = false }) {
         <nav className="public-footer-primary" aria-label="Draftix tools">
           <a href="/draft">Open Draftix</a>
           <a href="/team-balance">Team balancer</a>
-          <a href="/valorant-draft-tool">Draft guide</a>
+          <a href="/tournaments">Tournaments</a>
         </nav>
       </div>
 

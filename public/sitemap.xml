@@ -13,6 +13,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.draftix.tech/tournaments</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.draftix.tech/valorant-map-veto</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
