@@ -909,12 +909,17 @@ async function main() {
     res.redirect(301, "/app" + appendQuery(req));
   });
 
-  const reactPageRoutes = [
-    "/team-balance", "/team-balance.html",
-    "/status", "/status.html",
-    "/privacy", "/privacy.html",
-    "/terms", "/terms.html",
-  ];
+  const legacyPageRoutes = {
+    "/team-balance.html": "/team-balance",
+    "/status.html": "/status",
+    "/privacy.html": "/privacy",
+    "/terms.html": "/terms",
+  };
+  for (const [legacyPath, canonicalPath] of Object.entries(legacyPageRoutes)) {
+    app.get(legacyPath, (req, res) => res.redirect(301, canonicalPath + appendQuery(req)));
+  }
+
+  const reactPageRoutes = ["/team-balance", "/status", "/privacy", "/terms"];
   app.get(reactPageRoutes, (_req, res) => {
     res.type("html");
     res.sendFile(appHtmlPath);

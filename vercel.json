@@ -3,6 +3,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist-react",
   "framework": "vite",
+  "redirects": [
+    { "source": "/team-balance.html", "destination": "/team-balance", "permanent": true },
+    { "source": "/status.html", "destination": "/status", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/terms.html", "destination": "/terms", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
