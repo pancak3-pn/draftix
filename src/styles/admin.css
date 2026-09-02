@@ -796,8 +796,10 @@
   --ad-text: #111820;
   --ad-muted: #52606d;
   --ad-accent: #ff4655;
+  --font-ui: "Plus Jakarta Sans", sans-serif;
   background: var(--ad-bg);
   color: var(--ad-text);
+  font-family: var(--font-ui);
 }
 .ax-app:has(.ax-login-side) .ax-topbar { display: none; }
 .ax-app:has(.ax-login-side) .ax-content {
@@ -923,8 +925,10 @@
   --ad-text: #0f1923;
   --ad-muted: #626b73;
   --ad-accent: #ff4655;
+  --font-ui: "Plus Jakarta Sans", sans-serif;
   background: var(--ad-bg);
   color: var(--ad-text);
+  font-family: var(--font-ui);
 }
 
 .ax-app:not(:has(.ax-login-side)) .ax-side {
