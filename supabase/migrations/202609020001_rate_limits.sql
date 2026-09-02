@@ -111,7 +111,7 @@ end;
 $$;
 
 revoke all on function public.draftix_check_request() from public, anon, authenticated;
+grant execute on function public.draftix_check_request() to anon, authenticated, authenticator;
 
 alter role authenticator set pgrst.db_pre_request = 'public.draftix_check_request';
 notify pgrst, 'reload config';
-

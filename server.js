@@ -35,11 +35,11 @@ const SOCKET_LIMITS = {
   banMap:        [60, 60_000],
   banAgent:      [60, 60_000],
   pickSide:      [20, 60_000],
-  chatMessage:   [12, 10_000],
+  chatMessage:   [1, 10_000, "socket"], // one message per participant every 10s
   leaveSession:  [10, 60_000],
 };
 
-const CHAT_MAX_LEN = 240;
+const CHAT_MAX_LEN = 100;
 const CHAT_HISTORY = 50;
 let chatMsgSeq = 0;
 const SERVER_STARTED_AT = Date.now();
@@ -1310,15 +1310,18 @@ async function main() {
   function allowSocketEvent(socket, event) {
     const limit = SOCKET_LIMITS[event];
     if (!limit) return true;
-    const [max, win] = limit;
+    const [max, win, scope = "ip"] = limit;
     const ip = ipFromSocket(socket);
     const now = Date.now();
-    let bucket = ipEventLog.get(ip);
-    if (!bucket) { bucket = {}; ipEventLog.set(ip, bucket); }
-    const allEvents = (bucket.__all = (bucket.__all || []).filter((t) => now - t < 60_000));
+    let ipBucket = ipEventLog.get(ip);
+    if (!ipBucket) { ipBucket = {}; ipEventLog.set(ip, ipBucket); }
+    const allEvents = (ipBucket.__all = (ipBucket.__all || []).filter((t) => now - t < 60_000));
     if (allEvents.length >= 180) return false;
     allEvents.push(now);
-    const arr = (bucket[event] = (bucket[event] || []).filter((t) => now - t < win));
+    const actor = scope === "socket" ? `socket:${socket.id}` : ip;
+    let eventBucket = ipEventLog.get(actor);
+    if (!eventBucket) { eventBucket = {}; ipEventLog.set(actor, eventBucket); }
+    const arr = (eventBucket[event] = (eventBucket[event] || []).filter((t) => now - t < win));
     if (arr.length >= max) return false;
     arr.push(now);
     return true;
@@ -1660,7 +1663,12 @@ async function main() {
         if (typeof cb === "function") cb({ ok: false, error: "Not in session" });
         return;
       }
-      const raw = clean(payload && payload.text, CHAT_MAX_LEN);
+      const submittedText = String((payload && payload.text) || "");
+      if (submittedText.length > CHAT_MAX_LEN) {
+        if (typeof cb === "function") cb({ ok: false, error: "Messages are limited to 100 characters" });
+        return;
+      }
+      const raw = clean(submittedText, CHAT_MAX_LEN);
       if (!raw) {
         if (typeof cb === "function") cb({ ok: false, error: "Empty message" });
         return;

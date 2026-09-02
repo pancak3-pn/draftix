@@ -448,6 +448,9 @@ function AgentBanConsole({
 export default function DraftBoard({ session, client, connection }) {
   const [seconds, setSeconds] = useState(null);
   const [message, setMessage] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatReadyAt, setChatReadyAt] = useState(0);
+  const [chatCooldown, setChatCooldown] = useState(0);
   const [musicMuted, setMusicMuted] = useState(false);
   const [matchCountdown, setMatchCountdown] = useState(null);
   const previousPhase = useRef(session.phase);
@@ -463,8 +466,8 @@ export default function DraftBoard({ session, client, connection }) {
   const matchFoundPlayedRef = useRef(false);
   const warnedTurnRef = useRef(null);
   const expiredTurnRef = useRef(null);
-  const send = (event, payload = {}) =>
-    client?.socket.emit(event, { code: session.code, ...payload });
+  const send = (event, payload = {}, callback) =>
+    client?.socket.emit(event, { code: session.code, ...payload }, callback);
   const maps = session.catalog?.maps || [];
   const agents = session.catalog?.agents || [];
   const selectedMaps = session.mapBans || [];
@@ -490,6 +493,21 @@ export default function DraftBoard({ session, client, connection }) {
     const timer = window.setInterval(tick, 250);
     return () => window.clearInterval(timer);
   }, [session.turnEndsAt, session.phase]);
+
+  useEffect(() => {
+    if (!chatReadyAt) {
+      setChatCooldown(0);
+      return undefined;
+    }
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((chatReadyAt - Date.now()) / 1000));
+      setChatCooldown(remaining);
+      if (remaining === 0) setChatReadyAt(0);
+    };
+    tick();
+    const timer = window.setInterval(tick, 250);
+    return () => window.clearInterval(timer);
+  }, [chatReadyAt]);
 
   useEffect(() => {
     if (
@@ -903,9 +921,14 @@ export default function DraftBoard({ session, client, connection }) {
   function sendChat(event) {
     event.preventDefault();
     const text = message.trim();
-    if (!text) return;
-    send("chatMessage", { text });
-    setMessage("");
+    if (!client?.socket || !text || chatSending || chatCooldown > 0) return;
+    setChatSending(true);
+    send("chatMessage", { text }, (result) => {
+      setChatSending(false);
+      if (result?.ok === false) return;
+      setMessage("");
+      setChatReadyAt(Date.now() + 10000);
+    });
   }
 
   const phaseLabel =
@@ -1081,12 +1104,22 @@ export default function DraftBoard({ session, client, connection }) {
           <form onSubmit={sendChat}>
             <input
               value={message}
-              maxLength={240}
+              maxLength={100}
               onChange={(event) => setMessage(event.target.value)}
               placeholder="Message the room"
               aria-label="Room message"
             />
-            <button type="submit">Send</button>
+            <span
+              className={`dx-chat-cooldown${chatCooldown > 0 ? " is-active" : ""}`}
+              aria-live="polite"
+              aria-label={chatCooldown > 0 ? `${chatCooldown} seconds until the next message` : "Ready to send"}
+            >
+              <span aria-hidden="true">⏱</span>
+              {`0:${String(chatCooldown).padStart(2, "0")}`}
+            </span>
+            <button type="submit" disabled={!message.trim() || chatSending || chatCooldown > 0} aria-label={chatCooldown > 0 ? `Send available in ${chatCooldown} seconds` : "Send room message"}>
+              {chatSending ? "Sending" : "Send"}
+            </button>
           </form>
         </aside>
       </div>
