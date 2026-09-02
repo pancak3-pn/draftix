@@ -523,6 +523,8 @@
 .public-footer > nav { grid-area:links; }
 .public-footer > nav a { color:#c5cad0; }
 .public-footer > nav a:hover,.public-footer > nav a:focus-visible { color:#ff6471; }
+.public-footer > nav .public-footer-contact { color:#f3f4f5; font-weight:700; }
+.public-footer > nav .public-footer-contact:hover,.public-footer > nav .public-footer-contact:focus-visible { color:#ff6471; }
 .public-footer > small {
   grid-area:copyright;
   align-self:end;

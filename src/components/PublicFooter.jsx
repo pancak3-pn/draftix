@@ -8,6 +8,7 @@ export default function PublicFooter({ reveal = false }) {
       <a href="/status.html">Status</a>
       <a href="/privacy.html">Privacy</a>
       <a href="/terms.html">Terms</a>
+      <a className="public-footer-contact" href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech" target="_blank" rel="noreferrer">support@draftix.tech</a>
     </nav>
     <small>© {new Date().getFullYear()} DRAFTIX</small>
   </footer>;
