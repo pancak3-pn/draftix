@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import "../styles/admin.css";
 
 const TOKEN_KEY = "dx_admin_token";
+const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers"];
+
+function viewFromHash() {
+  if (typeof window === "undefined") return "overview";
+  const view = window.location.hash.replace(/^#/, "").toLowerCase();
+  return ADMIN_VIEWS.includes(view) ? view : "overview";
+}
 
 function supabaseConfig() {
   const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
@@ -77,21 +84,31 @@ function StatCard({ label, value, sub, icon }) {
   );
 }
 
-function RankedList({ id, title, icon, pairs, emptyText }) {
+function RankedList({ id, title, icon, pairs, emptyText, linkType }) {
+  const itemHref = (key) => {
+    if (linkType === "path" && String(key).startsWith("/")) return String(key);
+    if (linkType === "host" && /^[a-z0-9.-]+(?::\d+)?$/i.test(String(key))) return `https://${key}`;
+    return null;
+  };
+
   return (
     <section className="ax-panel" id={id}>
       <h3>
         <span className="ax-panel-icon">{icon}</span>
         {title}
+        {pairs?.length ? <span className="ax-panel-note">Top {pairs.length}</span> : null}
       </h3>
       {pairs && pairs.length ? (
         <ul className="ax-list">
-          {pairs.map(([key, value]) => (
-            <li key={key}>
-              <span>{key}</span>
-              <strong>{value}</strong>
-            </li>
-          ))}
+          {pairs.map(([key, value]) => {
+            const href = itemHref(key);
+            return (
+              <li key={key}>
+                {href ? <a href={href} target="_blank" rel="noreferrer">{key}</a> : <span>{key}</span>}
+                <strong>{value}</strong>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p className="ax-empty">{emptyText}</p>
@@ -151,7 +168,7 @@ function DailyChart({ daily }) {
         <polyline points={pts} fill="none" stroke="#ff4655" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
         {views.map((v, i) => (
           <circle key={daily[i].date} cx={x(i)} cy={y(v)} r="3.5" fill="#ff4655">
-            <title>{`${daily[i].date}: ${v} views · ${daily[i].visitors} visitors`}</title>
+            <title>{`${daily[i].date}: ${v} views / ${daily[i].visitors} visitors`}</title>
           </circle>
         ))}
         <text x={PAD.left} y={H - 8} className="ax-tick">{daily[0].date.slice(5)}</text>
@@ -174,18 +191,34 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [tick, setTick] = useState(0); // re-renders the "updated Xs ago" label
-  const [activeView, setActiveView] = useState("overview");
+  const [activeView, setActiveView] = useState(viewFromHash);
 
 
   useEffect(() => {
     // Keep crawlers and link previews away from the admin shell.
     let meta = document.querySelector('meta[name="robots"]');
+    const created = !meta;
+    const previous = meta?.content || "";
     if (!meta) {
       meta = document.createElement("meta");
       meta.name = "robots";
       document.head.appendChild(meta);
     }
     meta.content = "noindex,nofollow";
+    return () => {
+      if (created) meta.remove();
+      else meta.content = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncView = () => setActiveView(viewFromHash());
+    window.addEventListener("hashchange", syncView);
+    window.addEventListener("popstate", syncView);
+    return () => {
+      window.removeEventListener("hashchange", syncView);
+      window.removeEventListener("popstate", syncView);
+    };
   }, []);
 
   // Auto-load stats when a saved token exists (e.g. returning visit),
@@ -232,18 +265,20 @@ export default function AdminPage() {
       });
       const payload = await res.json().catch(() => null);
       if (!res.ok) {
-        setStats(null);
+        const unauthorized = res.status === 401 || res.status === 403;
+        if (unauthorized) {
+          setStats(null);
+          setToken("");
+          sessionStorage.removeItem(TOKEN_KEY);
+        }
         setError(payload?.message || `Request failed (HTTP ${res.status}).`);
-        sessionStorage.removeItem(TOKEN_KEY);
         return;
       }
       setStats(payload);
       setUpdatedAt(Date.now());
       sessionStorage.setItem(TOKEN_KEY, t);
     } catch (e) {
-      setStats(null);
       setError(e?.message || "Network error: could not reach Supabase.");
-      sessionStorage.removeItem(TOKEN_KEY);
     } finally {
       setLoading(false);
     }
@@ -262,6 +297,12 @@ export default function AdminPage() {
     setToken("");
     setStats(null);
     setInput("");
+  }
+
+  function selectView(view) {
+    setActiveView(view);
+    const url = view === "overview" ? window.location.pathname : `${window.location.pathname}#${view}`;
+    window.history.pushState({ adminView: view }, "", url);
   }
 
   if (!token || !stats) {
@@ -314,7 +355,7 @@ export default function AdminPage() {
                 </div>
               </label>
               <button type="submit" className="ax-button" disabled={!input.trim() || loading} aria-busy={loading}>
-                {loading ? "Checking…" : "Unlock dashboard"}
+                {loading ? "Checking..." : "Unlock dashboard"}
               </button>
               {error ? <p className="ax-error" role="alert">{error}</p> : null}
             </form>
@@ -341,19 +382,19 @@ export default function AdminPage() {
           </span>
         </div>
         <nav className="ax-nav" aria-label="Admin sections">
-          <button type="button" className={activeView === "overview" ? "ax-nav-active" : "ax-nav-item"} onClick={() => setActiveView("overview")}>
+          <button type="button" className={activeView === "overview" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("overview")} aria-current={activeView === "overview" ? "page" : undefined}>
             <span className="ax-nav-icon">{Icon.grid}</span>
             Overview
           </button>
-          <button type="button" className={activeView === "rooms" ? "ax-nav-active" : "ax-nav-item"} onClick={() => setActiveView("rooms")}>
+          <button type="button" className={activeView === "rooms" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("rooms")} aria-current={activeView === "rooms" ? "page" : undefined}>
             <span className="ax-nav-icon">{Icon.door}</span>
             Draft Rooms
           </button>
-          <button type="button" className={activeView === "pages" ? "ax-nav-active" : "ax-nav-item"} onClick={() => setActiveView("pages")}>
+          <button type="button" className={activeView === "pages" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("pages")} aria-current={activeView === "pages" ? "page" : undefined}>
             <span className="ax-nav-icon">{Icon.doc}</span>
             Top Pages
           </button>
-          <button type="button" className={activeView === "referrers" ? "ax-nav-active" : "ax-nav-item"} onClick={() => setActiveView("referrers")}>
+          <button type="button" className={activeView === "referrers" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("referrers")} aria-current={activeView === "referrers" ? "page" : undefined}>
             <span className="ax-nav-icon">{Icon.link}</span>
             Referrers
           </button>
@@ -380,7 +421,7 @@ export default function AdminPage() {
           </div>
           <div className="ax-topbar-tools">
             <span className="ax-updated">
-              {tick >= 0 && ago ? `Updated ${ago} · auto-refresh 60s` : null}
+              {tick >= 0 && ago ? `Updated ${ago} / auto-refresh 60s` : null}
             </span>
             <button
               type="button"
@@ -389,22 +430,22 @@ export default function AdminPage() {
               disabled={loading}
             >
               <span className="ax-btn-icon">{Icon.refresh}</span>
-              {loading ? "Refreshing…" : "Refresh"}
+              {loading ? "Refreshing..." : "Refresh"}
             </button>
           </div>
         </header>
 
         <div className="ax-content">
-          {error ? <p className="ax-error ax-banner-error" role="alert">{error}</p> : null}
-          {loading && !stats ? <p className="ax-loading">Loading metrics…</p> : null}
+          {error ? <div className="ax-error ax-banner-error" role="alert"><span>{error}</span><button type="button" onClick={() => loadStats(token)}>Try again</button></div> : null}
+          {loading && !stats ? <div className="ax-loading" aria-live="polite"><span /><span /><span />Loading metrics...</div> : null}
 
           {stats ? (
             <>
               {activeView === "overview" ? <div className="ax-cards">
                 <StatCard label="Views today" value={fmtInt(stats.today?.views)} sub="Since midnight UTC" icon={Icon.eye} />
                 <StatCard label="Visitors today" value={fmtInt(stats.today?.visitors)} sub="Unique anonymous visitors" icon={Icon.users} />
-                <StatCard label="Views · 7 days" value={fmtInt(stats.last7?.views)} sub="Rolling week" icon={Icon.calendar} />
-                <StatCard label="Visitors · 7 days" value={fmtInt(stats.last7?.visitors)} sub="Unique this week" icon={Icon.users} />
+                <StatCard label="Views / 7 days" value={fmtInt(stats.last7?.views)} sub="Rolling week" icon={Icon.calendar} />
+                <StatCard label="Visitors / 7 days" value={fmtInt(stats.last7?.visitors)} sub="Unique this week" icon={Icon.users} />
                 <StatCard label="All-time views" value={fmtInt(stats.allTime?.views)} sub={`${fmtInt(stats.allTime?.visitors)} unique visitors`} icon={Icon.infinity} />
               </div> : null}
 
@@ -429,8 +470,8 @@ export default function AdminPage() {
               </div> : null}
 
               {activeView === "overview" || activeView === "pages" || activeView === "referrers" ? <div className="ax-row">
-                {activeView === "overview" || activeView === "pages" ? <RankedList id="ax-pages" title="Top pages" icon={Icon.doc} pairs={stats.topPages} emptyText="No pageviews recorded yet." /> : null}
-                {activeView === "overview" || activeView === "referrers" ? <RankedList id="ax-referrers" title="Top referrers" icon={Icon.link} pairs={stats.topReferrers} emptyText="No external referrers yet." /> : null}
+                {activeView === "overview" || activeView === "pages" ? <RankedList id="ax-pages" title="Top pages" icon={Icon.doc} pairs={stats.topPages} emptyText="No pageviews recorded yet." linkType="path" /> : null}
+                {activeView === "overview" || activeView === "referrers" ? <RankedList id="ax-referrers" title="Top referrers" icon={Icon.link} pairs={stats.topReferrers} emptyText="No external referrers yet." linkType="host" /> : null}
               </div> : null}
             </>
           ) : null}

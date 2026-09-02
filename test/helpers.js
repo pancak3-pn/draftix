@@ -18,7 +18,7 @@ async function waitForHealth(baseUrl, child) {
   throw new Error("Timed out waiting for test server");
 }
 
-async function startServer(port) {
+async function startServer(port, extraEnv = {}) {
   const child = spawn(process.execPath, ["server.js"], {
     cwd: process.cwd(),
     env: {
@@ -29,6 +29,7 @@ async function startServer(port) {
       RECONNECT_GRACE_MS: "5000",
       TURN_TIMEOUT_MS: "60000",
       ALLOWED_ORIGINS: `http://127.0.0.1:${port}`,
+      ...extraEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });

@@ -21,12 +21,13 @@ const TURN_TIMEOUT_MS = Number(process.env.TURN_TIMEOUT_MS) || 30_000;
 const RECONNECT_GRACE_MS = Number(process.env.RECONNECT_GRACE_MS) || 60_000;
 /** Per-IP socket-event rate limits: { eventName: [maxEvents, windowMs] } */
 const SOCKET_LIMITS = {
-  createSession: [10, 60_000],   // 10 per minute
-  joinSession:   [60, 60_000],   // 60 per minute
+  createSession: [5, 60_000],
+  joinSession:   [30, 60_000],
   claimCaptain:  [30, 60_000],
   setTeam:       [30, 60_000],
-  setTeamNames:  [30, 60_000],
-  setGameSettings: [30, 60_000],
+  setTeamNames:  [20, 60_000],
+  setTeamLogos:  [20, 60_000],
+  setGameSettings: [20, 60_000],
   startDraft:    [10, 60_000],
   undoDraftAction: [30, 60_000],
   rematchDraft:  [10, 60_000],
@@ -34,7 +35,7 @@ const SOCKET_LIMITS = {
   banMap:        [60, 60_000],
   banAgent:      [60, 60_000],
   pickSide:      [20, 60_000],
-  chatMessage:   [30, 60_000],   // 30 messages per minute per IP
+  chatMessage:   [12, 10_000],
   leaveSession:  [10, 60_000],
 };
 
@@ -1006,6 +1007,15 @@ async function main() {
   });
   app.use(httpLimiter);
 
+  const adminLimiter = rateLimit({
+    windowMs: 15 * 60_000,
+    max: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    handler: (_req, res) => res.status(429).json({ error: "Too many sign-in attempts. Try again in 15 minutes." }),
+  });
+
   // ─── Health check (for monitors / load balancers) ───────
   app.get("/healthz", (_req, res) => {
     res.json({
@@ -1229,7 +1239,7 @@ async function main() {
     return "deny";
   }
 
-  app.get("/api/admin/stats", (req, res) => {
+  app.get("/api/admin/stats", adminLimiter, (req, res) => {
     const a = adminAccess(req);
     if (a === "off") return res.status(404).end("Not found");
     if (a === "deny") return res.status(401).json({ error: "Unauthorized" });
@@ -1255,7 +1265,7 @@ async function main() {
     });
   });
 
-  app.get("/internal/metrics", (req, res) => {
+  app.get("/internal/metrics", adminLimiter, (req, res) => {
     const secret = process.env.ADMIN_STATS_TOKEN;
     if (!secret || String(secret).length < 24) return res.status(404).end("Not found");
     if (String(req.query.token || "") !== secret) {
@@ -1305,6 +1315,9 @@ async function main() {
     const now = Date.now();
     let bucket = ipEventLog.get(ip);
     if (!bucket) { bucket = {}; ipEventLog.set(ip, bucket); }
+    const allEvents = (bucket.__all = (bucket.__all || []).filter((t) => now - t < 60_000));
+    if (allEvents.length >= 180) return false;
+    allEvents.push(now);
     const arr = (bucket[event] = (bucket[event] || []).filter((t) => now - t < win));
     if (arr.length >= max) return false;
     arr.push(now);
@@ -1697,7 +1710,7 @@ async function main() {
       if (typeof cb === "function") cb({ ok: true });
     }));
 
-    socket.on("setTeamLogos", (payload, cb) => withLimit(socket, "setTeamNames", cb, () => {
+    socket.on("setTeamLogos", (payload, cb) => withLimit(socket, "setTeamLogos", cb, () => {
       const code = payload && String(payload.code).toUpperCase();
       const session = sessions.get(code);
       if (!session || session.hostId !== socket.id) {

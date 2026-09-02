@@ -1102,3 +1102,137 @@
   .ax-app:not(:has(.ax-login-side)) .ax-side-footer { box-shadow: none; }
   .ax-app:not(:has(.ax-login-side)) .ax-card:first-child { grid-column: 1 / -1; }
 }
+
+/* Functional dashboard states and compact responsive shell. */
+.ax-app:not(:has(.ax-login-side)) .ax-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-nav-active,
+.ax-app:not(:has(.ax-login-side)) .ax-nav-item,
+.ax-app:not(:has(.ax-login-side)) .ax-refresh,
+.ax-app:not(:has(.ax-login-side)) .ax-link { -webkit-tap-highlight-color: transparent; }
+
+.ax-app:not(:has(.ax-login-side)) .ax-list a {
+  color: var(--ad-text);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  text-decoration-color: rgba(255, 70, 85, 0.35);
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-list a:hover { color: #d93646; text-decoration-color: currentColor; }
+.ax-app:not(:has(.ax-login-side)) .ax-list a:focus-visible { outline: 2px solid var(--ad-accent); outline-offset: 3px; border-radius: 2px; }
+
+.ax-app:not(:has(.ax-login-side)) .ax-banner-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(180, 35, 48, 0.22);
+  border-left: 3px solid var(--ad-accent);
+  color: #982532;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-banner-error button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(180, 35, 48, 0.25);
+  border-radius: 8px;
+  background: #fff;
+  color: #982532;
+  font: 700 0.72rem/1 var(--font-ui, sans-serif);
+  cursor: pointer;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-banner-error button:hover { background: #fff1f2; }
+.ax-app:not(:has(.ax-login-side)) .ax-banner-error button:focus-visible { outline: 2px solid var(--ad-accent); outline-offset: 2px; }
+
+.ax-app:not(:has(.ax-login-side)) .ax-loading {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  color: transparent;
+  font-size: 0;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-loading span {
+  display: block;
+  height: 142px;
+  border-radius: 16px;
+  background: linear-gradient(100deg, #fff 25%, #f2f0ed 42%, #fff 60%);
+  background-size: 240% 100%;
+  box-shadow: 0 0 0 1px rgba(15, 25, 35, 0.06);
+  animation: ax-skeleton 1.2s linear infinite;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-refresh:disabled .ax-btn-icon { animation: ax-spin 750ms linear infinite; }
+
+.ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child h3 { grid-column: 1 / -1; }
+.ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child .ax-roomstat {
+  min-height: 140px;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f5f4f1;
+}
+
+@keyframes ax-skeleton { to { background-position: -240% 0; } }
+@keyframes ax-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .ax-app:not(:has(.ax-login-side)) .ax-side {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 0.4rem;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-nav {
+    min-width: 0;
+    scrollbar-width: none;
+  }
+  .ax-app:not(:has(.ax-login-side)) .ax-nav::-webkit-scrollbar { display: none; }
+  .ax-app:not(:has(.ax-login-side)) .ax-nav-active,
+  .ax-app:not(:has(.ax-login-side)) .ax-nav-item { min-height: 40px; width: auto; }
+  .ax-app:not(:has(.ax-login-side)) .ax-side-footer { padding-left: 0.4rem; }
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar { top: 64px; }
+  .ax-app:not(:has(.ax-login-side)) .ax-loading { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .ax-app:not(:has(.ax-login-side)) .ax-logo-word,
+  .ax-app:not(:has(.ax-login-side)) .ax-side-user strong { display: none; }
+  .ax-app:not(:has(.ax-login-side)) .ax-logo-image { width: 28px; height: 28px; }
+  .ax-app:not(:has(.ax-login-side)) .ax-side-footer { gap: 0; }
+  .ax-app:not(:has(.ax-login-side)) .ax-avatar { display: none; }
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar {
+    top: 62px;
+    gap: 0.8rem;
+    padding-block: 0.9rem;
+  }
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar-tools { align-items: center; }
+  .ax-app:not(:has(.ax-login-side)) .ax-updated { max-width: 16ch; line-height: 1.35; }
+  .ax-app:not(:has(.ax-login-side)) .ax-refresh { padding-inline: 0.8rem; }
+  .ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child { grid-template-columns: 1fr; }
+  .ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child h3 { grid-column: auto; }
+  .ax-app:not(:has(.ax-login-side)) .ax-row > .ax-rooms:only-child .ax-roomstat { min-height: 110px; }
+  .ax-app:not(:has(.ax-login-side)) .ax-banner-error { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-app:not(:has(.ax-login-side)) .ax-loading span,
+  .ax-app:not(:has(.ax-login-side)) .ax-refresh:disabled .ax-btn-icon { animation: none; }
+}
