@@ -42,7 +42,7 @@ function BackToTop() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Back to top" title="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.png" alt="" /><span>Back to top</span></button>;
+  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Updraft to top" title="Updraft to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.png" alt="" /><span>Updraft to top</span></button>;
 }
 
 function MapCarousel() {
