@@ -4,6 +4,14 @@
   "outputDirectory": "dist-react",
   "framework": "vite",
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "draftix.tech" }],
+      "destination": "https://www.draftix.tech/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
