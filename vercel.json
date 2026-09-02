@@ -6,6 +6,11 @@
   "cleanUrls": true,
   "redirects": [
     {
+      "source": "/admin",
+      "destination": "/r",
+      "permanent": true
+    },
+    {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "draftix.tech" }],
       "destination": "https://www.draftix.tech/$1",

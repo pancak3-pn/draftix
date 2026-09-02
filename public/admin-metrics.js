@@ -59,6 +59,52 @@
     return h;
   }
 
+  function tableList(pairs, emptyLabel, formatter) {
+    const wrap = document.createElement("div");
+    wrap.className = "dash-table";
+    if (!pairs || !pairs.length) {
+      const p = document.createElement("p");
+      p.className = "dash-empty";
+      p.textContent = emptyLabel;
+      wrap.appendChild(p);
+      return wrap;
+    }
+    for (const [key, value] of pairs) {
+      const row = document.createElement("div");
+      row.className = "dash-table-row";
+      const k = document.createElement("span");
+      k.className = "dash-table-key";
+      k.textContent = formatter ? formatter(key) : key;
+      const v = document.createElement("strong");
+      v.textContent = String(value);
+      row.appendChild(k);
+      row.appendChild(v);
+      wrap.appendChild(row);
+    }
+    return wrap;
+  }
+
+  function dailyChart(daily) {
+    const wrap = document.createElement("div");
+    wrap.className = "dash-chart";
+    const max = Math.max(1, ...(daily || []).map((d) => d.views));
+    for (const d of daily || []) {
+      const col = document.createElement("div");
+      col.className = "dash-chart-col";
+      const bar = document.createElement("div");
+      bar.className = "dash-chart-bar";
+      bar.style.height = Math.round((d.views / max) * 100) + "%";
+      bar.title = `${d.date}: ${d.views} views · ${d.visitors} visitors`;
+      const lbl = document.createElement("span");
+      lbl.className = "dash-chart-label";
+      lbl.textContent = d.date.slice(8); // day-of-month
+      col.appendChild(bar);
+      col.appendChild(lbl);
+      wrap.appendChild(col);
+    }
+    return wrap;
+  }
+
   function render(data) {
     if (!grid) return;
     const loading = document.getElementById("dash-loading");
@@ -91,6 +137,27 @@
     grid.appendChild(card("GET / (landing)", String(tr.landingViews ?? "—"), "Since process start"));
     grid.appendChild(card("GET /app", String(tr.appShellViews ?? "—"), "App shell loads"));
     grid.appendChild(card("Counters since", fmtTime(tr.since), "Resets on deploy / restart"));
+
+    grid.appendChild(section("Visitors & page views"));
+    const an = data.analytics || {};
+    const today = an.today || {};
+    const last7 = an.last7 || {};
+    const all = an.allTime || {};
+    grid.appendChild(card("Views today", String(today.views ?? "—"), "Page views since midnight UTC"));
+    grid.appendChild(card("Visitors today", String(today.visitors ?? "—"), "Unique cookies today"));
+    grid.appendChild(card("Views · last 7 days", String(last7.views ?? "—"), "Rolling week"));
+    grid.appendChild(card("Visitors · last 7 days", String(last7.visitors ?? "—"), "Unique cookies this week"));
+    grid.appendChild(card("All-time views", String(all.views ?? "—"), "Persisted across redeploys"));
+    grid.appendChild(card("All-time visitors", String(all.visitors ?? "—"), "Unique visitor cookies"));
+
+    const chartTitle = section("Last 14 days");
+    grid.appendChild(chartTitle);
+    grid.appendChild(dailyChart(an.daily));
+
+    grid.appendChild(section("Top pages (all tracked days)"));
+    grid.appendChild(tableList(an.topPages, "No page views recorded yet."));
+    grid.appendChild(section("Top referrers"));
+    grid.appendChild(tableList(an.topReferrers, "No external referrers yet."));
 
     grid.appendChild(section("Catalog"));
     const cat = data.catalog || {};

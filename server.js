@@ -650,6 +650,7 @@ async function main() {
   await loadCatalog();
   const isProd = process.env.NODE_ENV === "production";
 
+
   // ─── Catalog auto-refresh ───
   // Re-fetch the Valorant API every 12h so newly-released agents/maps appear
   // without a server restart. Errors are logged but never crash the loop.
@@ -686,6 +687,174 @@ async function main() {
     appShellViews: 0,
     peakSockets: 0,
   };
+
+  // ─── First-party visit analytics ────────────────────────
+  // Cookie-based unique visitor counting + per-day page views, persisted to
+  // DATA_DIR/analytics.json so numbers survive redeploys (Render volume).
+  // Privacy: anonymous random UUID cookie, no IP/UA/fingerprint stored.
+  const ANALYTICS_PATH = path.join(DATA_DIR, "analytics.json");
+  const ANALYTICS_DAY_MS = 86_400_000;
+  const ANALYTICS_MAX_DAYS = 120;      // keep ~4 months of daily buckets
+  const ANALYTICS_MAX_VISITOR_IDS = 500_000; // safety cap for the all-time set
+  const ANALYTICS_PAGES = new Set([
+    "/",
+    "/app",
+    "/team-balance",
+    "/status",
+    "/privacy",
+    "/terms",
+  ]);
+  const analytics = { days: new Map(), allTime: { views: 0, visitors: new Set() } };
+  let analyticsDirty = false;
+
+  function dayKey(ts = Date.now()) {
+    return new Date(ts).toISOString().slice(0, 10);
+  }
+
+  function ensureDay(key) {
+    let day = analytics.days.get(key);
+    if (!day) {
+      day = { views: 0, visitors: 0, visitorIds: new Set(), pages: new Map(), referrers: new Map() };
+      analytics.days.set(key, day);
+    }
+    return day;
+  }
+
+  function parseCookies(header) {
+    const out = {};
+    if (!header) return out;
+    for (const part of String(header).split(";")) {
+      const i = part.indexOf("=");
+      if (i < 0) continue;
+      out[part.slice(0, i).trim()] = part.slice(i + 1).trim();
+    }
+    return out;
+  }
+
+  function referrerHost(raw) {
+    try {
+      const u = new URL(String(raw || ""));
+      if (!/^https?:$/.test(u.protocol)) return null;
+      const host = u.hostname.toLowerCase().replace(/^www\./, "");
+      // Internal navigation isn't a "referral" — ignore our own hosts.
+      if (!host || host === "draftix.tech" || host.endsWith(".draftix.tech")) return null;
+      if (u.pathname === "/" || u.pathname === "") return host; // bare-domain refs still count
+      return host;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function pruneAnalytics() {
+    const cutoff = Date.now() - ANALYTICS_MAX_DAYS * ANALYTICS_DAY_MS;
+    for (const key of analytics.days.keys()) {
+      if (new Date(key + "T00:00:00Z").getTime() < cutoff) analytics.days.delete(key);
+    }
+  }
+
+  async function loadAnalytics() {
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+      const raw = await fsp.readFile(ANALYTICS_PATH, "utf8");
+      const saved = JSON.parse(raw);
+      for (const [key, day] of Object.entries(saved.days || {})) {
+        analytics.days.set(key, {
+          views: Number(day.views) || 0,
+          visitors: Number(day.visitors) || 0,
+          visitorIds: new Set(Array.isArray(day.visitorIds) ? day.visitorIds : []),
+          pages: new Map(Object.entries(day.pages || {})),
+          referrers: new Map(Object.entries(day.referrers || {})),
+        });
+      }
+      analytics.allTime.views = Number(saved.allTime?.views) || 0;
+      analytics.allTime.visitors = new Set(
+        Array.isArray(saved.allTime?.visitors) ? saved.allTime.visitors : []
+      );
+      pruneAnalytics();
+      console.log(
+        `Analytics: ${analytics.allTime.views} views / ${analytics.allTime.visitors.size} visitors all-time, ${analytics.days.size} days loaded`
+      );
+    } catch (_) {
+      // First run or unreadable file — start fresh.
+    }
+  }
+
+  function analyticsSnapshot() {
+    const days = {};
+    for (const [key, day] of analytics.days) {
+      days[key] = {
+        views: day.views,
+        visitors: day.visitors,
+        visitorIds: [...day.visitorIds],
+        pages: Object.fromEntries(day.pages),
+        referrers: Object.fromEntries(day.referrers),
+      };
+    }
+    return {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      allTime: { views: analytics.allTime.views, visitors: [...analytics.allTime.visitors] },
+      days,
+    };
+  }
+
+  async function flushAnalytics() {
+    if (!analyticsDirty) return;
+    try {
+      await fsp.mkdir(DATA_DIR, { recursive: true });
+      const tmp = ANALYTICS_PATH + ".tmp";
+      await fsp.writeFile(tmp, JSON.stringify(analyticsSnapshot()), "utf8");
+      await fsp.rename(tmp, ANALYTICS_PATH);
+      analyticsDirty = false;
+    } catch (e) {
+      console.warn("Analytics flush failed:", e.message);
+    }
+  }
+
+  // Final synchronous flush on process exit (shutdown handlers give us a
+  // grace window; exit handlers must be sync).
+  process.on("exit", () => {
+    if (!analyticsDirty) return;
+    try {
+      fs.writeFileSync(ANALYTICS_PATH, JSON.stringify(analyticsSnapshot()), "utf8");
+    } catch (_) {}
+  });
+
+  // Aggregate helpers for the admin dashboard.
+  function analyticsDay(key) {
+    return analytics.days.get(key) || ensureDay(key);
+  }
+
+  function analyticsSummary() {
+    const now = Date.now();
+    const today = analyticsDay(dayKey(now));
+    const daily = [];
+    for (let i = 13; i >= 0; i--) {
+      const key = dayKey(now - i * ANALYTICS_DAY_MS);
+      const d = analytics.days.get(key);
+      daily.push({ date: key, views: d ? d.views : 0, visitors: d ? d.visitors : 0 });
+    }
+    const last7 = daily.slice(7);
+    const sum = (arr, field) => arr.reduce((a, d) => a + d[field], 0);
+    const mergeMap = (field) => {
+      const merged = new Map();
+      for (const d of analytics.days.values()) {
+        for (const [k, v] of d[field]) merged.set(k, (merged.get(k) || 0) + v);
+      }
+      return merged;
+    };
+    const topPages = [...mergeMap("pages").entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const topRefs = [...mergeMap("referrers").entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+    return {
+      today: { views: today.views, visitors: today.visitors },
+      last7: { views: sum(last7, "views"), visitors: sum(last7, "visitors") },
+      allTime: { views: analytics.allTime.views, visitors: analytics.allTime.visitors.size },
+      daily,
+      topPages,
+      topReferrers: topRefs,
+    };
+  }
+
 
   // ─── Trust proxy ────────────────────────────────────
   // Behind nginx/Caddy/Cloudflare we MUST trust the X-Forwarded-* headers so
@@ -781,9 +950,48 @@ async function main() {
       const p = req.path || "";
       if (p === "/" || p === "/index.html") traffic.landingViews++;
       else if (p === "/app") traffic.appShellViews++;
+
+      // ── Visit analytics (page views + unique visitors) ──
+      if (ANALYTICS_PAGES.has(p)) {
+        try {
+          const cookies = parseCookies(req.headers.cookie);
+          let vid = cookies.dx_v;
+          if (!vid || !/^[0-9a-f-]{16,64}$/i.test(vid)) {
+            vid = crypto.randomUUID();
+            res.setHeader(
+              "Set-Cookie",
+              `dx_v=${vid}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${isProd ? "; Secure" : ""}`
+            );
+          }
+          const day = ensureDay(dayKey());
+          day.views++;
+          day.pages.set(p, (day.pages.get(p) || 0) + 1);
+          if (!day.visitorIds.has(vid)) {
+            day.visitorIds.add(vid);
+            day.visitors++;
+          }
+          if (
+            !analytics.allTime.visitors.has(vid) &&
+            analytics.allTime.visitors.size < ANALYTICS_MAX_VISITOR_IDS
+          ) {
+            analytics.allTime.visitors.add(vid);
+          }
+          analytics.allTime.views++;
+          const ref = referrerHost(req.headers.referer);
+          if (ref) day.referrers.set(ref, (day.referrers.get(ref) || 0) + 1);
+          analyticsDirty = true;
+        } catch (_) {
+          // Analytics must never break a page load.
+        }
+      }
     }
     next();
   });
+
+  // Persist analytics to disk every 60s (and on exit via the "exit" handler).
+  await loadAnalytics();
+  setInterval(flushAnalytics, 60_000).unref();
+
 
   // ─── HTTP rate limit (lenient — protects static + healthz) ───
   const httpLimiter = rateLimit({
@@ -1026,6 +1234,7 @@ async function main() {
         appShellViews: traffic.appShellViews,
         peakSockets: traffic.peakSockets,
       },
+      analytics: analyticsSummary(),
     });
   });
 

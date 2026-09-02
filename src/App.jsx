@@ -1,9 +1,33 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import LandingPage from "./pages/LandingPage.jsx";
-import SessionGate from "./components/SessionGate.jsx";
-import TeamBalancerPage from "./pages/TeamBalancerPage.jsx";
-import StatusPage from "./pages/StatusPage.jsx";
-import LegalPage from "./pages/LegalPage.jsx";
+import { trackPageview } from "./lib/analytics.js";
+
+// Lazy-load route pages so the initial bundle stays lean. Only the landing
+// page is loaded eagerly; everything else (draft shell, balancer, status,
+// legal) is fetched on demand → smaller first load, better LCP.
+const SessionGate = lazy(() => import("./components/SessionGate.jsx"));
+const TeamBalancerPage = lazy(() => import("./pages/TeamBalancerPage.jsx"));
+const StatusPage = lazy(() => import("./pages/StatusPage.jsx"));
+const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
+const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
+
+function RouteFallback() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "var(--dx-bg, #060912)",
+        color: "#fff",
+        font: "600 1rem/1.4 system-ui, sans-serif",
+      }}
+      aria-busy="true"
+    >
+      <p>Loading…</p>
+    </main>
+  );
+}
 
 export default function App() {
   const path = window.location.pathname.replace(/\/$/, "") || "/";
@@ -14,13 +38,24 @@ export default function App() {
       "/status": "Draftix System Status",
       "/privacy": "Privacy Policy | Draftix",
       "/terms": "Terms of Service | Draftix",
+      "/r": "Draftix Admin",
     };
     document.title = titles[path] || "Valorant Map Veto & Agent Draft Tool | Draftix";
+    // First-party analytics: one pageview per route change.
+    trackPageview(path);
   }, [path]);
-  if (path === "/app") return <SessionGate />;
-  if (path === "/team-balance") return <TeamBalancerPage />;
-  if (path === "/status") return <StatusPage />;
-  if (path === "/privacy") return <LegalPage type="privacy" />;
-  if (path === "/terms") return <LegalPage type="terms" />;
-  return <LandingPage />;
+
+  let page;
+  if (path === "/app") page = <SessionGate />;
+  else if (path === "/team-balance") page = <TeamBalancerPage />;
+  else if (path === "/status") page = <StatusPage />;
+  else if (path === "/privacy") page = <LegalPage type="privacy" />;
+  else if (path === "/terms") page = <LegalPage type="terms" />;
+  else if (path === "/r") page = <AdminPage />;
+  else page = <LandingPage />;
+
+
+  // Landing page is already eager; only wrap the lazy routes in Suspense.
+  if (path === "/") return page;
+  return <Suspense fallback={<RouteFallback />}>{page}</Suspense>;
 }
