@@ -12,26 +12,51 @@ const pages = [
   {
     path: "/",
     title: "Valorant Map Veto & Agent Draft Tool | Draftix",
-    description: "Run Valorant map vetoes, choose starting sides, ban agents, and share match-ready results in one real-time room. Free and no signup required.",
-    socialDescription: "Run Valorant map vetoes, side picks, and agent bans together in one real-time room.",
+    description: "Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments. Run live map bans, side picks, and agent bans.",
+    socialDescription: "Free Valorant drafting and map vetoes for teams, scrims, and tournaments.",
     schema: {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: "Draftix",
-      alternateName: "Draftix Valorant Draft Tool",
-      url: `${origin}/`,
-      description: "A free real-time Valorant map veto and agent draft tool for competitive teams.",
-      applicationCategory: "GameApplication",
-      operatingSystem: "Any",
-      browserRequirements: "Requires a modern web browser with JavaScript enabled",
-      isAccessibleForFree: true,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      featureList: [
-        "Real-time Valorant map vetoes",
-        "Starting-side selection",
-        "Agent ban drafting",
-        "Shareable match result posters",
-        "Rank-based team balancing",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": `${origin}/#organization`,
+          name: "Draftix",
+          url: `${origin}/`,
+          logo: `${origin}/images/draftix.png`,
+          email: "support@draftix.tech",
+          description: "Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.",
+        },
+        {
+          "@type": "WebSite",
+          "@id": `${origin}/#website`,
+          name: "Draftix",
+          alternateName: "Draftix Valorant Draft Tool",
+          url: `${origin}/`,
+          publisher: { "@id": `${origin}/#organization` },
+          inLanguage: "en",
+        },
+        {
+          "@type": "WebApplication",
+          "@id": `${origin}/#application`,
+          name: "Draftix",
+          alternateName: "Draftix Valorant Draft Tool",
+          url: `${origin}/`,
+          description: "A free real-time Valorant drafting and map veto platform for teams, scrims, and tournaments.",
+          applicationCategory: "GameApplication",
+          applicationSubCategory: "Esports drafting tool",
+          operatingSystem: "Any",
+          browserRequirements: "Requires a modern web browser with JavaScript enabled",
+          isAccessibleForFree: true,
+          provider: { "@id": `${origin}/#organization` },
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          featureList: [
+            "Real-time Valorant map vetoes",
+            "Starting-side selection",
+            "Agent ban drafting",
+            "Shareable match result posters",
+            "Rank-based team balancing",
+          ],
+        },
       ],
     },
   },
@@ -54,6 +79,7 @@ const pages = [
         { "@type": "FAQPage", mainEntity: [
           { "@type": "Question", name: "Do players need an account?", acceptedAnswer: { "@type": "Answer", text: "No. Everyone joins with the same room code." } },
           { "@type": "Question", name: "Does the veto update live?", acceptedAnswer: { "@type": "Answer", text: "Yes. Connected players see each confirmed choice immediately." } },
+          { "@type": "Question", name: "Can Draftix run tournament map bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. Hosts can set the format, invite both captains, and record the final map and starting side." } },
         ] },
       ],
     },
@@ -133,7 +159,6 @@ function seoBlock(page) {
   const description = escapeHtml(page.description);
   const socialDescription = escapeHtml(page.socialDescription);
   const robots = page.robots || "index,follow,max-image-preview:large";
-  const brandSchema = `\n    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Draftix","url":"${origin}/","logo":"${origin}/images/draftix.png"}</script>\n    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Draftix","alternateName":"Draftix","url":"${origin}/"}</script>`;
   const schema = page.schema
     ? `\n    <script type="application/ld+json">${JSON.stringify(page.schema).replaceAll("<", "\\u003c")}</script>`
     : "";
@@ -159,7 +184,7 @@ function seoBlock(page) {
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${socialDescription}" />
     <meta name="twitter:image" content="${image}" />
-    <meta name="twitter:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />${schema}${brandSchema}
+    <meta name="twitter:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />${schema}
     <!-- SEO:END -->`;
 }
 

@@ -119,7 +119,7 @@ export default function LandingPage() {
   return <main className="dr-site">
     <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
-      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>A shared command room for map vetoes, side picks, and agent bans.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
+      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
       <HeroSlideshow />
     </section>
     <section className="dr-agents" id="agents" data-reveal>

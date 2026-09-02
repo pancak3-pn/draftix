@@ -6,7 +6,7 @@ export default function PublicFooter({ reveal = false }) {
       <div className="public-footer-main">
         <div className="public-footer-brand">
           <AppBrand className="dr-brand" />
-          <p>Real-time drafting for Valorant teams.</p>
+          <p>Valorant drafting and map vetoes for teams, scrims, and tournaments.</p>
         </div>
 
         <nav className="public-footer-primary" aria-label="Draftix tools">

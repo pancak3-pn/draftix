@@ -6,7 +6,7 @@ const TOPICS = {
     label: "Draftix guide",
     title: "Valorant map veto.",
     lead: "Ban maps, choose a side, and keep both captains on the same screen.",
-    intro: "Draftix gives both teams one shared room for the full map veto. Every confirmed choice appears live, with no spreadsheet or chat log to manage.",
+    intro: "Draftix gives both teams one shared room for a scrim or tournament map veto. Every confirmed ban appears live, with no spreadsheet or chat log to manage.",
     image: "/images/Homepage/step2-banmap.png",
     imageAlt: "Draftix map veto screen showing available Valorant maps",
     steps: [
@@ -17,6 +17,7 @@ const TOPICS = {
     faq: [
       ["Do players need an account?", "No. Everyone joins with the same room code."],
       ["Does the veto update live?", "Yes. Connected players see each confirmed choice immediately."],
+      ["Can Draftix run tournament map bans?", "Yes. Hosts can set the format, invite both captains, and record the final map and starting side."],
     ],
   },
   "/valorant-agent-ban": {
