@@ -698,7 +698,7 @@
   opacity:0;
   pointer-events:none;
   transform-origin:70% 38%;
-  animation:dr-hero-card-stream 18s cubic-bezier(.45,0,.55,1) infinite;
+  animation:dr-hero-card-stream 18s linear infinite;
   animation-delay:calc(var(--dr-slide-index) * -3s);
   will-change:transform,opacity;
   border:0;

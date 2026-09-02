@@ -11,8 +11,8 @@
   "categories": ["games", "utilities"],
   "icons": [
     {
-      "src": "images/draftix-favicon.png",
-      "sizes": "1254x1254",
+      "src": "/images/favicon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
