@@ -745,6 +745,30 @@ async function main() {
     })
   );
 
+  // ─── Canonical host (SEO): collapse non-www → www ───
+  // Search engines treat draftix.tech and www.draftix.tech as separate sites.
+  // Redirect every non-www HTML/asset request to the canonical www origin so
+  // crawlers see one host (matching canonical/sitemap/OG URLs). Socket.IO
+  // handshakes and health probes are excluded so realtime keeps working.
+  const CANONICAL_HOST = "www.draftix.tech";
+  const NON_WWW_HOST = "draftix.tech";
+  app.use((req, res, next) => {
+    if (
+      isProd &&
+      req.method === "GET" &&
+      !req.path.startsWith("/socket.io/") &&
+      !req.path.startsWith("/healthz") &&
+      !req.path.startsWith("/readyz")
+    ) {
+      const host = String(req.hostname || "")
+        .toLowerCase()
+        .replace(/:\d+$/, "");
+      if (host === NON_WWW_HOST) {
+        return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+      }
+    }
+    next();
+  });
   // Custom marker used by the client's port-discovery probe to identify
   // a DRAFTIX server vs. some other random Node app on the same port.
   app.use((_req, res, next) => {
