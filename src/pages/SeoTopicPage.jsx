@@ -7,7 +7,7 @@ const TOPICS = {
     title: "Valorant map veto.",
     lead: "Ban maps, choose a side, and keep both captains on the same screen.",
     intro: "Draftix gives both teams one shared room for a scrim or tournament map veto. Every confirmed ban appears live, with no spreadsheet or chat log to manage.",
-    image: "/images/Homepage/step2-banmap.png",
+    image: "/images/Homepage/step2-banmap.webp",
     imageAlt: "Draftix map veto screen showing available Valorant maps",
     steps: [
       "Create a room and choose the competitive preset.",
@@ -25,7 +25,7 @@ const TOPICS = {
     title: "Valorant agent bans.",
     lead: "Set the ban count, follow captain turns, and record every decision live.",
     intro: "Draftix keeps the agent pool and turn order visible to both teams. The host sets the rules once, then each captain completes their ban in sequence.",
-    image: "/images/Homepage/step4-banagent.png",
+    image: "/images/Homepage/step4-banagent.webp",
     imageAlt: "Draftix agent ban screen with Valorant agent choices",
     steps: [
       "Enable agent bans in the room settings.",
@@ -42,7 +42,7 @@ const TOPICS = {
     title: "Valorant draft tool.",
     lead: "Handle maps, sides, agent bans, and the final matchup in one flow.",
     intro: "Draftix replaces scattered messages with a focused pre-match room. It works for scrims, custom matches, and community tournaments without requiring signup.",
-    image: "/images/Homepage/matchfound.png",
+    image: "/images/Homepage/matchfound.webp",
     imageAlt: "Draftix match result showing the selected Valorant map and team sides",
     steps: [
       "Choose a format and set the draft rules.",

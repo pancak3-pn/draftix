@@ -33,8 +33,8 @@ async function rpc(client, name, args) {
   if (guestAuthError) throw guestAuthError;
 
   const catalog = {
-    maps: ["Ascent", "Bind", "Haven"].map((name) => ({ uuid: `smoke-map-${name.toLowerCase()}`, name, image: `/images/maps/${name.toLowerCase()}.png` })),
-    agents: ["Jett", "Sage", "Sova", "Omen"].map((name) => ({ uuid: `smoke-agent-${name.toLowerCase()}`, name, image: "/images/draftix.png" })),
+    maps: ["Ascent", "Bind", "Haven"].map((name) => ({ uuid: `smoke-map-${name.toLowerCase()}`, name, image: `/images/maps/${name.toLowerCase()}.webp` })),
+    agents: ["Jett", "Sage", "Sova", "Omen"].map((name) => ({ uuid: `smoke-agent-${name.toLowerCase()}`, name, image: "/images/draftix.webp" })),
   };
   const created = await rpc(host, "draftix_create_room", { p_nickname: "Alpha", p_catalog: catalog });
   await rpc(guest, "draftix_join_room", { p_code: created.code, p_nickname: "Bravo" });

@@ -91,7 +91,7 @@ function MatchReadyConsole({
         <article className="is-team-a">
           <img
             className="dx-ready-team-logo"
-            src={session.teamLogos?.A || "/images/draftix.png"}
+            src={session.teamLogos?.A || "/images/draftix.webp"}
             alt=""
           />
           <small>Squad A</small>
@@ -107,7 +107,7 @@ function MatchReadyConsole({
         <article className="is-team-b">
           <img
             className="dx-ready-team-logo"
-            src={session.teamLogos?.B || "/images/draftix.png"}
+            src={session.teamLogos?.B || "/images/draftix.webp"}
             alt=""
           />
           <small>Squad B</small>
@@ -630,7 +630,7 @@ export default function DraftBoard({ session, client, connection }) {
     setMatchCountdown(5);
     if (matchFound && !musicMuted) {
       matchFound.currentTime = 0;
-      matchFound.play().catch(() => {});
+      matchFound.play().catch(() => { });
     }
 
     const countdownTimer = window.setInterval(() => {
@@ -676,7 +676,7 @@ export default function DraftBoard({ session, client, connection }) {
       sidePrompt
         .play()
         .then(removeRetryListeners)
-        .catch(() => {});
+        .catch(() => { });
 
     sidePrompt.currentTime = 0;
     sidePrompt.play().catch(() => {
@@ -709,7 +709,7 @@ export default function DraftBoard({ session, client, connection }) {
     const warning = agentWarningRef.current;
     if (!warning || musicMuted) return;
     warning.currentTime = 0;
-    warning.play().catch(() => {});
+    warning.play().catch(() => { });
   }, [canPick, seconds, session.phase, session.turnEndsAt, musicMuted]);
 
   useEffect(() => {
@@ -736,7 +736,7 @@ export default function DraftBoard({ session, client, connection }) {
       return;
     selection.pause();
     selection.currentTime = 0;
-    selection.play().catch(() => {});
+    selection.play().catch(() => { });
   }
 
   function requestAgentBan(uuid) {
@@ -752,7 +752,7 @@ export default function DraftBoard({ session, client, connection }) {
     if (!confirmation || musicMuted) return;
     confirmation.pause();
     confirmation.currentTime = 0;
-    confirmation.play().catch(() => {});
+    confirmation.play().catch(() => { });
   }, [selectedAgents, musicMuted]);
 
   useEffect(() => {
@@ -771,7 +771,7 @@ export default function DraftBoard({ session, client, connection }) {
       audio
         .play()
         .then(removeRetryListeners)
-        .catch(() => {});
+        .catch(() => { });
     };
     const removeRetryListeners = () => {
       if (!waitingForInteraction) return;
@@ -807,7 +807,7 @@ export default function DraftBoard({ session, client, connection }) {
       try {
         const mapImage = await loadPosterImage(session.selectedMap.image);
         drawPosterCover(context, mapImage, 0, 0, canvas.width, canvas.height);
-      } catch {}
+      } catch { }
     }
     const shade = context.createLinearGradient(0, 0, 0, canvas.height);
     shade.addColorStop(0, "rgba(5,8,13,.38)");
@@ -851,10 +851,10 @@ export default function DraftBoard({ session, client, connection }) {
     const sideA = pickerTeam === "A" ? chosenSide : oppositeSide;
     const sideB = pickerTeam === "B" ? chosenSide : oppositeSide;
     const [logoA, logoB] = await Promise.all([
-      loadPosterImage(session.teamLogos?.A || "/images/draftix.png").catch(
+      loadPosterImage(session.teamLogos?.A || "/images/draftix.webp").catch(
         () => null,
       ),
-      loadPosterImage(session.teamLogos?.B || "/images/draftix.png").catch(
+      loadPosterImage(session.teamLogos?.B || "/images/draftix.webp").catch(
         () => null,
       ),
     ]);
@@ -1028,7 +1028,7 @@ export default function DraftBoard({ session, client, connection }) {
               }
               canPick={Boolean(
                 session.me?.isCaptain &&
-                  session.me.myTeam === session.sidePickerTeam,
+                session.me.myTeam === session.sidePickerTeam,
               )}
               onPick={(side) => send("pickSide", { side })}
             />

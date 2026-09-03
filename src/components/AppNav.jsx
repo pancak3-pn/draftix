@@ -9,7 +9,7 @@ const variants = {
 
 export function AppBrand({ className = "", href = "/", onClick }) {
   return <a className={`site-brand ${className}`} href={href} onClick={onClick} aria-label="Draftix home">
-    <img src="/images/draftix.png" alt="Draftix" />
+    <img src="/images/draftix.webp" alt="Draftix" />
   </a>;
 }
 

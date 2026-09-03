@@ -138,8 +138,10 @@ server instance, implement Redis-backed room state and the Socket.IO Redis
 adapter. PostgreSQL is optional and only needed for permanent accounts or match
 history.
 
-## Asset optimization still required
+## Asset optimization
 
-`public/music/bg-music.mp3` is currently approximately 16 MB. Re-encode it to a
-web-quality MP3 or Opus file before the public launch, then verify seamless
-looping and autoplay fallback behavior.
+Static images are shipped as resized WebP (quality 80) via
+`npm run optimize:images`, and `public/music/bg-music.mp3` is encoded at
+96 kbps. `scripts/sync-valorant-agents.mjs` downloads agent art directly as
+WebP and preserves custom agents (miks, veto) that are not in the public API.
+Re-run `npm run optimize:images` after adding new PNG assets.

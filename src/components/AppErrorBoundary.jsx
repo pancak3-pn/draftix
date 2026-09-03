@@ -19,7 +19,7 @@ export default class AppErrorBoundary extends Component {
 
     return (
       <main className="app-error-boundary" role="alert">
-        <img src="/images/draftix.png" alt="Draftix" />
+        <img src="/images/draftix.webp" alt="Draftix" />
         <section>
           <span>Something went wrong</span>
           <h1>Draftix needs a refresh.</h1>

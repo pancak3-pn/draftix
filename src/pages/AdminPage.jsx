@@ -312,7 +312,7 @@ export default function AdminPage() {
       <div className="ax-app">
         <aside className="ax-side ax-login-side">
           <div className="ax-login-brand">
-            <img src="/images/draftix.png" alt="Draftix" />
+            <img src="/images/draftix.webp" alt="Draftix" />
             <span className="ax-logo-word">
               DRAFT<em>IX</em>
             </span>
@@ -336,7 +336,7 @@ export default function AdminPage() {
           </header>
           <div className="ax-content">
             <form className="ax-signin" onSubmit={signIn} aria-label="Draftix admin sign-in">
-              <img className="ax-minimal-brand" src="/images/draftix.png" alt="Draftix" />
+              <img className="ax-minimal-brand" src="/images/draftix.webp" alt="Draftix" />
               <span className="ax-kicker">Private access</span>
               <h2>Admin access</h2>
               <p className="ax-signin-intro">Enter the private admin token to continue.</p>
@@ -369,16 +369,16 @@ export default function AdminPage() {
 
   const ago = updatedAt
     ? (() => {
-        const s = Math.max(0, Math.round((Date.now() - updatedAt) / 1000));
-        return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)}m ago`;
-      })()
+      const s = Math.max(0, Math.round((Date.now() - updatedAt) / 1000));
+      return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)}m ago`;
+    })()
     : null;
 
   return (
     <div className="ax-app">
       <aside className="ax-side">
         <div className="ax-logo">
-          <img className="ax-logo-image" src="/images/draftix.png" alt="" />
+          <img className="ax-logo-image" src="/images/draftix.webp" alt="" />
           <span className="ax-logo-word">
             DRAFT<em>IX</em>
           </span>

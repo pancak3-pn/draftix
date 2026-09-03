@@ -4,16 +4,16 @@ import PublicFooter from "../components/PublicFooter.jsx";
 
 const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Corrode", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Summit", "Sunset"].map((displayName) => ({
   displayName,
-  src: `/images/maps/${displayName.toLowerCase()}.png`,
+  src: `/images/maps/${displayName.toLowerCase()}.webp`,
 }));
 
 const heroSlides = [
-  { src: "/images/Homepage/steap1-create.png", alt: "Draftix room creation screen" },
-  { src: "/images/Homepage/step2-banmap.png", alt: "Draftix map veto screen" },
-  { src: "/images/Homepage/step3-choosteam.png", alt: "Draftix side selection screen" },
-  { src: "/images/Homepage/step4-banagent.png", alt: "Draftix agent ban screen" },
-  { src: "/images/Homepage/matchfound.png", alt: "Draftix match found screen" },
-  { src: "/images/Homepage/result.png", alt: "Draftix completed match result" },
+  { src: "/images/Homepage/steap1-create.webp", alt: "Draftix room creation screen" },
+  { src: "/images/Homepage/step2-banmap.webp", alt: "Draftix map veto screen" },
+  { src: "/images/Homepage/step3-choosteam.webp", alt: "Draftix side selection screen" },
+  { src: "/images/Homepage/step4-banagent.webp", alt: "Draftix agent ban screen" },
+  { src: "/images/Homepage/matchfound.webp", alt: "Draftix match found screen" },
+  { src: "/images/Homepage/result.webp", alt: "Draftix completed match result" },
 ];
 
 const navigationLinks = [
@@ -50,7 +50,7 @@ function BackToTop() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Updraft to top" title="Updraft to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.png" alt="" /><span>Updraft to top</span></button>;
+  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Updraft to top" title="Updraft to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.webp" alt="" /><span>Updraft to top</span></button>;
 }
 
 function MapCarousel() {
@@ -132,7 +132,7 @@ export default function LandingPage() {
     </section>
     <section className="dr-agents" id="agents" data-reveal>
       <figure className="dr-agents-media">
-        <img src="/images/Homepage/hero-agents.png" alt="Draftix agent key art" loading="lazy" />
+        <img src="/images/Homepage/hero-agents.webp" alt="Draftix agent key art" loading="lazy" />
       </figure>
       <div className="dr-agents-intro">
         <h2>Your agents</h2>
@@ -148,16 +148,16 @@ export default function LandingPage() {
         <a href="/draft" className="dr-button dr-button-primary">Open a room</a>
       </header>
       <figure className="dr-banner-media">
-        <img src="/images/Homepage/section-banner.png" alt="Draftix squad key art" loading="lazy" />
+        <img src="/images/Homepage/section-banner.webp" alt="Draftix squad key art" loading="lazy" />
       </figure>
     </section>
     <section className="dr-process" id="process" data-flow>
       <header data-reveal><h2>Four calls. Match ready.</h2><p>See the full flow in under two minutes.</p><button type="button" className="dr-button dr-button-secondary dr-tutorial-btn" onClick={() => setShowTutorial(true)}>Watch tutorial</button></header>
       <div className="dr-process-track">
-        <article data-reveal><img src="/images/Homepage/steap1-create.png" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step2-banmap.png" alt="" loading="lazy" /><div><strong>02</strong><h3>Veto</h3><p>Ban the map.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step3-choosteam.png" alt="" loading="lazy" /><div><strong>03</strong><h3>Claim</h3><p>Choose your team.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step4-banagent.png" alt="" loading="lazy" /><div><strong>04</strong><h3>Lock</h3><p>Ban the agent.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/steap1-create.webp" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step2-banmap.webp" alt="" loading="lazy" /><div><strong>02</strong><h3>Veto</h3><p>Ban the map.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step3-choosteam.webp" alt="" loading="lazy" /><div><strong>03</strong><h3>Claim</h3><p>Choose your team.</p></div></article>
+        <article data-reveal><img src="/images/Homepage/step4-banagent.webp" alt="" loading="lazy" /><div><strong>04</strong><h3>Lock</h3><p>Ban the agent.</p></div></article>
       </div>
     </section>
     <section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Choose the arena before the match begins.</p></header><MapCarousel /></section>

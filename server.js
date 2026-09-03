@@ -22,21 +22,21 @@ const RECONNECT_GRACE_MS = Number(process.env.RECONNECT_GRACE_MS) || 60_000;
 /** Per-IP socket-event rate limits: { eventName: [maxEvents, windowMs] } */
 const SOCKET_LIMITS = {
   createSession: [5, 60_000],
-  joinSession:   [30, 60_000],
-  claimCaptain:  [30, 60_000],
-  setTeam:       [30, 60_000],
-  setTeamNames:  [20, 60_000],
-  setTeamLogos:  [20, 60_000],
+  joinSession: [30, 60_000],
+  claimCaptain: [30, 60_000],
+  setTeam: [30, 60_000],
+  setTeamNames: [20, 60_000],
+  setTeamLogos: [20, 60_000],
   setGameSettings: [20, 60_000],
-  startDraft:    [10, 60_000],
+  startDraft: [10, 60_000],
   undoDraftAction: [30, 60_000],
-  rematchDraft:  [10, 60_000],
+  rematchDraft: [10, 60_000],
   resetDraftToLobby: [10, 60_000],
-  banMap:        [60, 60_000],
-  banAgent:      [60, 60_000],
-  pickSide:      [20, 60_000],
-  chatMessage:   [1, 10_000, "socket"], // one message per participant every 10s
-  leaveSession:  [10, 60_000],
+  banMap: [60, 60_000],
+  banAgent: [60, 60_000],
+  pickSide: [20, 60_000],
+  chatMessage: [1, 10_000, "socket"], // one message per participant every 10s
+  leaveSession: [10, 60_000],
 };
 
 const CHAT_MAX_LEN = 100;
@@ -355,13 +355,13 @@ async function loadCatalog() {
     catalog.maps = ["Ascent", "Bind", "Haven"].map((name) => ({
       uuid: `test-map-${name.toLowerCase()}`,
       name,
-      image: `/images/maps/${name.toLowerCase()}.png`,
+      image: `/images/maps/${name.toLowerCase()}.webp`,
     }));
     catalog.agents = ["Brimstone", "Jett", "Killjoy", "Omen", "Sage", "Sova"].map((name) => ({
       uuid: `test-agent-${name.toLowerCase()}`,
       name,
-      image: "/images/draftix.png",
-      icon: "/images/draftix.png",
+      image: "/images/draftix.webp",
+      icon: "/images/draftix.webp",
     }));
     console.log(`Catalog: ${catalog.maps.length} maps, ${catalog.agents.length} agents (test fixture)`);
     return;
@@ -393,7 +393,7 @@ async function loadCatalog() {
         .map((m) => ({
           uuid: m.uuid,
           name: m.displayName,
-          image: `/images/maps/${String(m.displayName).trim().toLowerCase()}.png`,
+          image: `/images/maps/${String(m.displayName).trim().toLowerCase()}.webp`,
         }))
         .sort(function (a, b) {
           const ia = MAP_POOL_ORDER.findIndex((n) => n.toLowerCase() === String(a.name).trim().toLowerCase());
@@ -512,7 +512,7 @@ function broadcastSession(io, session) {
         s.emit("state", sessionView(session, s.id));
       }
     })
-    .catch(() => {});
+    .catch(() => { });
 }
 
 function createSession(hostId, roomCode) {
@@ -676,9 +676,9 @@ async function main() {
   const corsOrigin =
     allowedList && allowedList.length
       ? function (origin, cb) {
-          if (!origin) return cb(null, true);
-          return cb(null, allowedList.includes(origin));
-        }
+        if (!origin) return cb(null, true);
+        return cb(null, allowedList.includes(origin));
+      }
       : true;
 
   const app = express();
@@ -823,7 +823,7 @@ async function main() {
     if (!analyticsDirty) return;
     try {
       fs.writeFileSync(ANALYTICS_PATH, JSON.stringify(analyticsSnapshot()), "utf8");
-    } catch (_) {}
+    } catch (_) { }
   });
 
   // Aggregate helpers for the admin dashboard.
@@ -1054,7 +1054,7 @@ async function main() {
       ) {
         return u;
       }
-    } catch (_) {}
+    } catch (_) { }
     return "";
   }
 
@@ -1126,14 +1126,14 @@ async function main() {
           received += chunk.length;
           if (received > IMG_MAX_BYTES) {
             up.destroy();
-            try { res.end(); } catch (_) {}
+            try { res.end(); } catch (_) { }
           }
         });
         up.pipe(res);
       }
     );
-    upstream.on("error", () => { try { res.status(502).end(); } catch (_) {} });
-    upstream.on("timeout", () => { upstream.destroy(); try { res.status(504).end(); } catch (_) {} });
+    upstream.on("error", () => { try { res.status(502).end(); } catch (_) { } });
+    upstream.on("timeout", () => { upstream.destroy(); try { res.status(504).end(); } catch (_) { } });
   });
 
   const reactBuildPath = path.join(__dirname, "dist-react");
@@ -1256,7 +1256,7 @@ async function main() {
   // ─── Public presence (live user count for the landing page) ───
   app.get("/api/presence", (_req, res) => {
     let sockets = 0;
-    try { sockets = io.engine.clientsCount; } catch (_) {}
+    try { sockets = io.engine.clientsCount; } catch (_) { }
     res.set("Cache-Control", "no-store");
     res.json({ ok: true, liveUsers: sockets, activeDrafts: sessions.size });
   });
@@ -1268,7 +1268,7 @@ async function main() {
     let sockets = 0;
     try {
       sockets = io.engine.clientsCount;
-    } catch (_) {}
+    } catch (_) { }
     res.json({
       ok: true,
       at: Date.now(),
@@ -1374,7 +1374,7 @@ async function main() {
     try {
       const n = io.engine.clientsCount;
       if (n > traffic.peakSockets) traffic.peakSockets = n;
-    } catch (_) {}
+    } catch (_) { }
 
     socket.on("createSession", (payload, cb) => withLimit(socket, "createSession", cb, () => {
       if (sessions.size >= MAX_SESSIONS) {
@@ -1441,7 +1441,7 @@ async function main() {
           wasCapA ? "captainA" : null,
           wasCapB ? "captainB" : null,
         ].filter(Boolean).join("+") || "spectator";
-        console.log(`[resume] ${code} ${nickname || "?"} restored (${roles}) tok=${requestedToken.slice(0,8)}…`);
+        console.log(`[resume] ${code} ${nickname || "?"} restored (${roles}) tok=${requestedToken.slice(0, 8)}…`);
         if (typeof cb === "function") cb({ ok: true, code, token: requestedToken, resumed: true });
         return;
       }
@@ -1449,7 +1449,7 @@ async function main() {
       // Diagnostic: a token was provided but didn't match — likely from a
       // dropped-then-rebuilt session, or a stale localStorage entry.
       if (requestedToken) {
-        console.log(`[resume-miss] ${code} ${nickname || "?"} sent token ${requestedToken.slice(0,8)}… (not in session.tokens — fresh join)`);
+        console.log(`[resume-miss] ${code} ${nickname || "?"} sent token ${requestedToken.slice(0, 8)}… (not in session.tokens — fresh join)`);
       }
 
       // ─── Cap clients per session (only counts fresh joins) ───────────
@@ -1927,10 +1927,10 @@ function installShutdownHandlers(server, io, sessions) {
     console.log(`\n${signal} received — shutting down gracefully...`);
     try {
       io.emit("serverShutdown", { reason: "Server restarting — please reconnect in a moment." });
-    } catch (_) {}
+    } catch (_) { }
     // give clients ~600ms to receive the broadcast before we tear sockets down
     setTimeout(() => {
-      try { io.close(); } catch (_) {}
+      try { io.close(); } catch (_) { }
       try {
         for (const sess of sessions.values()) {
           if (sess && sess._turnTimer) {
@@ -1938,7 +1938,7 @@ function installShutdownHandlers(server, io, sessions) {
             sess._turnTimer = null;
           }
         }
-      } catch (_) {}
+      } catch (_) { }
       server.close(() => {
         console.log("Server closed cleanly.");
         process.exit(0);
@@ -1951,7 +1951,7 @@ function installShutdownHandlers(server, io, sessions) {
     }, 5000).unref();
   };
   process.on("SIGTERM", () => shutdown("SIGTERM"));
-  process.on("SIGINT",  () => shutdown("SIGINT"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
 // ─── Stale session GC ─────────────────────────────────
@@ -1970,7 +1970,7 @@ function installSessionGc(io, sessions) {
         try {
           if (sess._turnTimer) { clearTimeout(sess._turnTimer); sess._turnTimer = null; }
           io.to(code).emit("state", { code, closed: true, reason: "idle" });
-        } catch (_) {}
+        } catch (_) { }
         sessions.delete(code);
         killed++;
       }

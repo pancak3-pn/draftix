@@ -279,7 +279,7 @@ function TeamPanel({ side, session, send }) {
       className={`dx-team-mark${teamLogo ? " has-logo" : " is-default-logo"}${session.me?.isHost ? " is-editable" : ""}`}
     >
       <img
-        src={teamLogo || "/images/draftix.png"}
+        src={teamLogo || "/images/draftix.webp"}
         alt={teamLogo ? `${name} logo` : "Draftix default team logo"}
       />
     </span>
@@ -370,9 +370,9 @@ function Lobby({ session, client, connection }) {
   const draftRulesDirty =
     settings.draftPreset !== session.settings?.draftPreset ||
     Number(settings.agentBanCount) !==
-      Number(session.settings?.agentBanCount) ||
+    Number(session.settings?.agentBanCount) ||
     Number(settings.turnTimeoutMs) !==
-      Number(session.settings?.turnTimeoutMs) ||
+    Number(session.settings?.turnTimeoutMs) ||
     settings.sidePickEnabled !== session.settings?.sidePickEnabled ||
     settings.autoBanEnabled !== session.settings?.autoBanEnabled;
   const send = (event, payload = {}) => {
@@ -383,9 +383,9 @@ function Lobby({ session, client, connection }) {
     const safePayload =
       event === "setGameSettings"
         ? {
-            ...payload,
-            agentBanCount: requestedBanCount - (requestedBanCount % 2),
-          }
+          ...payload,
+          agentBanCount: requestedBanCount - (requestedBanCount % 2),
+        }
         : payload;
     client?.socket.emit(
       event,

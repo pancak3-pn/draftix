@@ -44,7 +44,7 @@ function LivePresence() {
           count = Number(data.liveUsers) || 0;
         }
         if (alive) setLive(count);
-      } catch (_) {}
+      } catch (_) { }
     };
     poll();
     const timer = window.setInterval(poll, 10_000);
@@ -55,7 +55,7 @@ function LivePresence() {
   return <div className="presence-badge" role="status" aria-label={`${live} people viewing now`}>
     <span className="presence-avatars" aria-hidden="true">
       {presenceAgents.map((agent, index) => (
-        <img key={agent} src={`/images/agents/${agent}/icon.png`} alt="" loading="lazy" style={{ zIndex: presenceAgents.length - index }} />
+        <img key={agent} src={`/images/agents/${agent}/icon.webp`} alt="" loading="lazy" style={{ zIndex: presenceAgents.length - index }} />
       ))}
       {overflow > 0 && <span className="presence-overflow">+{overflow}</span>}
     </span>

@@ -22,7 +22,7 @@ const pages = [
           "@id": `${origin}/#organization`,
           name: "Draftix",
           url: `${origin}/`,
-          logo: `${origin}/images/draftix.png`,
+          logo: `${origin}/images/draftix.webp`,
           email: "support@draftix.tech",
           description: "Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.",
         },
@@ -92,11 +92,13 @@ const pages = [
       "@graph": [
         { "@type": "WebPage", name: "Valorant Map Veto Tool", url: `${origin}/valorant-map-veto`, description: "A free shared tool for running Valorant map bans and starting-side selection." },
         { "@type": "SoftwareApplication", name: "Draftix Valorant Map Veto Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
-        { "@type": "FAQPage", mainEntity: [
-          { "@type": "Question", name: "Do players need an account?", acceptedAnswer: { "@type": "Answer", text: "No. Everyone joins with the same room code." } },
-          { "@type": "Question", name: "Does the veto update live?", acceptedAnswer: { "@type": "Answer", text: "Yes. Connected players see each confirmed choice immediately." } },
-          { "@type": "Question", name: "Can Draftix run tournament map bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. Hosts can set the format, invite both captains, and record the final map and starting side." } },
-        ] },
+        {
+          "@type": "FAQPage", mainEntity: [
+            { "@type": "Question", name: "Do players need an account?", acceptedAnswer: { "@type": "Answer", text: "No. Everyone joins with the same room code." } },
+            { "@type": "Question", name: "Does the veto update live?", acceptedAnswer: { "@type": "Answer", text: "Yes. Connected players see each confirmed choice immediately." } },
+            { "@type": "Question", name: "Can Draftix run tournament map bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. Hosts can set the format, invite both captains, and record the final map and starting side." } },
+          ]
+        },
       ],
     },
   },
@@ -110,10 +112,12 @@ const pages = [
       "@graph": [
         { "@type": "WebPage", name: "Valorant Agent Ban Tool", url: `${origin}/valorant-agent-ban`, description: "A free real-time tool for organized Valorant agent bans." },
         { "@type": "SoftwareApplication", name: "Draftix Valorant Agent Ban Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
-        { "@type": "FAQPage", mainEntity: [
-          { "@type": "Question", name: "Can the host choose the ban count?", acceptedAnswer: { "@type": "Answer", text: "Yes. The limit is configured before the draft starts." } },
-          { "@type": "Question", name: "Can both teams follow the bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. The room stays synchronized for every connected player." } },
-        ] },
+        {
+          "@type": "FAQPage", mainEntity: [
+            { "@type": "Question", name: "Can the host choose the ban count?", acceptedAnswer: { "@type": "Answer", text: "Yes. The limit is configured before the draft starts." } },
+            { "@type": "Question", name: "Can both teams follow the bans?", acceptedAnswer: { "@type": "Answer", text: "Yes. The room stays synchronized for every connected player." } },
+          ]
+        },
       ],
     },
   },
@@ -127,10 +131,12 @@ const pages = [
       "@graph": [
         { "@type": "WebPage", name: "Valorant Draft Tool", url: `${origin}/valorant-draft-tool`, description: "A complete real-time drafting tool for Valorant teams and custom matches." },
         { "@type": "SoftwareApplication", name: "Draftix Valorant Draft Tool", applicationCategory: "GameApplication", operatingSystem: "Any", isAccessibleForFree: true, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
-        { "@type": "FAQPage", mainEntity: [
-          { "@type": "Question", name: "What does Draftix include?", acceptedAnswer: { "@type": "Answer", text: "Map vetoes, side selection, agent bans, and a final match result." } },
-          { "@type": "Question", name: "Is Draftix free?", acceptedAnswer: { "@type": "Answer", text: "Yes. You can create a room without an account." } },
-        ] },
+        {
+          "@type": "FAQPage", mainEntity: [
+            { "@type": "Question", name: "What does Draftix include?", acceptedAnswer: { "@type": "Answer", text: "Map vetoes, side selection, agent bans, and a final match result." } },
+            { "@type": "Question", name: "Is Draftix free?", acceptedAnswer: { "@type": "Answer", text: "Yes. You can create a room without an account." } },
+          ]
+        },
       ],
     },
   },

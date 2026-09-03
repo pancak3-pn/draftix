@@ -1,5 +1,5 @@
-const MAP_POOL = ["Ascent","Abyss","Bind","Breeze","Corrode","Fracture","Haven","Icebox","Lotus","Pearl","Split","Summit","Sunset"];
-const CACHE_KEY = "draftix:catalog:v4";
+const MAP_POOL = ["Ascent", "Abyss", "Bind", "Breeze", "Corrode", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Summit", "Sunset"];
+const CACHE_KEY = "draftix:catalog:v5";
 const CACHE_TTL = 12 * 60 * 60 * 1000;
 
 function readCache() {
@@ -36,11 +36,11 @@ export async function getValorantCatalog() {
       .sort((a, b) => a.name.localeCompare(b.name));
     const maps = (mapsJson.data || [])
       .filter((map) => MAP_POOL.includes(map.displayName))
-      .map((map) => ({ uuid: map.uuid, name: map.displayName, image: `/images/maps/${map.displayName.toLowerCase()}.png` }))
+      .map((map) => ({ uuid: map.uuid, name: map.displayName, image: `/images/maps/${map.displayName.toLowerCase()}.webp` }))
       .sort((a, b) => MAP_POOL.indexOf(a.name) - MAP_POOL.indexOf(b.name));
     if (maps.length < 2 || agents.length < 2) throw new Error("Valorant catalog is incomplete");
     const catalog = { maps, agents };
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), catalog })); } catch {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), catalog })); } catch { }
     return catalog;
   } catch (error) {
     if (cached) return cached.catalog;
