@@ -4,6 +4,10 @@
 
 Draftix lets players create a room, share one room code, assign captains, configure draft rules, and produce a match-ready result without requiring an account. Draftix is an independent community project and is not endorsed by Riot Games.
 
+## Traction
+
+During Draftix's first week after launch, the platform averaged 500+ players daily. Live usage is visible on the landing page.
+
 ## Primary tools
 
 - [Draftix home](https://www.draftix.tech/): Product overview and entry point for Draftix.

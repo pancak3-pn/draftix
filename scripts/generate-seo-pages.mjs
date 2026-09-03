@@ -12,7 +12,7 @@ const pages = [
   {
     path: "/",
     title: "Valorant Map Veto & Agent Draft Tool | Draftix",
-    description: "Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments. Run live map bans, side picks, and agent bans.",
+    description: "Draftix is a free Valorant drafting and map veto platform trusted by 500+ players daily. Run live map bans, side picks, and agent bans for teams, scrims, and tournaments.",
     socialDescription: "Free Valorant drafting and map vetoes for teams, scrims, and tournaments.",
     schema: {
       "@context": "https://schema.org",

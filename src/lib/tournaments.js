@@ -20,6 +20,7 @@ function friendlyTournamentError(error) {
   if (message.includes("non-tied score") || message.includes("higher score")) return "The selected winner must have the higher score.";
   if (message.includes("unique")) return "Every team needs a unique name.";
   if (message.includes("too many") || message.includes("rate limit")) return "Too many attempts. Please wait and try again.";
+  if (message.includes("daily tournament limit")) return "You've reached today's tournament limit — try again tomorrow.";
   if (message.includes("failed to fetch") || message.includes("network")) return "Could not reach Draftix. Check your connection and try again.";
   if (message.includes("authentication")) return "Your session expired. Refresh the page and try again.";
   return "Something went wrong. Please try again.";

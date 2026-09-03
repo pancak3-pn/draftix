@@ -13,7 +13,7 @@ export function AppBrand({ className = "", href = "/", onClick }) {
   </a>;
 }
 
-export default function AppNav({ variant = "support", homeHref = "/", links = [], center = null, actions = null }) {
+export default function AppNav({ variant = "support", homeHref = "/", links = [], center = null, aside = null, actions = null }) {
   const [open, setOpen] = useState(false);
   const config = variants[variant] || variants.support;
   const Shell = config.element;
@@ -22,6 +22,7 @@ export default function AppNav({ variant = "support", homeHref = "/", links = []
 
   return <Shell className={`site-nav site-nav-${variant} ${config.shell}`} aria-label={variant === "landing" ? "Primary navigation" : undefined}>
     <AppBrand className={config.brand} href={homeHref} onClick={close} />
+    {aside}
     {center && <div className="site-nav-center">{center}</div>}
     {links.length > 0 && <>
       <button className={`site-nav-menu ${config.menu || ""}`} type="button" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls={menuId} onClick={() => setOpen((value) => !value)}>

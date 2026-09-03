@@ -23,6 +23,37 @@ const navigationLinks = [
   { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
 ];
 
+const DAILY_PLAYERS = "500+";
+
+function LiveCount() {
+  const [live, setLive] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    const poll = async () => {
+      try {
+        const response = await fetch("/api/presence", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (alive) setLive(Number(data.liveUsers) || 0);
+      } catch (_) {}
+    };
+    poll();
+    const timer = window.setInterval(poll, 10_000);
+    return () => { alive = false; window.clearInterval(timer); };
+  }, []);
+  if (live === null) return null;
+  return <span className="dr-live-count" role="status">
+      <span className="dr-live-dot" aria-hidden="true"></span>
+      {live === 1 ? "1 player online" : `${live} players online`}
+    </span>;
+}
+
+function DailyStat() {
+  return <span className="dr-daily-stat" title="Draftix averaged 500+ players daily during its first week after launch.">
+    <strong>{DAILY_PLAYERS}</strong> players daily in launch week
+  </span>;
+}
+
 function HeroSlideshow() {
   return <div className="dr-hero-flight">
     <div className="dr-hero-stream" aria-hidden="true">
@@ -117,9 +148,9 @@ export default function LandingPage() {
   }, []);
 
   return <main className="dr-site">
-    <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
+    <AppNav variant="landing" homeHref="#top" links={navigationLinks} aside={<LiveCount />} />
     <section className="dr-hero" id="top">
-      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note">No signup. Share one room code.</small></div>
+      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note"><DailyStat /> No signup.</small></div>
       <HeroSlideshow />
     </section>
     <section className="dr-agents" id="agents" data-reveal>
