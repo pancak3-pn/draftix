@@ -25,6 +25,7 @@ During Draftix's first week after launch, the platform averaged 500+ players dai
 - [Service status](https://www.draftix.tech/status): Current availability of Draftix services.
 - [Privacy policy](https://www.draftix.tech/privacy): How Draftix handles session and service data.
 - [Terms of service](https://www.draftix.tech/terms): Rules and conditions for using Draftix.
+- [Send feedback](https://www.draftix.tech/feedback): Rate Draftix and leave a note for the team.
 - [XML sitemap](https://www.draftix.tech/sitemap.xml): Index of public pages intended for search engines.
 
 ## Contact

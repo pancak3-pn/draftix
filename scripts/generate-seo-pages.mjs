@@ -159,6 +159,12 @@ const pages = [
     socialDescription: "Terms for using the Draftix Valorant drafting platform.",
   },
   {
+    path: "/feedback",
+    title: "Send Feedback | Draftix",
+    description: "Tell the Draftix team what you think about the Valorant map veto and agent draft tool. Rate your experience and leave a short note — no account needed.",
+    socialDescription: "Rate Draftix and share your feedback with the team.",
+  },
+  {
     path: "/draft",
     title: "Draft Room | Draftix",
     description: "Create or join a private Draftix room for your Valorant map veto and agent draft.",
@@ -196,6 +202,7 @@ const NAME_BY_PATH = {
   "/status": "System Status",
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Service",
+  "/feedback": "Feedback",
 };
 
 // BreadcrumbList + WebPage nodes appended to every indexable page. The
