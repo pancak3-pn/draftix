@@ -61,13 +61,31 @@ const competitiveTools = [
 const DAILY_PLAYERS = "500+";
 
 function DailyStat() {
-  return <div className="dr-hero-note" title="Draftix averaged 500+ players daily during its first week after launch.">
-    <span className="dr-daily-dot" aria-hidden="true" />
-    <strong className="dr-daily-num">{DAILY_PLAYERS}</strong>
-    <span className="dr-daily-text">players daily in launch week</span>
-    <span className="dr-hero-sep" aria-hidden="true">•</span>
-    <span className="dr-hero-tag">No signup</span>
-  </div>;
+  return (
+    <div className="dr-hero-proof dr-hero-note" role="region" aria-label="Platform highlights">
+      <div className="dr-proof-item">
+        <svg className="dr-proof-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span className="dr-proof-text">
+          <strong className="dr-proof-num">{DAILY_PLAYERS}</strong> users in launch week
+        </span>
+      </div>
+
+      <span className="dr-proof-divider" aria-hidden="true" />
+
+      <div className="dr-proof-item">
+        <svg className="dr-proof-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <polyline points="9 12 11 14 15 10" />
+        </svg>
+        <span className="dr-proof-text">No signup required</span>
+      </div>
+    </div>
+  );
 }
 
 function HeroSlideshow() {

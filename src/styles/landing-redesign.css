@@ -499,64 +499,50 @@
 .dr-actions { margin-top:32px; }
 .dr-button { min-height:50px; padding-inline:22px; clip-path:none; border-radius:8px; font-family:var(--dr-home-font); font-size:.72rem; font-weight:700; letter-spacing:0; text-transform:none; }
 .dr-button-primary { box-shadow:0 14px 34px rgba(232,63,78,.2); }
-.dr-hero-note {
+.dr-hero-proof {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   margin-top: 24px;
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(15, 25, 35, 0.12);
-  box-shadow: 0 6px 20px rgba(15, 25, 35, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  font-family: "Plus Jakarta Sans", var(--font-ui), sans-serif;
-  font-size: 0.86rem;
-  line-height: 1;
-  transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
-  cursor: default;
-}
-
-.dr-hero-note:hover {
-  border-color: rgba(15, 25, 35, 0.22);
-  background: #ffffff;
-  transform: translateY(-1px);
-}
-
-.dr-daily-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #00c97b;
-  box-shadow: 0 0 0 3px rgba(0, 201, 123, 0.18);
-  flex: 0 0 auto;
-}
-
-.dr-daily-num {
-  font-family: "Plus Jakarta Sans", var(--font-ui), sans-serif;
-  font-weight: 800;
-  color: #0f1923;
-  font-size: 0.92rem;
-  letter-spacing: -0.01em;
-}
-
-.dr-daily-text {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  line-height: 1.4;
   color: #555f6d;
-  font-weight: 500;
-  font-size: 0.84rem;
-}
-
-.dr-hero-sep {
-  color: #b2b9c3;
-  font-size: 0.72rem;
   user-select: none;
 }
 
-.dr-hero-tag {
-  color: #0f1923;
+.dr-proof-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dr-proof-icon {
+  color: #ff4655;
+  flex-shrink: 0;
+}
+
+.dr-proof-text {
+  color: #555f6d;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dr-proof-num {
   font-weight: 700;
-  font-size: 0.84rem;
+  color: #0f1923;
+  margin-right: 2px;
+}
+
+.dr-proof-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(15, 25, 35, 0.18);
+  flex-shrink: 0;
 }
 .dr-hero-visual::before { inset:20px; border-color:rgba(255,255,255,.12); border-right:0; border-bottom:0; }
 .dr-hero-visual::after { background:linear-gradient(90deg,rgba(7,10,16,.4),transparent 38%),linear-gradient(0deg,rgba(7,10,16,.88),transparent 42%); }
@@ -585,6 +571,17 @@
   .dr-actions { display:grid; margin-top:26px; }
   .dr-hero-visual { height:340px; }
   .dr-hero-visual figcaption { right:14px; bottom:14px; }
+  .dr-hero-proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+    margin-top: 20px;
+    font-size: 0.82rem;
+  }
+  .dr-proof-text {
+    white-space: normal;
+  }
 }
 
 /* Tournament-grade polish */
