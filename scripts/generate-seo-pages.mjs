@@ -182,14 +182,82 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
+// Freshness date injected into every page's WebPage schema (the "2 days ago"
+// line in Google results). Updated on each SEO regeneration.
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+
+const NAME_BY_PATH = {
+  "/": "Home",
+  "/team-balance": "Team Balancer",
+  "/tournaments": "Tournament Brackets",
+  "/valorant-map-veto": "Map Veto",
+  "/valorant-agent-ban": "Agent Bans",
+  "/valorant-draft-tool": "Draft Tool",
+  "/status": "System Status",
+  "/privacy": "Privacy Policy",
+  "/terms": "Terms of Service",
+};
+
+// BreadcrumbList + WebPage nodes appended to every indexable page. The
+// breadcrumb drives the "playvalorant.com › en-us" style URL line and the
+// WebPage dateModified drives the freshness date in the snippet.
+function defaultGraphNodes(page, url) {
+  const nodes = [];
+  if (page.path !== "/" && !page.robots) {
+    nodes.push({
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+        { "@type": "ListItem", position: 2, name: NAME_BY_PATH[page.path] || page.title, item: url },
+      ],
+    });
+  }
+  if (!page.robots) {
+    nodes.push({
+      "@type": "WebPage",
+      name: page.title,
+      url,
+      inLanguage: "en",
+      dateModified: BUILD_DATE,
+      isPartOf: { "@id": `${origin}/#website` },
+    });
+  }
+  return nodes;
+}
+
+// Merge the default nodes into a page's schema. Pages without schema get a
+// new @graph; @graph schemas get the nodes appended; single-object schemas
+// are promoted to a @graph first.
+function schemaFor(page, url) {
+  const nodes = defaultGraphNodes(page, url);
+  if (!page.schema) {
+    if (nodes.length === 0) return null;
+    return { "@context": "https://schema.org", "@graph": nodes };
+  }
+  const clone = JSON.parse(JSON.stringify(page.schema));
+  if (Array.isArray(clone["@graph"])) {
+    // Enrich an existing WebPage node with the freshness date instead of
+    // appending a duplicate.
+    const existing = clone["@graph"].find((n) => n["@type"] === "WebPage");
+    const webpage = nodes.find((n) => n["@type"] === "WebPage");
+    if (existing && webpage) {
+      Object.assign(existing, { dateModified: webpage.dateModified, inLanguage: existing.inLanguage || webpage.inLanguage });
+      return { ...clone, "@graph": [...clone["@graph"], ...nodes.filter((n) => n["@type"] !== "WebPage")] };
+    }
+    return { ...clone, "@graph": [...clone["@graph"], ...nodes] };
+  }
+  return { "@context": "https://schema.org", "@graph": [clone, ...nodes] };
+}
+
 function seoBlock(page) {
   const url = `${origin}${page.path === "/" ? "/" : page.path}`;
   const title = escapeHtml(page.title);
   const description = escapeHtml(page.description);
   const socialDescription = escapeHtml(page.socialDescription);
   const robots = page.robots || "index,follow,max-image-preview:large";
-  const schema = page.schema
-    ? `\n    <script type="application/ld+json">${JSON.stringify(page.schema).replaceAll("<", "\\u003c")}</script>`
+  const mergedSchema = schemaFor(page, url);
+  const schema = mergedSchema
+    ? `\n    <script type="application/ld+json">${JSON.stringify(mergedSchema).replaceAll("<", "\\u003c")}</script>`
     : "";
   return `<!-- SEO:START -->
     <title>${title}</title>
