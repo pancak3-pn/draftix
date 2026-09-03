@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../styles/admin.css";
+import { supabaseConfig } from "../lib/supabaseConfig.js";
 
 const TOKEN_KEY = "dx_admin_token";
 const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers"];
@@ -8,12 +9,6 @@ function viewFromHash() {
   if (typeof window === "undefined") return "overview";
   const view = window.location.hash.replace(/^#/, "").toLowerCase();
   return ADMIN_VIEWS.includes(view) ? view : "overview";
-}
-
-function supabaseConfig() {
-  const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
-  const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
-  return url && key ? { url, key } : null;
 }
 
 /* ── Small inline icon set (stroke icons, currentColor) ─────────────── */

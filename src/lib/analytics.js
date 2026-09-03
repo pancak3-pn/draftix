@@ -1,3 +1,5 @@
+import { supabaseConfig } from "./supabaseConfig.js";
+
 /**
  * First-party pageview tracking → Supabase (`site_pageviews`).
  * Privacy: anonymous random-UUID cookie, page path + referrer host only.
@@ -5,12 +7,6 @@
  */
 const VISITOR_COOKIE = "dx_v";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
-
-function supabaseConfig() {
-  const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
-  const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
-  return url && key ? { url, key } : null;
-}
 
 function readVisitorId() {
   const match = document.cookie.match(/(?:^|;\s*)dx_v=([0-9a-f-]{16,64})/i);

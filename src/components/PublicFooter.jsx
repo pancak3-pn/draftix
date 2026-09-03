@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 import { AppBrand } from "./AppNav.jsx";
+import { supabaseConfig } from "../lib/supabaseConfig.js";
 
 const presenceAgents = ["jett", "phoenix", "sage"];
 
 // Same detection as src/socket/draftSocket.js: when Supabase is configured
 // the app runs on the Supabase backend, so the live counter must read from
 // the public presence RPC instead of the Express-only /api/presence endpoint.
-function supabaseConfig() {
-  const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
-  const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
-  return url && key ? { url, key } : null;
-}
 
 function LivePresence() {
   const [live, setLive] = useState(null);

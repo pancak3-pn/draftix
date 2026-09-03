@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { supabaseConfig } from "./supabaseConfig.js";
 
 // Site-wide live visitor presence. Runs on every page (mounted once in
 // App.jsx) and feeds the "N people viewing now" badge in PublicFooter via
@@ -20,15 +21,9 @@ let ready = null;
 let timer = null;
 let currentPage = "/";
 
-function config() {
-  const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
-  const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
-  return url && key ? { url, key } : null;
-}
-
 function getClient() {
   if (client) return client;
-  const cfg = config();
+  const cfg = supabaseConfig();
   if (!cfg) return null;
   client = createClient(cfg.url, cfg.key, {
     auth: {
@@ -72,7 +67,7 @@ async function ping() {
 // Called on pagehide: tab close, navigation, refresh, mobile app switch.
 // keepalive lets the request complete after the page unloads.
 function leave() {
-  const cfg = config();
+  const cfg = supabaseConfig();
   const supabase = getClient();
   if (!cfg || !supabase) return;
   try {
