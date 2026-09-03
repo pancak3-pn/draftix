@@ -271,7 +271,7 @@ small {
 .site-nav-support .site-nav-links a:not(.sp-open):focus-visible,
 .sp-page > .sp-header .sp-nav-links a:not(.sp-open):hover,
 .sp-page > .sp-header .sp-nav-links a:not(.sp-open):focus-visible {
-  background:#171e27;
+  background:rgba(255,255,255,.1);
   color:#fff;
 }
 .site-nav-landing .site-nav-menu,

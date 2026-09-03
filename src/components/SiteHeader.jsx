@@ -1,10 +1,9 @@
 import AppNav from "./AppNav.jsx";
 
 const primaryLinks = [
-  { href: "/#product", label: "Product" },
   { href: "/#process", label: "How it works" },
-  { href: "/team-balance", label: "Team balancer" },
   { href: "/tournaments", label: "Tournaments" },
+  { href: "/team-balance", label: "Team balancer" },
 ];
 
 export default function SiteHeader({ draftEntry = false }) {

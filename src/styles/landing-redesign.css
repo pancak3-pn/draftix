@@ -990,12 +990,12 @@
 @media (max-width:560px) { .dr-back-to-top { right:16px; bottom:16px; width:46px; height:46px; } }
 @media (prefers-reduced-motion:reduce) { .dr-back-to-top { transition:none; } }
 
-/* --- Live presence badge (nav bar) --- */
-.site-nav .dr-live-count { display:inline-flex; align-items:center; gap:8px; margin-left:14px; padding:7px 14px; border:1px solid rgba(255,70,85,.4); border-radius:999px; background:rgba(255,70,85,.09); font-family:var(--font-display, "Barlow Condensed", sans-serif); font-size:.95rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; white-space:nowrap; }
-.site-nav .dr-live-dot { width:8px; height:8px; flex:none; border-radius:50%; background:#ff4655; box-shadow:0 0 0 3px rgba(255,70,85,.18); }
+/* --- Live presence badge (footer) --- */
+.presence-badge { display:inline-flex; align-items:center; gap:10px; margin-top:16px; }
+.presence-avatars { display:inline-flex; align-items:center; }
+.presence-avatars img { width:26px; height:26px; border-radius:50%; border:2px solid #0f1923; object-fit:cover; background:#1d2935; }
+.presence-avatars img:not(:first-child) { margin-left:-9px; }
+.presence-overflow { display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 7px; margin-left:-9px; border-radius:999px; border:2px solid #0f1923; background:#2a3947; color:#e8ecef; font:700 .68rem/1 var(--font-ui, Inter, sans-serif); letter-spacing:.02em; }
+.presence-text { color:#8a959e; font:500 .85rem/1 var(--font-ui, Inter, sans-serif); }
+.presence-text strong { color:#f0f3f5; font-weight:700; }
 
-@media (max-width:760px) { .site-nav .dr-live-count { font-size:.8rem; } }
-
-/* --- Daily players stat (separate from live counter) --- */
-.dr-daily-stat { display:inline-flex; align-items:baseline; gap:5px; margin-right:10px; padding:4px 10px; border:1px solid rgba(15,25,35,.22); border-radius:999px; background:#fff; font-family:var(--font-display, "Barlow Condensed", sans-serif); font-size:.8rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#0f1923; white-space:nowrap; }
-.dr-daily-stat strong { font-size:1rem; font-weight:800; color:#ff4655; }
