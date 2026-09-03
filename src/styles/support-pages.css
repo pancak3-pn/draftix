@@ -1,4 +1,4 @@
-﻿.sp-page {
+.sp-page {
   --sp-line: #35404b;
   --sp-panel: #151f29;
   --sp-muted: #a9adb3;
@@ -2368,6 +2368,17 @@
 }
 .feedback-submit:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
 .feedback-submit:disabled { opacity: .45; cursor: not-allowed; }
+
+.feedback-error {
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border-left: 3px solid #ff4655;
+  background: #fff1f2;
+  color: #9f2632;
+  font-size: .88rem;
+  line-height: 1.45;
+}
 
 .feedback-done {
   display: grid;

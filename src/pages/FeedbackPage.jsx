@@ -124,7 +124,7 @@ export default function FeedbackPage() {
                 <span className="feedback-count">{message.length}/{MAX_MESSAGE}</span>
               </label>
 
-              {error ? <p className="ax-error" role="alert">{error}</p> : null}
+              {error ? <p className="feedback-error" role="alert">{error}</p> : null}
 
               <button type="submit" className="feedback-submit" disabled={!canSubmit} aria-busy={status === "sending"}>
                 {status === "sending" ? "Sending..." : "Send feedback"}

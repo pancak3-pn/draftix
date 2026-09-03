@@ -1,4 +1,4 @@
-﻿/* DRAFTIX admin dashboard â€” /admin (token-gated).
+/* DRAFTIX admin dashboard â€” /admin (token-gated).
    Sidebar dashboard layout, dark theme scoped to .ax-app so it never
    leaks into the light public site. Doto for numbers, Barlow Condensed
    for headings, Inter for UI. */
@@ -39,6 +39,7 @@
   align-self: flex-start;
   z-index: 10;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ax-logo {
@@ -46,6 +47,14 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.2rem 0.5rem 1.4rem;
+}
+
+.ax-logo-image {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.22));
 }
 
 .ax-logo-mark {
@@ -633,305 +642,6 @@
   }
 }
 
-/* Admin polish: clear operator entry state and stronger information hierarchy. */
-.ax-app {
-  background:
-    radial-gradient(circle at 72% -10%, rgba(255, 70, 85, 0.08), transparent 32rem),
-    var(--ad-bg);
-}
-
-.ax-login-side {
-  position: relative;
-  isolation: isolate;
-  width: min(42vw, 520px);
-  flex-basis: min(42vw, 520px);
-  justify-content: space-between;
-  padding: 2rem clamp(1.5rem, 4vw, 4.5rem);
-  overflow: hidden;
-  background:
-    linear-gradient(145deg, rgba(255, 70, 85, 0.15), transparent 45%),
-    var(--ad-side);
-}
-
-.ax-login-side::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: 22rem;
-  height: 22rem;
-  right: -10rem;
-  bottom: -9rem;
-  border: 1px solid rgba(255, 70, 85, 0.28);
-  transform: rotate(45deg);
-  box-shadow: 0 0 0 1.5rem rgba(255, 70, 85, 0.04), 0 0 0 3rem rgba(255, 70, 85, 0.025);
-}
-
-.ax-login-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
-.ax-login-brand img,
-.ax-logo-image {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.22));
-}
-
-.ax-login-context {
-  max-width: 20rem;
-  margin-block: auto;
-  padding-block: 4rem;
-}
-
-.ax-kicker {
-  display: block;
-  color: var(--ad-accent);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.ax-login-context h2 {
-  margin: 0.9rem 0 0;
-  font: 800 clamp(2.5rem, 5vw, 4.8rem)/0.92 var(--font-display, "Barlow Condensed", sans-serif);
-  letter-spacing: -0.025em;
-  text-transform: uppercase;
-}
-
-.ax-login-context h2 span {
-  color: var(--ad-accent);
-}
-
-.ax-login-context p {
-  max-width: 19rem;
-  margin: 1.1rem 0 0;
-  color: var(--ad-muted);
-}
-
-.ax-login-mark {
-  color: rgba(232, 235, 239, 0.32);
-  font: 800 0.75rem/1 var(--font-data, monospace);
-  letter-spacing: 0.14em;
-}
-
-.ax-signin {
-  width: min(100%, 440px);
-  margin: clamp(1rem, 8vh, 5rem) auto 0;
-  padding: clamp(1.5rem, 3vw, 2.4rem);
-  border-color: rgba(255, 255, 255, 0.12);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent 65%), var(--ad-panel);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
-}
-
-.ax-signin h2 {
-  margin-top: -0.4rem;
-  font-size: 1.8rem;
-}
-
-.ax-signin-intro {
-  margin: -0.45rem 0 0;
-  color: var(--ad-muted);
-  font-size: 0.86rem;
-}
-
-.ax-signin label {
-  margin-top: 0.35rem;
-}
-
-.ax-token-field {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.ax-token-field input {
-  min-height: 48px;
-  padding-right: 4.5rem;
-}
-
-.ax-token-toggle {
-  position: absolute;
-  right: 0.7rem;
-  border: 0;
-  background: transparent;
-  color: var(--ad-muted);
-  font: 700 0.68rem/1 var(--font-ui, sans-serif);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-
-.ax-token-toggle:hover,
-.ax-token-toggle:focus-visible {
-  color: var(--ad-text);
-}
-
-.ax-token-toggle:focus-visible {
-  outline: 2px solid var(--ad-accent);
-  outline-offset: 3px;
-  border-radius: 3px;
-}
-
-.ax-signin-note {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: -0.2rem 0 0;
-  color: var(--ad-muted);
-  font-size: 0.72rem;
-}
-
-.ax-signin-note span {
-  color: #44c184;
-  font-size: 0.55rem;
-}
-
-.ax-button {
-  min-height: 46px;
-  padding-inline: 1.25rem;
-}
-
-.ax-logo-image {
-  flex: 0 0 auto;
-}
-
-@media (max-width: 760px) {
-  .ax-login-side {
-    width: 100%;
-    flex-basis: auto;
-    min-height: 260px;
-    padding: 1.25rem 1rem;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .ax-login-context {
-    margin: 0;
-    padding: 2.5rem 0 1rem;
-  }
-
-  .ax-login-context h2 {
-    font-size: clamp(2.4rem, 13vw, 3.8rem);
-  }
-
-  .ax-login-mark {
-    display: none;
-  }
-
-  .ax-signin {
-    margin-top: 1rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .ax-card,
-  .ax-nav-item,
-  .ax-refresh,
-  .ax-button {
-    transition: none;
-  }
-}
-
-/* Minimal operator sign-in */
-.ax-app:has(.ax-login-side) {
-  display: block;
-  min-height: 100vh;
-  background: var(--ad-bg);
-}
-
-.ax-app:has(.ax-login-side) .ax-login-side {
-  display: none;
-}
-
-.ax-app:has(.ax-login-side) .ax-main {
-  min-height: 100vh;
-}
-
-.ax-app:has(.ax-login-side) .ax-topbar {
-  min-height: 76px;
-  padding: 1rem clamp(1.25rem, 4vw, 4rem);
-  background: #10141a;
-}
-
-.ax-app:has(.ax-login-side) .ax-topbar-icon {
-  display: none;
-}
-
-.ax-app:has(.ax-login-side) .ax-topbar-title {
-  gap: 0;
-}
-
-.ax-app:has(.ax-login-side) .ax-topbar-title h1 {
-  font-size: 1rem;
-  letter-spacing: 0.04em;
-}
-
-.ax-app:has(.ax-login-side) .ax-topbar-title p {
-  font-size: 0.78rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-content {
-  display: grid;
-  place-items: start center;
-  padding: clamp(4rem, 15vh, 9rem) 1.25rem 3rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin {
-  width: min(100%, 360px);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin h2 {
-  margin: 0.55rem 0 0;
-  font-size: 1.55rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin-intro {
-  margin-top: 0.45rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin label {
-  margin-top: 2rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin label>span {
-  font-size: 0.72rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-token-field input {
-  background: #0b0e13;
-}
-
-.ax-app:has(.ax-login-side) .ax-button {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.ax-app:has(.ax-login-side) .ax-signin-note {
-  margin-top: 0.9rem;
-}
-
-@media (max-width: 760px) {
-  .ax-app:has(.ax-login-side) .ax-topbar {
-    min-height: 64px;
-  }
-
-  .ax-app:has(.ax-login-side) .ax-content {
-    padding-top: 4rem;
-  }
-}
-
 /* Reference-inspired light login */
 .ax-app:has(.ax-login-side) {
   --ad-bg: #f5f5f2;
@@ -1122,6 +832,7 @@
   height: 100dvh;
   min-height: 100dvh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ax-app:not(:has(.ax-login-side)) .ax-main {
@@ -1133,16 +844,6 @@
   max-width: 1480px;
   width: 100%;
   margin-inline: auto;
-}
-
-.ax-app:not(:has(.ax-login-side)) .ax-card,
-.ax-app:not(:has(.ax-login-side)) .ax-panel {
-  background: #151a21;
-}
-
-.ax-app:not(:has(.ax-login-side)) .ax-card:hover {
-  transform: translateY(-2px);
-  transition: transform .15s ease, border-color .15s ease;
 }
 
 .ax-app:not(:has(.ax-login-side)) .ax-content>.ax-row:last-child {
