@@ -420,7 +420,7 @@
   transition:color .2s ease,background-color .2s ease,transform .16s ease;
 }
 .dr-site > .dr-nav .dr-nav-links a:not(.dr-nav-cta):hover,
-.dr-site > .dr-nav .dr-nav-links a:not(.dr-nav-cta):focus-visible { background:rgba(15,25,35,.07); color:var(--nav-ink); }
+.dr-site > .dr-nav .dr-nav-links a:not(.dr-nav-cta):focus-visible { background:#ff4655; color:#fff; }
 .dr-site > .dr-nav .dr-nav-links .dr-nav-cta {
   padding:12px 18px;
   border:1px solid var(--nav-red);

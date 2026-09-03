@@ -3,16 +3,47 @@ import { AppBrand } from "./AppNav.jsx";
 
 const presenceAgents = ["jett", "phoenix", "sage"];
 
+// Same detection as src/socket/draftSocket.js: when Supabase is configured
+// the app runs on the Supabase backend, so the live counter must read from
+// the public presence RPC instead of the Express-only /api/presence endpoint.
+function supabaseConfig() {
+  const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
+  return url && key ? { url, key } : null;
+}
+
 function LivePresence() {
   const [live, setLive] = useState(null);
   useEffect(() => {
     let alive = true;
+    const cfg = supabaseConfig();
     const poll = async () => {
       try {
-        const response = await fetch("/api/presence", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = await response.json();
-        if (alive) setLive(Number(data.liveUsers) || 0);
+        let count = 0;
+        if (cfg) {
+          // Supabase deployment → public presence RPC. Plain fetch (not
+          // supabase-js) keeps the eager-loaded landing bundle dependency-free,
+          // matching the pattern used by AdminPage.
+          const response = await fetch(`${cfg.url}/rest/v1/rpc/draftix_presence`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: cfg.key,
+              Authorization: `Bearer ${cfg.key}`,
+            },
+            body: "{}",
+          });
+          if (!response.ok) return;
+          const data = await response.json();
+          count = Number(data?.liveUsers) || 0;
+        } else {
+          // Express + Socket.IO deployment.
+          const response = await fetch("/api/presence", { cache: "no-store" });
+          if (!response.ok) return;
+          const data = await response.json();
+          count = Number(data.liveUsers) || 0;
+        }
+        if (alive) setLive(count);
       } catch (_) {}
     };
     poll();
@@ -44,6 +75,7 @@ export default function PublicFooter({ reveal = false }) {
 
         <nav className="public-footer-primary" aria-label="Draftix tools">
           <a href="/draft">Open Draftix</a>
+          <a href="/valorant-draft-tool">Draft guide</a>
           <a href="/team-balance">Team balancer</a>
           <a href="/tournaments">Tournaments</a>
         </nav>

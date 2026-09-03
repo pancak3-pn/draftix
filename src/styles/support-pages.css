@@ -721,7 +721,7 @@
 }
 .sp-page > .sp-header .sp-nav-links a { color:#3e4850; }
 .sp-page > .sp-header .sp-nav-links a:not(.sp-open):hover,
-.sp-page > .sp-header .sp-nav-links a:not(.sp-open):focus-visible { background:rgba(15,25,35,.07); color:#0f1923; }
+.sp-page > .sp-header .sp-nav-links a:not(.sp-open):focus-visible { background:#ff4655; color:#fff; }
 .sp-page > .sp-header .sp-open { color:#fff; }
 
 .sp-page > .public-footer {
