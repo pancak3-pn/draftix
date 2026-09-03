@@ -1,15 +1,32 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
-import { clearMatchResult, createTournament, getTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken } from "../lib/tournaments.js";
+import { clearMatchResult, createTournament, getTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore } from "../lib/tournaments.js";
 
 const sizes = Array.from({ length: 14 }, (_, index) => index + 3);
+const formats = [
+  { value: "single_elimination", label: "Single elimination" },
+  { value: "double_elimination", label: "Double elimination" },
+  { value: "round_robin", label: "Round robin" },
+  { value: "swiss", label: "Swiss" },
+];
 function roundName(round, finalRound) {
   const remaining = finalRound - round;
   if (remaining === 0) return "Final";
   if (remaining === 1) return "Semifinals";
   if (remaining === 2) return "Quarterfinals";
   return "Round of 16";
+}
+function roundLabel(round, maxRound, format, totalRounds) {
+  if (format === "double_elimination") {
+    const winnersRounds = Math.round((maxRound + 1) / 3);
+    if (round <= winnersRounds) return round === winnersRounds ? "Winners Final" : `Winners Round ${round}`;
+    if (round < maxRound) return `Losers Round ${round - winnersRounds}`;
+    return "Grand Final";
+  }
+  if (format === "round_robin") return `Round ${round}`;
+  if (format === "swiss") return totalRounds ? `Swiss Round ${round} of ${totalRounds}` : `Swiss Round ${round}`;
+  return roundName(round, maxRound);
 }
 
 function copyText(text, setCopied) {
@@ -23,6 +40,7 @@ export function TournamentHubPage() {
   const [size, setSize] = useState(8);
   const [name, setName] = useState("");
   const [bestOf, setBestOf] = useState(3);
+  const [format, setFormat] = useState("single_elimination");
   const [teams, setTeams] = useState(() => Array.from({ length: 8 }, (_, index) => `Team ${index + 1}`));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,7 +55,7 @@ export function TournamentHubPage() {
     setError("");
     setBusy(true);
     try {
-      const result = await createTournament(name, teams.map((team) => team.trim()), bestOf);
+      const result = await createTournament(name, teams.map((team) => team.trim()), bestOf, format);
       saveTournamentToken(result.slug, result.organizerToken);
       window.location.assign(`/t/${result.slug}`);
     } catch (requestError) {
@@ -51,7 +69,7 @@ export function TournamentHubPage() {
     <main className="tournament-create-shell">
       <header className="tournament-intro">
         <h1>Build the bracket.</h1>
-        <p>Create a live single-elimination tournament and share one public link.</p>
+        <p>Create a live tournament bracket — single or double elimination, round robin, or Swiss — and share one public link.</p>
       </header>
       <form className="tournament-form" onSubmit={submit}>
         <div className="tournament-form-head"><strong>Tournament setup</strong></div>
@@ -59,6 +77,7 @@ export function TournamentHubPage() {
         <div className="tournament-options">
           <label>Team count<select value={size} onChange={(event) => changeSize(Number(event.target.value))}>{sizes.map((option) => <option key={option} value={option}>{option} teams</option>)}</select></label>
           <label>Match format<select value={bestOf} onChange={(event) => setBestOf(Number(event.target.value))}><option value="1">Best of 1</option><option value="3">Best of 3</option><option value="5">Best of 5</option></select></label>
+          <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
         </div>
         <div className="tournament-team-fields">
           {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2,"0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
@@ -71,14 +90,14 @@ export function TournamentHubPage() {
   </div>;
 }
 
-function MatchCard({ match, teams, canManage, onSave, onClear, busy }) {
+function MatchCard({ match, teams, canManage, bestOf = 1, onSave, onClear, onScore, busy }) {
   const [scoreA, setScoreA] = useState(match.scoreA ?? "");
   const [scoreB, setScoreB] = useState(match.scoreB ?? "");
   const [winner, setWinner] = useState(match.winnerTeamId || "");
   const [localError, setLocalError] = useState("");
   const teamA = teams.get(match.teamAId);
   const teamB = teams.get(match.teamBId);
-  const isBye = match.round === 1 && Boolean(teamA) !== Boolean(teamB);
+  const isBye = Boolean(teamA) !== Boolean(teamB);
   // Only resync local inputs when the server-side saved values actually change,
   // not on every poll (each poll creates a new `match` object identity, which
   // used to wipe whatever the organizer was typing every 5 seconds).
@@ -92,37 +111,54 @@ function MatchCard({ match, teams, canManage, onSave, onClear, busy }) {
     setWinner(match.winnerTeamId || "");
     setLocalError("");
   }, [savedScoresKey, match.scoreA, match.scoreB, match.winnerTeamId]);
-  const ready = teamA && teamB;
+    const isDecided = Boolean(match.winnerTeamId);
+  // Two modes:
+  //  - Live score: for best-of-N matches (N>1) that aren't decided yet — the
+  //    organizer picks a current leader + the running score, then saves it
+  //    live. The bracket doesn't advance; only the displayed score updates.
+  //  - Final result: requires the winner to reach the required number of wins.
+  const requiredWins = Math.ceil(bestOf / 2);
   const winnerScore = winner === match.teamAId ? scoreA : winner === match.teamBId ? scoreB : "";
   const loserScore = winner === match.teamAId ? scoreB : winner === match.teamBId ? scoreA : "";
+  const isLiveSeries = bestOf > 1 && !isDecided;
   const scoreMismatch = Boolean(winner) && winnerScore !== "" && loserScore !== "" && Number(winnerScore) <= Number(loserScore);
-  const invalid = busy || !winner || scoreA === "" || scoreB === "" || scoreMismatch;
+  const wouldWinNow = isLiveSeries && Boolean(winner) && winnerScore !== "" && loserScore !== "" && Number(winnerScore) >= requiredWins && Number(winnerScore) > Number(loserScore);
+  const seriesIncomplete = Boolean(winner) && winnerScore !== "" && Number(winnerScore) !== requiredWins;
+  const liveScoreInvalid = busy || !winner || scoreA === "" || scoreB === "" || scoreMismatch;
+  const finalInvalid = busy || !winner || scoreA === "" || scoreB === "" || scoreMismatch || seriesIncomplete;
   function changeScore(setScore) {
     return (event) => { setLocalError(""); setScore(event.target.value); };
   }
   function changeWinner(teamId) {
     return () => { setLocalError(""); setWinner(teamId); };
   }
-  function save() {
-    if (invalid) return;
+  function saveLive() {
+    if (liveScoreInvalid) return;
+    setLocalError("");
+    onScore(match.id, Number(scoreA), Number(scoreB));
+  }
+  function saveFinal() {
+    if (finalInvalid) return;
     if (Number(scoreA) === Number(scoreB)) { setLocalError("Scores cannot be tied — pick a winner with the higher score."); return; }
+    if (seriesIncomplete) { setLocalError(`Best of ${bestOf} — the winner must score ${requiredWins} maps.`); return; }
     onSave(match.id, Number(scoreA), Number(scoreB), winner);
   }
-  return <article className={`bracket-match${match.winnerTeamId ? " is-complete" : ""}${isBye ? " is-bye" : ""}`} data-match-id={match.id}>
+    return <article className={`bracket-match${isDecided ? " is-complete" : ""}${isBye ? " is-bye" : ""}`} data-match-id={match.id}>
     <div className="bracket-match-label">Match {match.position}</div>
     {[teamA, teamB].map((team, index) => {
       const teamId = index ? match.teamBId : match.teamAId;
       const value = index ? scoreB : scoreA;
       return <div className={`bracket-team${winner === teamId ? " is-winner" : ""}`} key={index}>
-        <button type="button" disabled={!canManage || !team || busy} onClick={changeWinner(teamId)}><span>{team ? <><small>{team.seed}</small>{team.name}</> : isBye ? "Bye" : "TBD"}</span>{match.winnerTeamId === teamId && <b>W</b>}</button>
-        {canManage && ready ? <input aria-label={`${team?.name || "Team"} score`} type="number" min="0" max="99" value={value} onChange={changeScore(index ? setScoreB : setScoreA)} /> : <span className="bracket-score">{value === "" ? "—" : value}</span>}
+                <button type="button" disabled={!canManage || !team || busy || isDecided} onClick={changeWinner(teamId)}><span>{team ? <><small>{team.seed}</small>{team.name}</> : isBye ? "Bye" : "TBD"}</span>{match.winnerTeamId === teamId && <b>W</b>}</button>
+                {canManage && teamA && teamB && !isDecided ? <input aria-label={`${team?.name || "Team"} score`} type="number" min="0" max={bestOf} value={value} onChange={changeScore(index ? setScoreB : setScoreA)} /> : <span className="bracket-score">{value === "" ? "—" : value}</span>}
       </div>;
     })}
-    {canManage && ready && <div className="bracket-actions">
-      <button type="button" disabled={invalid} onClick={save}>{scoreMismatch ? "Winner needs higher score" : "Save result"}</button>
-      {match.winnerTeamId && <button type="button" disabled={busy} onClick={() => onClear(match.id)}>Clear</button>}
+        {canManage && teamA && teamB && !isDecided && <div className="bracket-actions">
+      {isLiveSeries && <button type="button" disabled={liveScoreInvalid} onClick={saveLive} className="is-outline">{wouldWinNow ? `Win series ${requiredWins}-${Math.max(0, Number(loserScore))}` : "Save live score"}</button>}
+      <button type="button" disabled={finalInvalid} onClick={saveFinal}>{seriesIncomplete ? `Needs ${requiredWins} wins` : scoreMismatch ? "Winner needs higher score" : "Save final result"}</button>
+            {(match.scoreA !== null || match.scoreB !== null) ? <button type="button" disabled={busy} onClick={() => onScore(match.id, null, null)}>Clear score</button> : ""}
     </div>}
-    {canManage && ready && localError && <p className="bracket-match-error" role="alert">{localError}</p>}
+    {canManage && teamA && teamB && localError && <p className="bracket-match-error" role="alert">{localError}</p>}
   </article>;
 }
 
@@ -196,23 +232,31 @@ export default function TournamentPage({ slug }) {
     catch (requestError) { setError(requestError.message); }
     setBusyMatch("");
   }
-  async function clear(matchId) {
+    async function clear(matchId) {
     setBusyMatch(matchId); setError("");
     try { await clearMatchResult(slug, token, matchId); await load(); }
+    catch (requestError) { setError(requestError.message); }
+    setBusyMatch("");
+  }
+  async function updateScore(matchId, scoreA, scoreB) {
+    setBusyMatch(matchId); setError("");
+    try { await updateSeriesScore(slug, token, matchId, scoreA, scoreB); await load(); }
     catch (requestError) { setError(requestError.message); }
     setBusyMatch("");
   }
 
   if (!data) return <div className="sp-page tournament-page"><SiteHeader /><main className="tournament-loading"><p>{error || "Loading bracket…"}</p>{error && <a href="/tournaments">Create a tournament</a>}</main></div>;
   const maxRound = Math.max(...rounds.map(([round]) => round));
-  const champion = teams.get(data.matches.find((match) => match.round === maxRound)?.winnerTeamId);
+  const formatLabel = { single_elimination: "Single elimination", double_elimination: "Double elimination", round_robin: "Round robin", swiss: "Swiss" }[data.format] || data.format;
+  const champion = teams.get(data.championTeamId);
+  const showStandings = (data.format === "round_robin" || data.format === "swiss") && Array.isArray(data.standings) && data.standings.length > 0;
   const shareUrl = `${window.location.origin}/t/${slug}`;
   const manageUrl = token ? `${shareUrl}?key=${token}` : "";
   return <div className="sp-page tournament-page tournament-view-page">
     <SiteHeader />
     <main className="tournament-view-shell">
       <header className="tournament-view-head">
-        <div><span className={`tournament-status ${data.status}`}>{data.status}</span><h1>{data.name}</h1><p>{data.teamCount} teams · Single elimination · Best of {data.bestOf}</p></div>
+        <div><span className={`tournament-status ${data.status}`}>{data.status}</span><h1>{data.name}</h1><p>{data.teamCount} teams · {formatLabel} · Best of {data.bestOf}</p></div>
         <div className="tournament-share-actions">
           <button type="button" onClick={() => copyText(shareUrl,setCopied)}>{copied ? "Copied" : "Copy public link"}</button>
           {data.canManage && <button type="button" onClick={() => copyText(manageUrl,setCopied)}>Copy organizer link</button>}
@@ -220,13 +264,32 @@ export default function TournamentPage({ slug }) {
       </header>
       {data.canManage && <p className="organizer-banner"><strong>Organizer mode</strong> Select a winner, enter the score, then save.</p>}
       {error && <p className="tournament-error" role="alert">{error}</p>}
-      {champion && <section className="tournament-champion"><span>Champion</span><strong>{champion.name}</strong></section>}
+      {champion && <section className="tournament-champion" aria-label="Tournament champion">
+        <span className="tournament-champion-trophy" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 5V2H6v3H2v4c0 2.76 2.24 5 5 5h.1A7 7 0 0 0 11 17.92V20H8v2h8v-2h-3v-2.08A7 7 0 0 0 16.9 14H17c2.76 0 5-2.24 5-5V5h-4zM4 9V7h2v4.83A3.01 3.01 0 0 1 4 9zm16 0a3.01 3.01 0 0 1-2 2.83V7h2v2z"/></svg>
+        </span>
+        <div className="tournament-champion-text">
+          <span>Champion</span>
+          <strong>{champion.name}</strong>
+        </div>
+        <span className="tournament-champion-meta">{data.name} · {formatLabel}</span>
+      </section>}
+      {showStandings && <section className="tournament-standings" aria-label="Standings">
+        <table>
+          <thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>Diff</th><th>P</th></tr></thead>
+          <tbody>
+            {data.standings.map((row, index) => <tr key={row.teamId} className={index === 0 && data.status === "completed" ? "is-leader" : ""}>
+              <td>{index + 1}</td><td>{row.name}</td><td>{row.wins}</td><td>{row.losses}</td><td>{row.diff > 0 ? `+${row.diff}` : row.diff}</td><td>{row.played}</td>
+            </tr>)}
+          </tbody>
+        </table>
+      </section>}
       <div className="bracket-scroll" aria-label={`${data.name} tournament bracket`}>
         <div className="bracket-board" ref={boardRef}>
           <BracketConnectors boardRef={boardRef} matches={data.matches} />
           {rounds.map(([round, matches]) => <section className="bracket-round" key={round}>
-            <header><span>{String(round).padStart(2,"0")}</span><h2>{roundName(round,maxRound)}</h2></header>
-            <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} />)}</div>
+            <header><span>{String(round).padStart(2,"0")}</span><h2>{roundLabel(round,maxRound,data.format,data.totalRounds)}</h2></header>
+                          <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
           </section>)}
         </div>
       </div>

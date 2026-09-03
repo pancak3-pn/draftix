@@ -12,7 +12,11 @@ function friendlyTournamentError(error) {
   if (message.includes("not found")) return "This tournament link is unavailable.";
   if (message.includes("organizer access")) return "The organizer link is invalid or has expired.";
   if (message.includes("next match")) return "Clear the later match result before changing this winner.";
-  if (message.includes("not ready")) return "Both teams must be decided before recording this match.";
+  if (message.includes("final series")) return "Enter the final series score (e.g. 3–1 in a best of 5). Partial scores can't be saved.";
+  if (message.includes("clear later swiss")) return "Clear the later Swiss rounds before changing this result.";
+          if (message.includes("not ready")) return "Both teams must be decided before recording this match.";
+  if (message.includes("already decided")) return "This match is already decided. Clear it first.";
+  if (message.includes("valid live score")) return "Enter a valid live score (within the match format).";
   if (message.includes("non-tied score") || message.includes("higher score")) return "The selected winner must have the higher score.";
   if (message.includes("unique")) return "Every team needs a unique name.";
   if (message.includes("too many") || message.includes("rate limit")) return "Too many attempts. Please wait and try again.";
@@ -51,8 +55,8 @@ export function saveTournamentToken(slug, token) {
   if (slug && token) sessionStorage.setItem(`draftix:tournament:${slug}`, token);
 }
 
-export const createTournament = (name, teams, bestOf) =>
-  rpc("draftix_create_tournament", { p_name: name, p_teams: teams, p_best_of: bestOf }, true);
+export const createTournament = (name, teams, bestOf, format = "single_elimination") =>
+  rpc("draftix_create_tournament", { p_name: name, p_teams: teams, p_best_of: bestOf, p_format: format }, true);
 
 export const getTournament = (slug, token = "") =>
   rpc("draftix_tournament_state", { p_slug: slug, p_token: token || null });
@@ -62,6 +66,9 @@ export const setMatchResult = (slug, token, matchId, scoreA, scoreB, winnerTeamI
 
 export const clearMatchResult = (slug, token, matchId) =>
   rpc("draftix_clear_match_result", { p_slug: slug, p_token: token, p_match_id: matchId }, true);
+
+export const updateSeriesScore = (slug, token, matchId, scoreA, scoreB) =>
+  rpc("draftix_update_series_score", { p_slug: slug, p_token: token, p_match_id: matchId, p_score_a: scoreA, p_score_b: scoreB }, true);
 
 export function subscribeToTournament(tournamentId, onChange) {
   if (!tournamentId) return () => {};
