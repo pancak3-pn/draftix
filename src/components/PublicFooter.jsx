@@ -81,6 +81,7 @@ export default function PublicFooter({ reveal = false }) {
         <small>{"©"} {new Date().getFullYear()} DRAFTIX</small>
         <nav aria-label="Footer information">
           <a href="/status">Status</a>
+          <a href="/feedback">Feedback</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
           <a className="public-footer-contact" href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech" target="_blank" rel="noreferrer">Email support</a>

@@ -3,7 +3,7 @@ import "../styles/admin.css";
 import { supabaseConfig } from "../lib/supabaseConfig.js";
 
 const TOKEN_KEY = "dx_admin_token";
-const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers"];
+const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers", "feedback"];
 
 function viewFromHash() {
   if (typeof window === "undefined") return "overview";
@@ -62,6 +62,16 @@ const Icon = {
   clock: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    </svg>
+  ),
+  chat: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z" /><path d="M9 11h.01M13 11h.01" />
+    </svg>
+  ),
+  star: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3 2.7 5.6 6.3.9-4.5 4.3 1 6.2-5.5-3-5.5 3 1-6.2L3 9.5l6.3-.9L12 3Z" />
     </svg>
   ),
 };
@@ -187,6 +197,7 @@ export default function AdminPage() {
   const [updatedAt, setUpdatedAt] = useState(null);
   const [tick, setTick] = useState(0); // re-renders the "updated Xs ago" label
   const [activeView, setActiveView] = useState(viewFromHash);
+  const [feedback, setFeedback] = useState(null);
 
 
   useEffect(() => {
@@ -230,6 +241,12 @@ export default function AdminPage() {
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  // Load the feedback feed when the Feedback view opens (or token changes).
+  useEffect(() => {
+    if (token && activeView === "feedback") loadFeedback(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, activeView]);
 
   // Tick every 5s so the "updated Xs ago" label stays fresh.
   useEffect(() => {
@@ -281,6 +298,24 @@ export default function AdminPage() {
     }
   }
 
+  async function loadFeedback(t) {
+    const cfg = supabaseConfig();
+    if (!cfg) return;
+    try {
+      const res = await fetch(`${cfg.url}/rest/v1/rpc/draftix_admin_feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: cfg.key,
+          Authorization: `Bearer ${cfg.key}`,
+        },
+        body: JSON.stringify({ p_token: t }),
+      });
+      if (!res.ok) return; // keep the last good feed; errors surface via stats banner
+      setFeedback(await res.json().catch(() => null));
+    } catch (_) { /* transient */ }
+  }
+
   function signIn(event) {
     event.preventDefault();
     const t = input.trim();
@@ -293,6 +328,7 @@ export default function AdminPage() {
     sessionStorage.removeItem(TOKEN_KEY);
     setToken("");
     setStats(null);
+    setFeedback(null);
     setInput("");
   }
 
@@ -395,6 +431,10 @@ export default function AdminPage() {
             <span className="ax-nav-icon">{Icon.link}</span>
             Referrers
           </button>
+          <button type="button" className={activeView === "feedback" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("feedback")} aria-current={activeView === "feedback" ? "page" : undefined}>
+            <span className="ax-nav-icon">{Icon.chat}</span>
+            Feedback
+          </button>
         </nav>
         <div className="ax-side-footer">
           <span className="ax-avatar">A</span>
@@ -412,8 +452,8 @@ export default function AdminPage() {
           <div className="ax-topbar-title">
             <span className="ax-topbar-icon">{Icon.clock}</span>
             <div>
-              <h1>{activeView === "overview" ? "Overview" : activeView === "rooms" ? "Draft Rooms" : activeView === "pages" ? "Top Pages" : "Referrers"}</h1>
-              <p>Traffic and usage across Draftix.</p>
+              <h1>{activeView === "overview" ? "Overview" : activeView === "rooms" ? "Draft Rooms" : activeView === "pages" ? "Top Pages" : activeView === "feedback" ? "User Feedback" : "Referrers"}</h1>
+              <p>{activeView === "feedback" ? "Ratings and notes from Draftix players." : "Traffic and usage across Draftix."}</p>
             </div>
           </div>
           <div className="ax-topbar-tools">
@@ -464,6 +504,67 @@ export default function AdminPage() {
                     </div>
                   </section>
                 ) : null}
+              </div> : null}
+
+              {activeView === "feedback" ? <div className="fb-layout">
+                <aside className="fb-summary ax-panel">
+                  <div className="fb-average">
+                    <span className="fb-average-num">{feedback?.average != null ? feedback.average : "—"}</span>
+                    <span className="fb-average-of">/ 5 average</span>
+                    <span className="fb-average-stars" aria-hidden="true">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <span key={s} className={feedback?.average != null && s <= Math.round(feedback.average) ? "fb-star on" : "fb-star"}>★</span>
+                      ))}
+                    </span>
+                  </div>
+                  <dl className="fb-facts">
+                    <div><dt>Total</dt><dd>{fmtInt(feedback?.total)}</dd></div>
+                    <div><dt>Today</dt><dd>{fmtInt(feedback?.today)}</dd></div>
+                    <div><dt>7 days</dt><dd>{fmtInt(feedback?.last7)}</dd></div>
+                  </dl>
+                  {feedback?.distribution && Object.keys(feedback.distribution).length ? (
+                    <div className="fb-dist">
+                      <h4>Ratings breakdown</h4>
+                      {[5, 4, 3, 2, 1].map((stars) => {
+                        const count = Number(feedback.distribution[String(stars)] || feedback.distribution[stars] || 0);
+                        const max = Math.max(1, ...Object.values(feedback.distribution).map(Number));
+                        return (
+                          <div key={stars} className="fb-dist-row">
+                            <span className="fb-dist-label">{stars}★</span>
+                            <span className="fb-dist-bar"><span style={{ width: `${Math.round((count / max) * 100)}%` }} /></span>
+                            <span className="fb-dist-count">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </aside>
+
+                <section className="fb-feed ax-panel" aria-label="Latest feedback">
+                  <h3>
+                    <span className="ax-panel-icon">{Icon.chat}</span>
+                    Latest feedback
+                    {feedback?.recent?.length ? <span className="ax-panel-note">{feedback.recent.length} most recent</span> : null}
+                  </h3>
+                  {feedback?.recent && feedback.recent.length ? (
+                    <div className="fb-feed-list" tabIndex={0} aria-label="Feedback entries, scroll to browse">
+                      {feedback.recent.map((entry) => (
+                        <article key={entry.id} className="fb-entry">
+                          <header className="fb-entry-head">
+                            <span className={"fb-entry-rating fb-r" + entry.rating}>{entry.rating}★</span>
+                            <time className="fb-entry-time" title={new Date(entry.createdAt).toLocaleString()}>
+                              {new Date(entry.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            </time>
+                          </header>
+                          <p className="fb-entry-message">{entry.message}</p>
+                          <footer className="fb-entry-foot">sent from <code>{entry.page}</code></footer>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="fb-empty">No feedback submitted yet.</p>
+                  )}
+                </section>
               </div> : null}
 
               {activeView === "overview" || activeView === "pages" || activeView === "referrers" ? <div className="ax-row">

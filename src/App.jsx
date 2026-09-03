@@ -13,6 +13,7 @@ const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
 const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
 const SeoTopicPage = lazy(() => import("./pages/SeoTopicPage.jsx"));
 const TournamentPage = lazy(() => import("./pages/TournamentPage.jsx"));
+const FeedbackPage = lazy(() => import("./pages/FeedbackPage.jsx"));
 const TournamentHubPage = lazy(() => import("./pages/TournamentPage.jsx").then((module) => ({ default: module.TournamentHubPage })));
 
 function RouteFallback() {
@@ -53,6 +54,7 @@ export default function App() {
       "/valorant-agent-ban": "Valorant Agent Ban Tool | Draftix",
       "/valorant-draft-tool": "Free Valorant Draft Tool | Draftix",
       "/tournaments": "Free Tournament Bracket Maker | Draftix",
+      "/feedback": "Send Feedback | Draftix",
     };
     document.title = titles[path] || "Valorant Map Veto & Agent Draft Tool | Draftix";
     // First-party analytics: one pageview per route change.
@@ -67,6 +69,7 @@ export default function App() {
   else if (path === "/terms") page = <LegalPage type="terms" />;
   else if (path === "/r") page = <AdminPage />;
   else if (path === "/tournaments") page = <TournamentHubPage />;
+  else if (path === "/feedback") page = <FeedbackPage />;
   else if (path.startsWith("/t/") && path.split("/").filter(Boolean).length === 2) page = <TournamentPage slug={decodeURIComponent(path.split("/")[2])} />;
   else if (["/valorant-map-veto", "/valorant-agent-ban", "/valorant-draft-tool"].includes(path)) page = <SeoTopicPage path={path} />;
   else page = <LandingPage />;
