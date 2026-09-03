@@ -150,6 +150,15 @@ function MatchReadyConsole({
               Run it back
             </button>
           )}
+          <a
+            href="/feedback"
+            target="_blank"
+            rel="noreferrer"
+            className="dx-button dx-ready-feedback"
+            title="Tell us how your draft went"
+          >
+            Feedback
+          </a>
         </div>
       </footer>
     </section>

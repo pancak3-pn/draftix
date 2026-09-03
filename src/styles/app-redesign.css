@@ -4726,6 +4726,19 @@
   padding-inline: 20px;
 }
 
+.dx-ready-feedback {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #9aa1ad;
+  text-decoration: none;
+}
+
+.dx-ready-feedback:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
 @keyframes dx-ready-map-enter {
   from {
     opacity: 0;

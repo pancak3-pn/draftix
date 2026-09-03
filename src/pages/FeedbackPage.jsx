@@ -86,7 +86,7 @@ export default function FeedbackPage() {
             <div className="feedback-done" role="status">
               <h2>Thank you! 🎉</h2>
               <p>Your feedback was received. It helps us decide what to build next.</p>
-              <a href="/">Back to Draftix</a>
+              <a href="/" className="feedback-submit">Back to Draftix</a>
             </div>
           ) : (
             <form className="feedback-form" onSubmit={submit} aria-label="Send feedback">
