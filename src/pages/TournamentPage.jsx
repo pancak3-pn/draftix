@@ -232,7 +232,7 @@ export default function TournamentPage({ slug }) {
     catch (requestError) { setError(requestError.message); }
     setBusyMatch("");
   }
-    async function clear(matchId) {
+  async function clear(matchId) {
     setBusyMatch(matchId); setError("");
     try { await clearMatchResult(slug, token, matchId); await load(); }
     catch (requestError) { setError(requestError.message); }
@@ -249,6 +249,12 @@ export default function TournamentPage({ slug }) {
   const maxRound = Math.max(...rounds.map(([round]) => round));
   const formatLabel = { single_elimination: "Single elimination", double_elimination: "Double elimination", round_robin: "Round robin", swiss: "Swiss" }[data.format] || data.format;
   const champion = teams.get(data.championTeamId);
+  // Final result (elimination formats): the bracket final is the match with no next match
+  const finalMatch = (data.format === "single_elimination" || data.format === "double_elimination")
+    ? (data.matches || []).find((m) => !m.nextMatchId && m.winnerTeamId && m.teamAId && m.teamBId)
+    : null;
+  const runnerUp = finalMatch ? teams.get(finalMatch.winnerTeamId === finalMatch.teamAId ? finalMatch.teamBId : finalMatch.teamAId) : null;
+  const finalScore = finalMatch ? (finalMatch.winnerTeamId === finalMatch.teamAId ? `${finalMatch.scoreA}–${finalMatch.scoreB}` : `${finalMatch.scoreB}–${finalMatch.scoreA}`) : "";
   const showStandings = (data.format === "round_robin" || data.format === "swiss") && Array.isArray(data.standings) && data.standings.length > 0;
   const shareUrl = `${window.location.origin}/t/${slug}`;
   const manageUrl = token ? `${shareUrl}?key=${token}` : "";
@@ -264,16 +270,21 @@ export default function TournamentPage({ slug }) {
       </header>
       {data.canManage && <p className="organizer-banner"><strong>Organizer mode</strong> Select a winner, enter the score, then save.</p>}
       {error && <p className="tournament-error" role="alert">{error}</p>}
-      {champion && <section className="tournament-champion" aria-label="Tournament champion">
-        <span className="tournament-champion-trophy" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 5V2H6v3H2v4c0 2.76 2.24 5 5 5h.1A7 7 0 0 0 11 17.92V20H8v2h8v-2h-3v-2.08A7 7 0 0 0 16.9 14H17c2.76 0 5-2.24 5-5V5h-4zM4 9V7h2v4.83A3.01 3.01 0 0 1 4 9zm16 0a3.01 3.01 0 0 1-2 2.83V7h2v2z"/></svg>
-        </span>
-        <div className="tournament-champion-text">
-          <span>Champion</span>
-          <strong>{champion.name}</strong>
-        </div>
-        <span className="tournament-champion-meta">{data.name} · {formatLabel}</span>
-      </section>}
+      {champion && <section className="champion-banner" aria-label="Tournament champion">
+  <div className="champion-banner-year" aria-hidden="true">
+    <span>{new Date().getFullYear().toString().slice(0, 2)}</span>
+    <svg className="champion-banner-mark" viewBox="0 0 64 64" fill="currentColor">
+      <path d="M8 4 L32 25 L56 4 L45 4 L32 15 L19 4 Z" />
+      <path d="M8 60 L32 39 L56 60 L45 60 L32 49 L19 60 Z" />
+    </svg>
+    <span>{new Date().getFullYear().toString().slice(2)}</span>
+  </div>
+  <h2 className="champion-banner-title">{data.name}</h2>
+  <p className="champion-banner-sub">Champions</p>
+  <div className="champion-banner-team">{champion.name}</div>
+  {runnerUp && <span className="champion-banner-final">def. {runnerUp.name} {finalScore}</span>}
+  <span className="champion-banner-meta">{formatLabel} · Best of {data.bestOf}</span>
+</section>}
       {showStandings && <section className="tournament-standings" aria-label="Standings">
         <table>
           <thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>Diff</th><th>P</th></tr></thead>
