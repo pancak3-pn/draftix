@@ -8,12 +8,11 @@ const mapPool = ["Ascent", "Abyss", "Bind", "Breeze", "Corrode", "Fracture", "Ha
 }));
 
 const heroSlides = [
-  { src: "/images/Homepage/steap1-create.webp", alt: "Draftix room creation screen" },
-  { src: "/images/Homepage/step2-banmap.webp", alt: "Draftix map veto screen" },
-  { src: "/images/Homepage/step3-choosteam.webp", alt: "Draftix side selection screen" },
-  { src: "/images/Homepage/step4-banagent.webp", alt: "Draftix agent ban screen" },
+  { src: "/images/Homepage/drafting-tool.webp", alt: "Draftix live map and agent draft tool" },
+  { src: "/images/Homepage/team-balance-tool.webp", alt: "Draftix team balancer tool" },
+  { src: "/images/Homepage/tournament-tool.webp", alt: "Draftix tournament bracket maker" },
   { src: "/images/Homepage/matchfound.webp", alt: "Draftix match found screen" },
-  { src: "/images/Homepage/result.webp", alt: "Draftix completed match result" },
+  { src: "/images/Homepage/result.webp", alt: "Draftix match result poster" },
 ];
 
 const navigationLinks = [
@@ -23,22 +22,76 @@ const navigationLinks = [
   { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
 ];
 
+const competitiveTools = [
+  {
+    id: "drafting",
+    num: "01",
+    kicker: "LIVE MAP VETO & AGENT COMPOSITION",
+    title: "DRAFTING",
+    desc: "Create dedicated tournament rooms with live map vetoes, side picks, agent bans, and match poster generation for competitive scrims and broadcasts.",
+    cta: "START DRAFTING",
+    href: "/draft",
+    image: "/images/Homepage/drafting-tool.webp",
+    alt: "Draftix live map and agent drafting tool preview",
+  },
+  {
+    id: "team-balance",
+    num: "02",
+    kicker: "SKILL-BASED MMR BALANCER",
+    title: "TEAM BALANCER",
+    desc: "Split custom lobbies into fairer, evenly matched 5v5 rosters with smart MMR distribution, rank balancing, and instant captain assignments.",
+    cta: "BALANCE TEAMS",
+    href: "/team-balance",
+    image: "/images/Homepage/team-balance-tool.webp",
+    alt: "Draftix team balancer tool preview",
+  },
+  {
+    id: "tournaments",
+    num: "03",
+    kicker: "BRACKET & TOURNAMENT ENGINE",
+    title: "TOURNAMENTS",
+    desc: "Build single and double elimination tournament brackets, track match progression, record scores, and crown a champion with live public share links.",
+    cta: "CREATE BRACKET",
+    href: "/tournaments",
+    image: "/images/Homepage/tournament-tool.webp",
+    alt: "Draftix tournament bracket maker preview",
+  },
+];
+
 const DAILY_PLAYERS = "500+";
 
 function DailyStat() {
-  return <span className="dr-daily-stat" title="Draftix averaged 500+ players daily during its first week after launch.">
-    <strong>{DAILY_PLAYERS}</strong> players daily in launch week
-  </span>;
+  return <div className="dr-hero-note" title="Draftix averaged 500+ players daily during its first week after launch.">
+    <span className="dr-daily-dot" aria-hidden="true" />
+    <strong className="dr-daily-num">{DAILY_PLAYERS}</strong>
+    <span className="dr-daily-text">players daily in launch week</span>
+    <span className="dr-hero-sep" aria-hidden="true">•</span>
+    <span className="dr-hero-tag">No signup</span>
+  </div>;
 }
 
 function HeroSlideshow() {
+  const total = heroSlides.length;
+  const step = (11 / total).toFixed(2);
   return <div className="dr-hero-flight">
     <div className="dr-hero-stream" aria-hidden="true">
-      {heroSlides.map((slide, index) => <figure className="dr-hero-visual" key={slide.src} style={{ "--dr-slide-index": index }}>
-        <img src={slide.src} alt="" fetchPriority={index === 0 ? "high" : "auto"} loading={index === 0 ? "eager" : "lazy"} />
+      {heroSlides.map((slide, index) => <figure
+        className="dr-hero-visual"
+        key={slide.src}
+        style={{
+          "--dr-slide-index": index,
+          animationDelay: `calc(${index} * -${step}s)`
+        }}
+      >
+        <img
+          src={slide.src}
+          alt=""
+          fetchPriority={index === 0 ? "high" : "auto"}
+          loading={index === 0 ? "eager" : "lazy"}
+        />
       </figure>)}
     </div>
-    <span className="sr-only">Animated preview of the Draftix workflow from room creation to final match result.</span>
+    <span className="sr-only">Animated preview of the Draftix competitive tools.</span>
   </div>;
 }
 
@@ -108,6 +161,8 @@ function TutorialModal({ onClose }) {
 
 export default function LandingPage() {
   const [showTutorial, setShowTutorial] = useState(false);
+  const [activeToolIndex, setActiveToolIndex] = useState(0);
+  const currentTool = competitiveTools[activeToolIndex];
   useEffect(() => {
     document.body.classList.add("dr-page");
     const nodes = document.querySelectorAll("[data-reveal], [data-flow]");
@@ -127,7 +182,7 @@ export default function LandingPage() {
   return <main className="dr-site">
     <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
-      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><small className="dr-hero-note"><DailyStat /> No signup.</small></div>
+      <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><DailyStat /></div>
       <HeroSlideshow />
     </section>
     <section className="dr-agents" id="agents" data-reveal>
@@ -151,17 +206,69 @@ export default function LandingPage() {
         <img src="/images/Homepage/section-banner.webp" alt="Draftix squad key art" loading="lazy" />
       </figure>
     </section>
-    <section className="dr-process" id="process" data-flow>
-      <header data-reveal><h2>Four calls. Match ready.</h2><p>See the full flow in under two minutes.</p><button type="button" className="dr-button dr-button-secondary dr-tutorial-btn" onClick={() => setShowTutorial(true)}>Watch tutorial</button></header>
-      <div className="dr-process-track">
-        <article data-reveal><img src="/images/Homepage/steap1-create.webp" alt="" loading="lazy" /><div><strong>01</strong><h3>Open</h3><p>Create the room.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step2-banmap.webp" alt="" loading="lazy" /><div><strong>02</strong><h3>Veto</h3><p>Ban the map.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step3-choosteam.webp" alt="" loading="lazy" /><div><strong>03</strong><h3>Claim</h3><p>Choose your team.</p></div></article>
-        <article data-reveal><img src="/images/Homepage/step4-banagent.webp" alt="" loading="lazy" /><div><strong>04</strong><h3>Lock</h3><p>Ban the agent.</p></div></article>
+    <section className="dr-val-section" id="process" data-reveal>
+      <div className="dr-val-showcase">
+        <div className="dr-val-content">
+          <h2 className="dr-val-title">{currentTool.title}</h2>
+          <p className="dr-val-kicker">{currentTool.kicker}</p>
+          <p className="dr-val-desc">{currentTool.desc}</p>
+
+          <div className="dr-val-actions">
+            <a href={currentTool.href} className="dr-val-btn-primary">
+              <span>{currentTool.cta}</span>
+            </a>
+            <button
+              type="button"
+              className="dr-val-btn-secondary"
+              onClick={() => setShowTutorial(true)}
+              aria-label="Watch Draftix tutorial video"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="6 3 20 12 6 21 6 3" />
+              </svg>
+              <span>WATCH TUTORIAL (1:45)</span>
+            </button>
+          </div>
+
+          <div className="dr-val-tabs" role="tablist" aria-label="Select tool format">
+            {competitiveTools.map((tool, idx) => {
+              const isActive = activeToolIndex === idx;
+              return (
+                <button
+                  key={tool.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`dr-val-tab${isActive ? " is-active" : ""}`}
+                  onClick={() => setActiveToolIndex(idx)}
+                >
+                  <span className="dr-val-tab-num">{tool.num}</span>
+                  <span className="dr-val-tab-name">{tool.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="dr-val-media-wrap">
+          <div className="dr-val-media-frame">
+            <span className="dr-val-corner dr-val-corner-tl" aria-hidden="true">■</span>
+            <span className="dr-val-corner dr-val-corner-br" aria-hidden="true">■</span>
+            <a href={currentTool.href} className="dr-val-media-link" title={`Launch ${currentTool.title}`}>
+              <img
+                key={currentTool.image}
+                src={currentTool.image}
+                alt={currentTool.alt}
+                className="dr-val-img"
+                loading="lazy"
+              />
+            </a>
+          </div>
+        </div>
       </div>
     </section>
     <section className="dr-pool" data-reveal><header><h2>Current map pool</h2><p>Choose the arena before the match begins.</p></header><MapCarousel /></section>
-    <section className="dr-final" data-reveal><p className="dr-final-eyebrow">// Final call</p><h2>Your next draft takes seconds.</h2><p className="dr-final-sub">No account needed. Create a room, share the code, and lock in your comp.</p><a href="/draft" className="dr-button dr-button-primary">Open Draftix</a></section>
+    <section className="dr-final" data-reveal><p className="dr-final-eyebrow">// Final call</p><h2>Your next draft takes seconds.</h2><p className="dr-final-sub">No account needed. Create a room, share the code, and lock in your comp.</p><a href="/draft" className="dr-button dr-button-primary">Start drafting</a></section>
     <PublicFooter reveal />
     {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
     <BackToTop />

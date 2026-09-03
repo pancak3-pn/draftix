@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Doto:wght@600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Doto:wght@600;700;900&family=Orbitron:wght@600;700;800;900&display=swap');
 
-/* Draftix type system: Inter for UI/body, Barlow Condensed for display, Doto for data/codes. */
+/* Draftix type system: Inter for UI/body, Barlow Condensed for display, Doto for data/codes, Orbitron for Y2K/tactical accents. */
 :root {
   --font-ui: "Inter", sans-serif;
   --font-display: "Barlow Condensed", sans-serif;
   --font-tactical: "Inter", sans-serif;
   --font-data: "Doto", monospace;
+  --font-y2k: "Orbitron", "Doto", monospace, sans-serif;
 }
 
 h1,
