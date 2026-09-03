@@ -896,7 +896,7 @@ async function main() {
     // connect-src: include cdn.socket.io so DevTools / browsers can fetch
     // socket.io.min.js.map when using the CDN client (harmless; optional).
     connectSrc: isProd
-      ? ["'self'", "wss:", "https://valorant-api.com", "https://cdn.socket.io"]
+      ? ["'self'", "wss:", "https://valorant-api.com", "https://cdn.socket.io", "https://*.supabase.co"]
       : ["'self'", "ws:", "wss:", "http:", "https:"],
     formAction: ["'self'"],
     upgradeInsecureRequests: isProd ? [] : null,

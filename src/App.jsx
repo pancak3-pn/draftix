@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import LandingPage from "./pages/LandingPage.jsx";
 import { trackPageview } from "./lib/analytics.js";
+import { startSitePresence, setSitePresencePage } from "./lib/sitePresence.js";
 
 // Lazy-load route pages so the initial bundle stays lean. Only the landing
 // page is loaded eagerly; everything else (draft shell, balancer, status,
@@ -34,6 +35,12 @@ function RouteFallback() {
 
 export default function App() {
   const path = window.location.pathname.replace(/\/$/, "") || "/";
+  useEffect(() => {
+    // Site-wide visitor presence: count this visitor on every page and
+    // keep their current path fresh for the "people viewing now" badge.
+    setSitePresencePage(path);
+    startSitePresence();
+  }, [path]);
   useEffect(() => {
     const titles = {
       "/draft": "Draft Room | Draftix",
