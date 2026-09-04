@@ -2,19 +2,38 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import LandingPage from "./pages/LandingPage.jsx";
 import { trackPageview } from "./lib/analytics.js";
 import { subscribeToNavigation, currentLocation } from "./lib/spaRouter.js";
+
+const CHUNK_RECOVERY_KEY = "draftix:chunk-recovery";
+const isStaleChunkError = (error) => /failed to fetch dynamically imported module|loading chunk|chunkloaderror/i.test(String(error?.message || error));
+
+function lazyRoute(load) {
+  return lazy(() => load().then((module) => {
+    sessionStorage.removeItem(CHUNK_RECOVERY_KEY);
+    return module;
+  }).catch((error) => {
+    if (isStaleChunkError(error) && !sessionStorage.getItem(CHUNK_RECOVERY_KEY)) {
+      sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()));
+      const freshUrl = new URL(window.location.href);
+      freshUrl.searchParams.set("refresh", String(Date.now()));
+      window.location.replace(freshUrl);
+      return new Promise(() => {});
+    }
+    throw error;
+  }));
+}
 // Lazy-load route pages so the initial bundle stays lean. Only the landing
 // page is loaded eagerly; everything else (draft shell, balancer, status,
 // legal) is fetched on demand → smaller first load, better LCP.
-const SessionGate = lazy(() => import("./components/SessionGate.jsx"));
-const TeamBalancerPage = lazy(() => import("./pages/TeamBalancerPage.jsx"));
-const StatusPage = lazy(() => import("./pages/StatusPage.jsx"));
-const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
-const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
-const SeoTopicPage = lazy(() => import("./pages/SeoTopicPage.jsx"));
-const TournamentPage = lazy(() => import("./pages/TournamentPage.jsx"));
-const FeedbackPage = lazy(() => import("./pages/FeedbackPage.jsx"));
-const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
-const TournamentHubPage = lazy(() => import("./pages/TournamentPage.jsx").then((module) => ({ default: module.TournamentHubPage })));
+const SessionGate = lazyRoute(() => import("./components/SessionGate.jsx"));
+const TeamBalancerPage = lazyRoute(() => import("./pages/TeamBalancerPage.jsx"));
+const StatusPage = lazyRoute(() => import("./pages/StatusPage.jsx"));
+const LegalPage = lazyRoute(() => import("./pages/LegalPage.jsx"));
+const AdminPage = lazyRoute(() => import("./pages/AdminPage.jsx"));
+const SeoTopicPage = lazyRoute(() => import("./pages/SeoTopicPage.jsx"));
+const TournamentPage = lazyRoute(() => import("./pages/TournamentPage.jsx"));
+const FeedbackPage = lazyRoute(() => import("./pages/FeedbackPage.jsx"));
+const NotFoundPage = lazyRoute(() => import("./pages/NotFoundPage.jsx"));
+const TournamentHubPage = lazyRoute(() => import("./pages/TournamentPage.jsx").then((module) => ({ default: module.TournamentHubPage })));
 
 function RouteFallback() {
   return (

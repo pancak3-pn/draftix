@@ -2303,6 +2303,16 @@
   transform: translateY(1px);
 }
 
+.public-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.2vw, 34px);
+}
+
+.public-footer-actions nav {
+  align-items: center;
+}
+
 @media (max-width:900px) {
   .public-footer-main {
     grid-template-columns: repeat(3, minmax(0, 1fr));

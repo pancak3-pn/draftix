@@ -13,6 +13,7 @@ export default class AppErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     if (import.meta.env.DEV) console.error("Draftix render failure", error, info);
+    if (/failed to fetch dynamically imported module|loading chunk|chunkloaderror/i.test(String(error?.message || error))) return;
     reportRenderError(error, info);
   }
 

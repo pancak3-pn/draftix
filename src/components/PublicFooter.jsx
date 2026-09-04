@@ -36,11 +36,13 @@ export default function PublicFooter({ reveal = false }) {
           <small>© {new Date().getFullYear()} DRAFTIX</small>
           <small>Not endorsed by Riot Games. Valorant and Riot Games are trademarks of Riot Games, Inc.</small>
         </div>
-        <nav aria-label="Legal and site info">
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-        </nav>
-        <a className="public-footer-donate" href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer" aria-label="Clutch the server bill on Ko-fi">Clutch the server bill</a>
+        <div className="public-footer-actions">
+          <nav aria-label="Legal and site info">
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+          </nav>
+          <a className="public-footer-donate" href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer" aria-label="Clutch the server bill on Ko-fi">Clutch the server bill</a>
+        </div>
       </div>
     </footer>
   );
