@@ -3,13 +3,6 @@ import LandingPage from "./pages/LandingPage.jsx";
 import { trackPageview } from "./lib/analytics.js";
 import { startSitePresence, setSitePresencePage } from "./lib/sitePresence.js";
 import { subscribeToNavigation, currentLocation } from "./lib/spaRouter.js";
-import { migrateTournamentStorage } from "./lib/tournaments.js";
-
-// One-time upgrade: rescue any organizer tokens still living in
-// sessionStorage (pre-persistence tournaments) into the persistent
-// "My tournaments" registry before any page reads it.
-migrateTournamentStorage();
-
 // Lazy-load route pages so the initial bundle stays lean. Only the landing
 // page is loaded eagerly; everything else (draft shell, balancer, status,
 // legal) is fetched on demand → smaller first load, better LCP.

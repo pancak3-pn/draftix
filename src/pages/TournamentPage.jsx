@@ -12,6 +12,13 @@ import { navigate } from "../lib/spaRouter.js";
 // Tournament styles ride this lazy chunk instead of the entry bundle.
 import "../styles/tournaments.css";
 
+// One-time upgrade: rescue any organizer tokens still living in
+// sessionStorage (pre-persistence tournaments) into the persistent
+// "My tournaments" registry before any component in this chunk reads it.
+// Module scope runs once when the chunk loads, covering both
+// TournamentHubPage and TournamentPage ahead of their first render.
+migrateTournamentStorage();
+
 const sizes = Array.from({ length: 14 }, (_, index) => index + 3);
 const formats = [
   { value: "single_elimination", label: "Single elimination" },
@@ -297,8 +304,6 @@ function BracketConnectors({ boardRef, matches }) {
 }
 
 export default function TournamentPage({ slug }) {
-  // One-time upgrade of any pre-persistence sessionStorage tokens.
-  useEffect(() => { migrateTournamentStorage(); }, []);
   const queryToken = new URLSearchParams(window.location.search).get("key") || "";
   const [token] = useState(() => queryToken || tournamentToken(slug));
   const [data, setData] = useState(null);
