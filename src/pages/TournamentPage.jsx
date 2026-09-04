@@ -9,6 +9,8 @@ import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 import { clearMatchResult, createTournament, getTournament, listMyTournaments, migrateTournamentStorage, registerMyTournament, removeMyTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore } from "../lib/tournaments.js";
 import { navigate } from "../lib/spaRouter.js";
+// Tournament styles ride this lazy chunk instead of the entry bundle.
+import "../styles/tournaments.css";
 
 const sizes = Array.from({ length: 14 }, (_, index) => index + 3);
 const formats = [
@@ -159,28 +161,28 @@ export function TournamentHubPage() {
           <button type="button" className={activeHubTab === "history" ? "is-active" : ""} aria-current={activeHubTab === "history" ? "page" : undefined} onClick={() => setActiveHubTab("history")}>History</button>
         </nav>
         <div className="tournament-hub-panel">
-        {activeHubTab === "create" ? <form className="tournament-form" onSubmit={submit}>
-        <section className="tournament-form-section" aria-labelledby="tournament-details-heading">
-          <header className="tournament-section-head"><span>01</span><div><h2 id="tournament-details-heading">Tournament details</h2><p>Name the event and choose how matches will run.</p></div></header>
-          <div className="tournament-basics-grid">
-            <label className="tournament-name-field">Tournament name<input value={name} maxLength="80" required placeholder="Community Cup" onChange={(event) => setName(event.target.value)} /></label>
-            <label>Team count<select value={size} onChange={(event) => changeSize(Number(event.target.value))}>{sizes.map((option) => <option key={option} value={option}>{option} teams</option>)}</select></label>
-            <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-            <label>Series length<select value={bestOf} onChange={(event) => setBestOf(Number(event.target.value))}><option value="1">Best of 1</option><option value="3">Best of 3</option><option value="5">Best of 5</option><option value="7">Best of 7</option></select></label>
-          </div>
-        </section>
-        <section className="tournament-form-section" aria-labelledby="tournament-teams-heading">
-          <header className="tournament-section-head"><span>02</span><div><h2 id="tournament-teams-heading">Seed the teams</h2><p>Seeds determine the opening matchups.</p></div><button className="tournament-shuffle" type="button" onClick={shuffleTeams}><ArrowsClockwise aria-hidden="true" />Shuffle</button></header>
-          <div className="tournament-team-fields">
-            {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2, "0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
-          </div>
-        </section>
-        {error && <p className="tournament-error" role="alert">{error}</p>}
-        <footer className="tournament-form-actions">
-          <p><strong>{size} teams</strong><span>{formatLabels[format]} · Best of {bestOf}</span></p>
-          <button className="tournament-submit" type="submit" disabled={busy}>{busy ? "Creating bracket…" : <>Create tournament<ArrowRight aria-hidden="true" weight="bold" /></>}</button>
-        </footer>
-        </form> : <MyTournaments />}
+          {activeHubTab === "create" ? <form className="tournament-form" onSubmit={submit}>
+            <section className="tournament-form-section" aria-labelledby="tournament-details-heading">
+              <header className="tournament-section-head"><span>01</span><div><h2 id="tournament-details-heading">Tournament details</h2><p>Name the event and choose how matches will run.</p></div></header>
+              <div className="tournament-basics-grid">
+                <label className="tournament-name-field">Tournament name<input value={name} maxLength="80" required placeholder="Community Cup" onChange={(event) => setName(event.target.value)} /></label>
+                <label>Team count<select value={size} onChange={(event) => changeSize(Number(event.target.value))}>{sizes.map((option) => <option key={option} value={option}>{option} teams</option>)}</select></label>
+                <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                <label>Series length<select value={bestOf} onChange={(event) => setBestOf(Number(event.target.value))}><option value="1">Best of 1</option><option value="3">Best of 3</option><option value="5">Best of 5</option><option value="7">Best of 7</option></select></label>
+              </div>
+            </section>
+            <section className="tournament-form-section" aria-labelledby="tournament-teams-heading">
+              <header className="tournament-section-head"><span>02</span><div><h2 id="tournament-teams-heading">Seed the teams</h2><p>Seeds determine the opening matchups.</p></div><button className="tournament-shuffle" type="button" onClick={shuffleTeams}><ArrowsClockwise aria-hidden="true" />Shuffle</button></header>
+              <div className="tournament-team-fields">
+                {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2, "0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
+              </div>
+            </section>
+            {error && <p className="tournament-error" role="alert">{error}</p>}
+            <footer className="tournament-form-actions">
+              <p><strong>{size} teams</strong><span>{formatLabels[format]} · Best of {bestOf}</span></p>
+              <button className="tournament-submit" type="submit" disabled={busy}>{busy ? "Creating bracket…" : <>Create tournament<ArrowRight aria-hidden="true" weight="bold" /></>}</button>
+            </footer>
+          </form> : <MyTournaments />}
         </div>
       </section>
     </main>

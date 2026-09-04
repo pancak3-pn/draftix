@@ -70,20 +70,17 @@ const competitiveTools = [
   },
 ];
 
-const DAILY_PLAYERS = "500+";
-
 function DailyStat() {
   return (
     <div className="dr-hero-proof dr-hero-note" role="region" aria-label="Platform highlights">
       <div className="dr-proof-item">
         <svg className="dr-proof-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+          <path d="M8 2v16" />
+          <path d="M16 6v16" />
         </svg>
         <span className="dr-proof-text">
-          <strong className="dr-proof-num">{DAILY_PLAYERS}</strong> users in launch week
+          <strong className="dr-proof-num">{mapPool.length}</strong> maps in the veto pool
         </span>
       </div>
 

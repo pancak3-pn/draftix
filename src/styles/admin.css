@@ -1465,7 +1465,7 @@
   margin-top: 30px;
 }
 
-.ax-login-app .ax-signin label > span {
+.ax-login-app .ax-signin label>span {
   color: #272d33;
   font-size: .72rem;
   font-weight: 800;
@@ -1647,6 +1647,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .ax-login-app .ax-token-field input,
   .ax-login-app .ax-button {
     transition: none;
@@ -1696,9 +1697,9 @@
 }
 
 .ax-app:not(:has(.ax-login-side)) .ax-topbar-title,
-.ax-app:not(:has(.ax-login-side)) .ax-topbar-title > div,
+.ax-app:not(:has(.ax-login-side)) .ax-topbar-title>div,
 .ax-app:not(:has(.ax-login-side)) .ax-panel,
-.ax-app:not(:has(.ax-login-side)) .ax-list li > :first-child {
+.ax-app:not(:has(.ax-login-side)) .ax-list li> :first-child {
   min-width: 0;
 }
 
@@ -1757,6 +1758,7 @@
 }
 
 @media (max-width: 480px) {
+
   .ax-app:not(:has(.ax-login-side)) .ax-topbar-title p,
   .ax-app:not(:has(.ax-login-side)) .ax-updated {
     display: none;
@@ -2116,4 +2118,74 @@
   .fb-dist-bar span {
     transition: none;
   }
+}
+
+/* ── Client errors view ───────────────────────────────── */
+/* Reuses the fb-layout / fb-summary / fb-feed treatment;
+   err-* only adds the kind pills, wider type labels, the
+   stack disclosure, and long-string wrapping. */
+.err-dist .fb-dist-row {
+  grid-template-columns: 4.6rem minmax(0, 1fr) 2.4rem;
+}
+
+.err-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  font: 800 0.72rem/1 var(--font-data, "Doto", monospace);
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #6b7280;
+}
+
+/* Kind-tinted pills: red = render crash (page died),
+   orange = script error, amber = unhandled promise. */
+.err-k-render {
+  background: #d93646;
+}
+
+.err-k-window {
+  background: #e06535;
+}
+
+.err-k-unhandledrejection {
+  background: #b98413;
+}
+
+.err-stack {
+  font-size: 0.72rem;
+}
+
+.err-stack summary {
+  cursor: pointer;
+  color: var(--ad-muted);
+  font-weight: 600;
+  user-select: none;
+}
+
+.err-stack summary:hover,
+.err-stack summary:focus-visible {
+  color: var(--ad-text);
+}
+
+.err-stack pre {
+  margin: 0.45rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(15, 25, 35, 0.05);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--ad-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.err-entry .fb-entry-foot {
+  overflow-wrap: anywhere;
 }

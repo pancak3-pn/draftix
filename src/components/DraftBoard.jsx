@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import AppNav from "./AppNav.jsx";
 
 function SelectionGrid({ items, selected, onPick, disabled, kind }) {
@@ -260,6 +260,72 @@ function SidePickConsole({ map, choosingTeam, canPick, onPick }) {
   );
 }
 
+// Owns the 250ms turn-countdown tick so its state updates re-render only this
+// small subtree instead of the whole board (agent grid, chat, consoles).
+// Internal refs dedupe the callbacks to at most one fire per turn window.
+function TurnCountdown({
+  turnEndsAt,
+  active,
+  variant = "clock",
+  label = "Turn timer",
+  warnBelow = null,
+  onExpire,
+  onWarning,
+}) {
+  const [seconds, setSeconds] = useState(null);
+  const expiredRef = useRef(null);
+  const warnedRef = useRef(null);
+  // Latest-ref pattern: the interval effect only depends on the turn window,
+  // so parent re-renders can swap callbacks without restarting the tick.
+  const callbacksRef = useRef({ onExpire, onWarning });
+  callbacksRef.current = { onExpire, onWarning };
+
+  useEffect(() => {
+    if (!turnEndsAt || !active) {
+      setSeconds(null);
+      return undefined;
+    }
+    const tick = () => {
+      const next = Math.max(0, Math.ceil((turnEndsAt - Date.now()) / 1000));
+      setSeconds(next);
+      if (next === 0 && expiredRef.current !== turnEndsAt) {
+        expiredRef.current = turnEndsAt;
+        callbacksRef.current.onExpire?.();
+      }
+      if (
+        warnBelow !== null &&
+        next > 0 &&
+        next <= warnBelow &&
+        warnedRef.current !== turnEndsAt
+      ) {
+        warnedRef.current = turnEndsAt;
+        callbacksRef.current.onWarning?.();
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 250);
+    return () => window.clearInterval(timer);
+  }, [turnEndsAt, active, warnBelow]);
+
+  if (variant === "agent") {
+    return (
+      <div
+        className={`dx-agent-timer${seconds !== null && seconds <= 10 ? " is-critical" : ""}`}
+      >
+        <span>{label}</span>
+        <time>{seconds === null ? "--" : String(seconds).padStart(2, "0")}</time>
+      </div>
+    );
+  }
+  if (seconds === null) return null;
+  return (
+    <div className="dx-clock">
+      <small>{label}</small>
+      <time>{String(seconds).padStart(2, "0")}</time>
+    </div>
+  );
+}
+
 function AgentBanConsole({
   agents,
   selected,
@@ -267,7 +333,7 @@ function AgentBanConsole({
   onSelect,
   disabled,
   session,
-  seconds,
+  timer,
   status,
 }) {
   const available = agents.filter((agent) => !selected.includes(agent.uuid));
@@ -325,14 +391,7 @@ function AgentBanConsole({
           <small>{disabled ? "Draft in progress" : "Action required"}</small>
           <strong>{status}</strong>
         </div>
-        <div
-          className={`dx-agent-timer${seconds !== null && seconds <= 10 ? " is-critical" : ""}`}
-        >
-          <span>Lock timer</span>
-          <time>
-            {seconds === null ? "--" : String(seconds).padStart(2, "0")}
-          </time>
-        </div>
+        {timer}
       </header>
 
       <aside className="dx-ban-ledger" aria-label="Agent ban history">
@@ -455,7 +514,6 @@ function AgentBanConsole({
 }
 
 export default function DraftBoard({ session, client, connection }) {
-  const [seconds, setSeconds] = useState(null);
   const [message, setMessage] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const [chatReadyAt, setChatReadyAt] = useState(0);
@@ -473,10 +531,29 @@ export default function DraftBoard({ session, client, connection }) {
   const sidePromptPlayedRef = useRef(false);
   const matchFoundRef = useRef(null);
   const matchFoundPlayedRef = useRef(false);
-  const warnedTurnRef = useRef(null);
-  const expiredTurnRef = useRef(null);
+  const chatLogRef = useRef(null);
+  const chatStickToBottomRef = useRef(true);
   const send = (event, payload = {}, callback) =>
     client?.socket.emit(event, { code: session.code, ...payload }, callback);
+  // TurnCountdown owns the 250ms tick and calls these at most once per turn,
+  // so the board itself no longer re-renders four times a second.
+  function expireTurn() {
+    send("expireTurn");
+  }
+  function playTurnWarning() {
+    const warning = agentWarningRef.current;
+    if (!warning || musicMuted) return;
+    warning.currentTime = 0;
+    warning.play().catch(() => { });
+  }
+  // Tracks whether the chat log sits near its bottom edge, so incoming
+  // messages auto-scroll only when the user is following the conversation.
+  function handleChatScroll() {
+    const log = chatLogRef.current;
+    if (!log) return;
+    chatStickToBottomRef.current =
+      log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+  }
   const maps = session.catalog?.maps || [];
   const agents = session.catalog?.agents || [];
   const selectedMaps = session.mapBans || [];
@@ -485,23 +562,6 @@ export default function DraftBoard({ session, client, connection }) {
     session.me?.isCaptain && session.me?.myTeam === session.currentTurn;
   const canPick =
     isMyTurn && (session.phase === "map_ban" || session.phase === "agent_ban");
-
-  useEffect(() => {
-    if (
-      !session.turnEndsAt ||
-      !["map_ban", "agent_ban"].includes(session.phase)
-    ) {
-      setSeconds(null);
-      return undefined;
-    }
-    const tick = () =>
-      setSeconds(
-        Math.max(0, Math.ceil((session.turnEndsAt - Date.now()) / 1000)),
-      );
-    tick();
-    const timer = window.setInterval(tick, 250);
-    return () => window.clearInterval(timer);
-  }, [session.turnEndsAt, session.phase]);
 
   useEffect(() => {
     if (!chatReadyAt) {
@@ -518,17 +578,14 @@ export default function DraftBoard({ session, client, connection }) {
     return () => window.clearInterval(timer);
   }, [chatReadyAt]);
 
-  useEffect(() => {
-    if (
-      seconds !== 0 ||
-      !session.turnEndsAt ||
-      !["map_ban", "agent_ban"].includes(session.phase)
-    )
-      return;
-    if (expiredTurnRef.current === session.turnEndsAt) return;
-    expiredTurnRef.current = session.turnEndsAt;
-    send("expireTurn");
-  }, [seconds, session.turnEndsAt, session.phase]);
+  // Keep the chat log pinned to the newest message unless the user scrolled
+  // up to read history. handleChatScroll maintains the stick flag; the
+  // programmatic scroll below also fires onScroll, which keeps it true.
+  useLayoutEffect(() => {
+    const log = chatLogRef.current;
+    if (!log || !chatStickToBottomRef.current) return;
+    log.scrollTop = log.scrollHeight;
+  }, [session.chat]);
 
   useEffect(() => {
     if (previousPhase.current === session.phase) return;
@@ -571,17 +628,20 @@ export default function DraftBoard({ session, client, connection }) {
     const sidePrompt = new Audio("/music/choose-your-side.mp3?v=43815");
     const matchFound = new Audio("/music/match-found.mp3");
     audio.loop = true;
-    audio.preload = "auto";
+    // preload="none": each clip fetches on first .play() instead of on mount,
+    // so sounds that never fire this session (e.g. match-found) are never
+    // downloaded. play() triggers the load automatically.
+    audio.preload = "none";
     audio.volume = 0.24;
-    agentWarning.preload = "auto";
+    agentWarning.preload = "none";
     agentWarning.volume = 0.72;
-    agentSelection.preload = "auto";
+    agentSelection.preload = "none";
     agentSelection.volume = 0.72;
-    agentBanned.preload = "auto";
+    agentBanned.preload = "none";
     agentBanned.volume = 0.38;
-    sidePrompt.preload = "auto";
+    sidePrompt.preload = "none";
     sidePrompt.volume = 0.76;
-    matchFound.preload = "auto";
+    matchFound.preload = "none";
     matchFound.volume = 0.78;
     musicRef.current = audio;
     agentWarningRef.current = agentWarning;
@@ -701,25 +761,6 @@ export default function DraftBoard({ session, client, connection }) {
     session.me?.myTeam,
     musicMuted,
   ]);
-
-  useEffect(() => {
-    if (
-      !canPick ||
-      session.phase !== "agent_ban" ||
-      seconds === null ||
-      seconds > 10 ||
-      seconds <= 0 ||
-      !session.turnEndsAt
-    )
-      return;
-    if (warnedTurnRef.current === session.turnEndsAt) return;
-
-    warnedTurnRef.current = session.turnEndsAt;
-    const warning = agentWarningRef.current;
-    if (!warning || musicMuted) return;
-    warning.currentTime = 0;
-    warning.play().catch(() => { });
-  }, [canPick, seconds, session.phase, session.turnEndsAt, musicMuted]);
 
   useEffect(() => {
     if (canPick && session.phase === "agent_ban") return;
@@ -1019,12 +1060,11 @@ export default function DraftBoard({ session, client, connection }) {
                     : "The board updates for everyone in real time."}
                 </p>
               </div>
-              {seconds !== null && (
-                <div className="dx-clock">
-                  <small>Turn timer</small>
-                  <time>{String(seconds).padStart(2, "0")}</time>
-                </div>
-              )}
+              <TurnCountdown
+                turnEndsAt={session.turnEndsAt}
+                active={session.phase === "map_ban"}
+                onExpire={expireTurn}
+              />
             </header>
           )}
           {session.phase === "side_pick" && (
@@ -1070,7 +1110,17 @@ export default function DraftBoard({ session, client, connection }) {
               onPick={requestAgentBan}
               onSelect={playAgentSelection}
               session={session}
-              seconds={seconds}
+              timer={
+                <TurnCountdown
+                  variant="agent"
+                  label="Lock timer"
+                  turnEndsAt={session.turnEndsAt}
+                  active
+                  warnBelow={canPick ? 10 : null}
+                  onExpire={expireTurn}
+                  onWarning={playTurnWarning}
+                />
+              }
               status={status}
             />
           )}
@@ -1092,7 +1142,11 @@ export default function DraftBoard({ session, client, connection }) {
             </div>
             <span>{session.chat?.length || 0}/50</span>
           </header>
-          <div className="dx-chat-log">
+          <div
+            className="dx-chat-log"
+            ref={chatLogRef}
+            onScroll={handleChatScroll}
+          >
             {session.chat?.length ? (
               session.chat.map((item) => (
                 <article

@@ -3,7 +3,9 @@ import "../styles/admin.css";
 import { supabaseConfig } from "../lib/supabaseConfig.js";
 
 const TOKEN_KEY = "dx_admin_token";
-const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers", "feedback"];
+const ADMIN_VIEWS = ["overview", "rooms", "pages", "referrers", "feedback", "errors"];
+
+const ERROR_KIND_LABELS = { render: "Render", window: "Script", unhandledrejection: "Async" };
 
 function viewFromHash() {
   if (typeof window === "undefined") return "overview";
@@ -72,6 +74,11 @@ const Icon = {
   star: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="m12 3 2.7 5.6 6.3.9-4.5 4.3 1 6.2-5.5-3-5.5 3 1-6.2L3 9.5l6.3-.9L12 3Z" />
+    </svg>
+  ),
+  alert: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 4 2.8 19.5h18.4L12 4Z" /><path d="M12 10v4" /><path d="M12 17h.01" />
     </svg>
   ),
 };
@@ -198,6 +205,7 @@ export default function AdminPage() {
   const [tick, setTick] = useState(0); // re-renders the "updated Xs ago" label
   const [activeView, setActiveView] = useState(viewFromHash);
   const [feedback, setFeedback] = useState(null);
+  const [errors, setErrors] = useState(null);
 
 
   useEffect(() => {
@@ -242,9 +250,10 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Load the feedback feed when the Feedback view opens (or token changes).
+  // Load the feedback / error feeds when their views open (or token changes).
   useEffect(() => {
     if (token && activeView === "feedback") loadFeedback(token);
+    if (token && activeView === "errors") loadErrors(token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, activeView]);
 
@@ -316,6 +325,24 @@ export default function AdminPage() {
     } catch (_) { /* transient */ }
   }
 
+  async function loadErrors(t) {
+    const cfg = supabaseConfig();
+    if (!cfg) return;
+    try {
+      const res = await fetch(`${cfg.url}/rest/v1/rpc/draftix_admin_errors`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: cfg.key,
+          Authorization: `Bearer ${cfg.key}`,
+        },
+        body: JSON.stringify({ p_token: t }),
+      });
+      if (!res.ok) return; // keep the last good feed; errors surface via stats banner
+      setErrors(await res.json().catch(() => null));
+    } catch (_) { /* transient */ }
+  }
+
   function signIn(event) {
     event.preventDefault();
     const t = input.trim();
@@ -329,6 +356,7 @@ export default function AdminPage() {
     setToken("");
     setStats(null);
     setFeedback(null);
+    setErrors(null);
     setInput("");
   }
 
@@ -351,36 +379,36 @@ export default function AdminPage() {
         </header>
         <main className="ax-login-main">
           <form className="ax-signin" onSubmit={signIn} aria-labelledby="ax-signin-title">
-              <span className="ax-kicker">Operator sign-in</span>
-              <h1 id="ax-signin-title">Admin access</h1>
-              <p className="ax-signin-intro" id="ax-signin-help">Enter your private token to open the Draftix dashboard.</p>
-              <label htmlFor="ax-admin-token">
-                <span>Admin token</span>
-                <div className="ax-token-field">
-                  <input
-                    id="ax-admin-token"
-                    name="admin-token"
-                    type={showToken ? "text" : "password"}
-                    value={input}
-                    onChange={(e) => {
-                      setInput(e.target.value);
-                      if (error) setError("");
-                    }}
-                    placeholder="Paste your admin token"
-                    autoComplete="current-password"
-                    spellCheck={false}
-                    aria-describedby="ax-signin-help"
-                    aria-invalid={Boolean(error)}
-                  />
-                  <button type="button" className="ax-token-toggle" onClick={() => setShowToken((visible) => !visible)} aria-label={showToken ? "Hide admin token" : "Show admin token"}>
-                    {showToken ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </label>
-              <button type="submit" className="ax-button" disabled={!input.trim() || loading} aria-busy={loading}>
-                {loading ? "Verifying access…" : "Open dashboard"}
-              </button>
-              {error ? <p className="ax-error" role="alert" aria-live="polite">{error}</p> : null}
+            <span className="ax-kicker">Operator sign-in</span>
+            <h1 id="ax-signin-title">Admin access</h1>
+            <p className="ax-signin-intro" id="ax-signin-help">Enter your private token to open the Draftix dashboard.</p>
+            <label htmlFor="ax-admin-token">
+              <span>Admin token</span>
+              <div className="ax-token-field">
+                <input
+                  id="ax-admin-token"
+                  name="admin-token"
+                  type={showToken ? "text" : "password"}
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="Paste your admin token"
+                  autoComplete="current-password"
+                  spellCheck={false}
+                  aria-describedby="ax-signin-help"
+                  aria-invalid={Boolean(error)}
+                />
+                <button type="button" className="ax-token-toggle" onClick={() => setShowToken((visible) => !visible)} aria-label={showToken ? "Hide admin token" : "Show admin token"}>
+                  {showToken ? "Hide" : "Show"}
+                </button>
+              </div>
+            </label>
+            <button type="submit" className="ax-button" disabled={!input.trim() || loading} aria-busy={loading}>
+              {loading ? "Verifying access…" : "Open dashboard"}
+            </button>
+            {error ? <p className="ax-error" role="alert" aria-live="polite">{error}</p> : null}
           </form>
         </main>
         <footer className="ax-login-footer">Authorized access only</footer>
@@ -426,6 +454,10 @@ export default function AdminPage() {
             <span className="ax-nav-icon" aria-hidden="true">{Icon.chat}</span>
             Feedback
           </button>
+          <button type="button" className={activeView === "errors" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("errors")} aria-current={activeView === "errors" ? "page" : undefined}>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.alert}</span>
+            Client Errors
+          </button>
         </nav>
         <div className="ax-side-footer">
           <span className="ax-avatar">A</span>
@@ -443,8 +475,8 @@ export default function AdminPage() {
           <div className="ax-topbar-title">
             <span className="ax-topbar-icon" aria-hidden="true">{Icon.clock}</span>
             <div>
-              <h1>{activeView === "overview" ? "Overview" : activeView === "rooms" ? "Draft Rooms" : activeView === "pages" ? "Top Pages" : activeView === "feedback" ? "User Feedback" : "Referrers"}</h1>
-              <p>{activeView === "feedback" ? "Ratings and notes from Draftix players." : "Traffic and usage across Draftix."}</p>
+              <h1>{activeView === "overview" ? "Overview" : activeView === "rooms" ? "Draft Rooms" : activeView === "pages" ? "Top Pages" : activeView === "feedback" ? "User Feedback" : activeView === "errors" ? "Client Errors" : "Referrers"}</h1>
+              <p>{activeView === "feedback" ? "Ratings and notes from Draftix players." : activeView === "errors" ? "Browser crashes reported by the app." : "Traffic and usage across Draftix."}</p>
             </div>
           </div>
           <div className="ax-topbar-tools">
@@ -554,6 +586,68 @@ export default function AdminPage() {
                     </div>
                   ) : (
                     <p className="fb-empty">No feedback submitted yet.</p>
+                  )}
+                </section>
+              </div> : null}
+
+              {activeView === "errors" ? <div className="fb-layout">
+                <aside className="fb-summary ax-panel">
+                  <div className="fb-average">
+                    <span className="fb-average-num">{errors?.today != null ? fmtInt(errors.today) : "—"}</span>
+                    <span className="fb-average-of">errors today</span>
+                  </div>
+                  <dl className="fb-facts">
+                    <div><dt>Total</dt><dd>{fmtInt(errors?.total)}</dd></div>
+                    <div><dt>Today</dt><dd>{fmtInt(errors?.today)}</dd></div>
+                    <div><dt>7 days</dt><dd>{fmtInt(errors?.last7)}</dd></div>
+                  </dl>
+                  {errors?.kinds && Object.keys(errors.kinds).length ? (
+                    <div className="fb-dist err-dist">
+                      <h4>By type</h4>
+                      {["render", "window", "unhandledrejection"].map((kind) => {
+                        const count = Number(errors.kinds[kind] || 0);
+                        const max = Math.max(1, ...Object.values(errors.kinds).map(Number));
+                        return (
+                          <div key={kind} className="fb-dist-row">
+                            <span className="fb-dist-label">{ERROR_KIND_LABELS[kind]}</span>
+                            <span className="fb-dist-bar"><span style={{ width: `${Math.round((count / max) * 100)}%` }} /></span>
+                            <span className="fb-dist-count">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </aside>
+
+                <section className="fb-feed ax-panel" aria-label="Latest client errors">
+                  <h3>
+                    <span className="ax-panel-icon" aria-hidden="true">{Icon.alert}</span>
+                    Latest errors
+                    {errors?.recent?.length ? <span className="ax-panel-note">{errors.recent.length} most recent</span> : null}
+                  </h3>
+                  {errors?.recent && errors.recent.length ? (
+                    <div className="fb-feed-list" tabIndex={0} aria-label="Client error entries, scroll to browse">
+                      {errors.recent.map((entry) => (
+                        <article key={entry.id} className="fb-entry err-entry">
+                          <header className="fb-entry-head">
+                            <span className={`err-kind err-k-${entry.kind}`}>{ERROR_KIND_LABELS[entry.kind] || entry.kind}</span>
+                            <time className="fb-entry-time" title={new Date(entry.createdAt).toLocaleString()}>
+                              {new Date(entry.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            </time>
+                          </header>
+                          <p className="fb-entry-message">{entry.message}</p>
+                          {entry.stack ? (
+                            <details className="err-stack">
+                              <summary>Stack trace</summary>
+                              <pre>{entry.stack}</pre>
+                            </details>
+                          ) : null}
+                          <footer className="fb-entry-foot">on <code>{entry.page}</code>{entry.userAgent ? <> · <code>{entry.userAgent}</code></> : null}</footer>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="fb-empty">No client errors reported yet.</p>
                   )}
                 </section>
               </div> : null}

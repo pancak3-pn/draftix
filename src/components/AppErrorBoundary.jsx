@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { reportRenderError } from "../lib/errorReporter.js";
 
 export default class AppErrorBoundary extends Component {
   constructor(props) {
@@ -12,6 +13,7 @@ export default class AppErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     if (import.meta.env.DEV) console.error("Draftix render failure", error, info);
+    reportRenderError(error, info);
   }
 
   render() {

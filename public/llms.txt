@@ -6,7 +6,7 @@ Draftix lets players create a room, share one room code, assign captains, config
 
 ## Traction
 
-During Draftix's first week after launch, the platform averaged 500+ players daily. Live usage is visible on the landing page.
+Live usage — the number of people currently on the site — is visible on the landing page footer.
 
 ## Primary tools
 

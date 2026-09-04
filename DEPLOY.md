@@ -14,6 +14,20 @@ and production frontend origin you intend to allow in `ALLOWED_ORIGINS`.
 Local development does not require `VITE_SOCKET_URL`; the client uses its own
 origin by default.
 
+### Backend selection
+
+The client supports two draft backends, selected at build time by
+`src/socket/draftSocket.js`:
+
+| Backend | When it is active | Reconnects / resume |
+| --- | --- | --- |
+| Supabase | `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` are set | Automatic — rooms persist in Postgres and rejoining restores roles via the anonymous auth UID |
+| Socket.IO (this section) | Supabase variables absent | Resume tokens stored in `localStorage` re-key a player's seat within the reconnect grace window (see `test/test-resume.js`) |
+
+Both paths expose the same client interface; the UI is unaware of which is
+active. Do not set the Supabase variables if you intend to run the Node
+backend — the Supabase client takes priority when both are configured.
+
 ## 1. Verify the release locally
 
 ```powershell

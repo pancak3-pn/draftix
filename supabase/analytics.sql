@@ -56,7 +56,12 @@ declare
   v_result json;
 begin
   select admin_token into v_stored from draftix_admin_config where id = 1;
-  if v_stored is null or p_token is null or p_token <> v_stored then
+  -- Fail closed while the token is still the shipped placeholder: an
+  -- unrotated token is a publicly-known constant from this repo.
+  if v_stored is null
+     or v_stored = 'CHANGE_ME_replace_with_a_long_random_secret'
+     or p_token is null
+     or p_token <> v_stored then
     raise exception 'Unauthorized' using errcode = '42501';
   end if;
 

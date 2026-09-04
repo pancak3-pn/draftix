@@ -3,6 +3,22 @@ import { getResumeToken, saveResumeToken } from "../state/draftReducer";
 import { createSupabaseDraftClient } from "./supabaseDraftClient";
 import { friendlyDraftError } from "./draftErrors";
 
+/**
+ * Draft transport factory — two supported backends, not a primary + dead code:
+ *
+ * 1. Supabase (preferred): active when VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY
+ *    are set. Rooms live in Postgres; realtime channels push updates. Reconnects
+ *    resume automatically because draftix_join_room upserts by the persistent
+ *    anonymous auth UID — no resume token needed.
+ * 2. Socket.IO (self-hosted fallback): the Node server in server.js, deployed per
+ *    DEPLOY.md ("Recommended split deployment"). Resume tokens are THIS path's
+ *    reconnect mechanism: the server keeps a player's seat tied to their token
+ *    for a grace window, so a refresh or Wi-Fi drop restores host/captain/team
+ *    roles. See test/test-resume.js.
+ *
+ * Both clients expose the same surface ({ socket, create, join, close }) and the
+ * UI drives them identically via client.socket.emit(event, { code, ...payload }).
+ */
 export function createDraftSocket({ onState, onChat, onConnection, onError }) {
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim();
   const supabaseKey = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();

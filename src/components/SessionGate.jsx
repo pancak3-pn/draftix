@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createDraftSocket } from "../socket/draftSocket";
 import {
   draftReducer,
@@ -9,6 +10,8 @@ import {
 import DraftBoard from "./DraftBoard.jsx";
 import AppNav from "./AppNav.jsx";
 import SiteHeader from "./SiteHeader.jsx";
+// Draft-room styles ride this lazy chunk instead of the entry bundle.
+import "../styles/app-redesign.css";
 
 function prepareTeamLogo(file) {
   return new Promise((resolve, reject) => {
@@ -393,15 +396,17 @@ function Lobby({ session, client, connection }) {
       (result) => {
         if (!result?.ok) return;
         if (event === "setTeamNames")
-          showSaveConfirmation(
-            "Team identity saved",
-            "Names are synced to the room",
-          );
+          showNotice({
+            variant: "save",
+            title: "Team identity saved",
+            detail: "Names are synced to the room",
+          });
         if (event === "setGameSettings")
-          showSaveConfirmation(
-            "Draft rules saved",
-            "The next draft will use these rules",
-          );
+          showNotice({
+            variant: "save",
+            title: "Draft rules saved",
+            detail: "The next draft will use these rules",
+          });
       },
     );
   };
@@ -409,54 +414,41 @@ function Lobby({ session, client, connection }) {
     session.captainNames?.A && session.captainNames?.B,
   );
 
-  function showSaveConfirmation(title, detail) {
-    document.querySelector(".dx-save-notice")?.remove();
-    const notice = document.createElement("div");
-    notice.className = "dx-copy-notice dx-save-notice";
-    notice.setAttribute("role", "status");
-    notice.setAttribute("aria-live", "polite");
-    notice.innerHTML = `<i aria-hidden="true">✓</i><span><strong>${title}</strong><small>${detail}</small></span>`;
-    document.body.appendChild(notice);
-    window.requestAnimationFrame(() => notice.classList.add("is-visible"));
-    window.setTimeout(() => notice.classList.remove("is-visible"), 1900);
-    window.setTimeout(() => notice.remove(), 2250);
+  const [notice, setNotice] = useState(null);
+  const [noticeShown, setNoticeShown] = useState(false);
+
+  function showNotice({ title, detail, variant }) {
+    setNoticeShown(false);
+    setNotice({ title, detail, variant });
   }
 
+  // Render the toast without .is-visible first so the CSS entrance
+  // transition always plays, including when a new notice replaces one.
   useEffect(() => {
-    if (settings.agentBanCount > maxAgentBans)
-      setSettings((current) => ({ ...current, agentBanCount: maxAgentBans }));
-    const input = document.querySelector(
-      '.dx-settings-grid input[type="number"]',
-    );
-    if (input) {
-      input.max = String(maxAgentBans);
-      input.step = "2";
-      input.title = `Maximum ${maxAgentBans} bans from ${playableAgentCount} available agents`;
-      input.closest(".dx-field")?.setAttribute("data-max", String(maxAgentBans));
-    }
-  }, [maxAgentBans, playableAgentCount, settings.agentBanCount]);
+    if (!notice) return undefined;
+    const showTimer = window.setTimeout(() => setNoticeShown(true), 30);
+    return () => window.clearTimeout(showTimer);
+  }, [notice]);
 
+  // Hold the toast, fade it out, then unmount once the fade completes.
   useEffect(() => {
-    const controls = document.querySelector(".dx-host-controls");
-    const buttons = controls?.querySelectorAll(".dx-text-button");
-    const dirtyStates = [teamNamesDirty, draftRulesDirty];
-    buttons?.forEach((button, index) => {
-      const dirty = dirtyStates[index];
-      button.classList.toggle("is-dirty", dirty);
-      button.classList.toggle("is-saved", !dirty);
-      button.textContent = dirty ? "Save changes" : "Saved";
-      button.setAttribute(
-        "aria-label",
-        dirty
-          ? `Save ${index === 0 ? "team name" : "draft rule"} changes`
-          : `${index === 0 ? "Team names" : "Draft rules"} saved`,
-      );
-    });
-    controls?.classList.toggle(
-      "has-unsaved-changes",
-      teamNamesDirty || draftRulesDirty,
+    if (!notice || !noticeShown) return undefined;
+    const hideTimer = window.setTimeout(() => setNoticeShown(false), 1900);
+    const removeTimer = window.setTimeout(() => setNotice(null), 2300);
+    return () => {
+      window.clearTimeout(hideTimer);
+      window.clearTimeout(removeTimer);
+    };
+  }, [notice, noticeShown]);
+
+  // Keep the agent-ban stepper inside the catalog-derived limit.
+  useEffect(() => {
+    setSettings((current) =>
+      current.agentBanCount > maxAgentBans
+        ? { ...current, agentBanCount: maxAgentBans }
+        : current,
     );
-  }, [teamNamesDirty, draftRulesDirty]);
+  }, [maxAgentBans, settings.agentBanCount]);
 
   useEffect(() => {
     window.dispatchEvent(
@@ -478,16 +470,10 @@ function Lobby({ session, client, connection }) {
     const url = `${window.location.origin}/draft?code=${session.code}`;
     try {
       await navigator.clipboard.writeText(url);
-      document.querySelector(".dx-copy-notice")?.remove();
-      const notice = document.createElement("div");
-      notice.className = "dx-copy-notice";
-      notice.setAttribute("role", "status");
-      notice.setAttribute("aria-live", "polite");
-      notice.innerHTML = `<i aria-hidden="true">✓</i><span><strong>Invite copied</strong><small>Room ${session.code} is ready to share</small></span>`;
-      document.body.appendChild(notice);
-      window.requestAnimationFrame(() => notice.classList.add("is-visible"));
-      window.setTimeout(() => notice.classList.remove("is-visible"), 1900);
-      window.setTimeout(() => notice.remove(), 2250);
+      showNotice({
+        title: "Invite copied",
+        detail: `Room ${session.code} is ready to share`,
+      });
     } catch {
       window.prompt("Copy this room link:", url);
     }
@@ -527,7 +513,9 @@ function Lobby({ session, client, connection }) {
             <span>Click to copy link</span>
           </button>
           {session.me?.isHost && (
-            <div className="dx-host-controls">
+            <div
+              className={`dx-host-controls${teamNamesDirty || draftRulesDirty ? " has-unsaved-changes" : ""}`}
+            >
               <div className="dx-control-group">
                 <h2>
                   <span>01</span> Team identity
@@ -555,11 +543,12 @@ function Lobby({ session, client, connection }) {
                   </label>
                 </div>
                 <button
-                  className="dx-text-button"
+                  className={`dx-text-button${teamNamesDirty ? " is-dirty" : " is-saved"}`}
                   aria-live="polite"
+                  aria-label={teamNamesDirty ? "Save team name changes" : "Team names saved"}
                   onClick={() => send("setTeamNames", names)}
                 >
-                  Apply team names
+                  {teamNamesDirty ? "Save changes" : "Saved"}
                 </button>
               </div>
               <div className="dx-control-group">
@@ -584,7 +573,10 @@ function Lobby({ session, client, connection }) {
                       <option value="custom">Custom</option>
                     </select>
                   </label>
-                  <div className="dx-field dx-stepper-field">
+                  <div
+                    className="dx-field dx-stepper-field"
+                    data-max={maxAgentBans}
+                  >
                     <span>Agent bans</span>
                     <div className="dx-stepper">
                       <button
@@ -603,7 +595,9 @@ function Lobby({ session, client, connection }) {
                       <input
                         type="number"
                         min="0"
-                        max="12"
+                        max={maxAgentBans}
+                        step="2"
+                        title={`Maximum ${maxAgentBans} bans from ${playableAgentCount} available agents`}
                         aria-label="Agent bans"
                         value={settings.agentBanCount}
                         onChange={(event) =>
@@ -616,11 +610,11 @@ function Lobby({ session, client, connection }) {
                       <button
                         type="button"
                         aria-label="More agent bans"
-                        disabled={settings.agentBanCount >= 12}
+                        disabled={settings.agentBanCount >= maxAgentBans}
                         onClick={() =>
                           setSettings((current) => ({
                             ...current,
-                            agentBanCount: Math.min(12, current.agentBanCount + 2),
+                            agentBanCount: Math.min(maxAgentBans, current.agentBanCount + 2),
                           }))
                         }
                       >
@@ -675,11 +669,12 @@ function Lobby({ session, client, connection }) {
                   </label>
                 </div>
                 <button
-                  className="dx-text-button"
+                  className={`dx-text-button${draftRulesDirty ? " is-dirty" : " is-saved"}`}
                   aria-live="polite"
+                  aria-label={draftRulesDirty ? "Save draft rule changes" : "Draft rules saved"}
                   onClick={() => send("setGameSettings", settings)}
                 >
-                  Apply draft rules
+                  {draftRulesDirty ? "Save changes" : "Saved"}
                 </button>
               </div>
             </div>
@@ -698,6 +693,21 @@ function Lobby({ session, client, connection }) {
         </section>
         <TeamPanel side="B" session={session} send={send} />
       </div>
+      {notice &&
+        createPortal(
+          <div
+            className={`dx-copy-notice${notice.variant === "save" ? " dx-save-notice" : ""}${noticeShown ? " is-visible" : ""}`}
+            role="status"
+            aria-live="polite"
+          >
+            <i aria-hidden="true">✓</i>
+            <span>
+              <strong>{notice.title}</strong>
+              <small>{notice.detail}</small>
+            </span>
+          </div>,
+          document.body,
+        )}
     </main>
   );
 }

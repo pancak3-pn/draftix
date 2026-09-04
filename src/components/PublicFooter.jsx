@@ -43,7 +43,7 @@ function LivePresence() {
       } catch (_) { }
     };
     poll();
-    const timer = window.setInterval(poll, 10_000);
+    const timer = window.setInterval(poll, 30_000);
     return () => { alive = false; window.clearInterval(timer); };
   }, []);
   if (live === null) return null;
