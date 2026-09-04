@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight } from "@phosphor-icons/react/ArrowRight";
+import { ArrowsClockwise } from "@phosphor-icons/react/ArrowsClockwise";
+import { Check } from "@phosphor-icons/react/Check";
+import { Copy } from "@phosphor-icons/react/Copy";
+import { ShieldCheck } from "@phosphor-icons/react/ShieldCheck";
+import { Trophy } from "@phosphor-icons/react/Trophy";
 import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
-import { clearMatchResult, createTournament, getTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore } from "../lib/tournaments.js";
+import { clearMatchResult, createTournament, getTournament, listMyTournaments, migrateTournamentStorage, registerMyTournament, removeMyTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore } from "../lib/tournaments.js";
 import { navigate } from "../lib/spaRouter.js";
 
 const sizes = Array.from({ length: 14 }, (_, index) => index + 3);
@@ -11,6 +17,8 @@ const formats = [
   { value: "round_robin", label: "Round robin" },
   { value: "swiss", label: "Swiss" },
 ];
+const formatLabels = { single_elimination: "Single elimination", double_elimination: "Double elimination", round_robin: "Round robin", swiss: "Swiss" };
+
 function roundName(round, finalRound) {
   const remaining = finalRound - round;
   if (remaining === 0) return "Final";
@@ -37,7 +45,67 @@ function copyText(text, setCopied) {
   });
 }
 
+function MyTournaments() {
+  // Server-side status per slug. Fetches are staggered so the hub never
+  // fires the whole registry at Supabase in one burst, and entries whose
+  // localStorage metadata is stale (migrated stubs with no name) get
+  // refreshed from draftix_tournament_state.
+  const [entries, setEntries] = useState(() => listMyTournaments());
+  const [statuses, setStatuses] = useState(() => ({}));
+
+  useEffect(() => {
+    if (!entries.length) return undefined;
+    let cancelled = false;
+    const timers = [];
+    entries.forEach((entry, index) => {
+      timers.push(window.setTimeout(async () => {
+        try {
+          const state = await getTournament(entry.slug, entry.token);
+          if (cancelled || !state) return;
+          // Self-heal registry metadata (migrated stubs, renamed tournaments).
+          registerMyTournament({ slug: entry.slug, name: state.name, token: entry.token, format: state.format, teamCount: state.teamCount, createdAt: state.createdAt ? Date.parse(state.createdAt) : 0 });
+          if (state.canManage) setStatuses((current) => ({ ...current, [entry.slug]: state.status }));
+          else setStatuses((current) => ({ ...current, [entry.slug]: "unavailable" }));
+        } catch {
+          if (!cancelled) setStatuses((current) => ({ ...current, [entry.slug]: "unavailable" }));
+        }
+      }, index * 120));
+    });
+    return () => { cancelled = true; timers.forEach((timer) => window.clearTimeout(timer)); };
+  }, [entries]);
+
+  function forget(slug) {
+    removeMyTournament(slug);
+    setEntries((current) => current.filter((entry) => entry.slug !== slug));
+  }
+
+  if (!entries.length) return <section className="my-tournaments" aria-label="My tournaments">
+    <header><strong>My tournaments</strong><span>Organizer access saved on this device</span></header>
+    <p className="my-tournaments-empty">No tournaments yet — create your first bracket and it will appear here for quick access.</p>
+  </section>;
+  return <section className="my-tournaments" aria-label="My tournaments">
+    <header><strong>My tournaments</strong><span>Organizer access saved on this device</span></header>
+    <ul>
+      {entries.map((entry) => {
+        const status = statuses[entry.slug] || "loading";
+        return <li key={entry.slug}>
+          <div className="my-tournament-info">
+            <a className="my-tournament-name" href={`/t/${entry.slug}?key=${encodeURIComponent(entry.token)}`}>{entry.name || entry.slug}</a>
+            <span className="my-tournament-meta">
+              {entry.format ? `${formatLabels[entry.format] || entry.format} · ` : ""}{entry.teamCount ? `${entry.teamCount} teams` : ""}
+            </span>
+          </div>
+          <span className={`tournament-status ${status === "loading" ? "" : status}`}>{status === "loading" ? "Checking…" : status === "unavailable" ? "Unavailable" : status}</span>
+          <a className="my-tournament-manage" href={`/t/${entry.slug}?key=${encodeURIComponent(entry.token)}`}>{statuses[entry.slug] === "unavailable" ? "View" : "Manage"}</a>
+          <button type="button" className="my-tournament-remove" onClick={() => forget(entry.slug)} aria-label={`Forget ${entry.name || entry.slug}`}>Forget</button>
+        </li>;
+      })}
+    </ul>
+  </section >;
+}
+
 export function TournamentHubPage() {
+  const [activeHubTab, setActiveHubTab] = useState("create");
   const [size, setSize] = useState(8);
   const [name, setName] = useState("");
   const [bestOf, setBestOf] = useState(3);
@@ -51,6 +119,17 @@ export function TournamentHubPage() {
     setTeams((current) => Array.from({ length: next }, (_, index) => current[index] || `Team ${index + 1}`));
   }
 
+  function shuffleTeams() {
+    setTeams((current) => {
+      const shuffled = [...current];
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+      }
+      return shuffled;
+    });
+  }
+
   async function submit(event) {
     event.preventDefault();
     setError("");
@@ -58,6 +137,7 @@ export function TournamentHubPage() {
     try {
       const result = await createTournament(name, teams.map((team) => team.trim()), bestOf, format);
       saveTournamentToken(result.slug, result.organizerToken);
+      registerMyTournament({ slug: result.slug, name, token: result.organizerToken, format, teamCount: size });
       navigate(`/t/${result.slug}`);
     } catch (requestError) {
       setError(requestError.message);
@@ -69,23 +149,40 @@ export function TournamentHubPage() {
     <SiteHeader />
     <main className="tournament-create-shell">
       <header className="tournament-intro">
+        <span>Tournament builder</span>
         <h1>Build the bracket.</h1>
         <p>Create a live tournament bracket — single or double elimination, round robin, or Swiss — and share one public link.</p>
       </header>
-      <form className="tournament-form" onSubmit={submit}>
-        <div className="tournament-form-head"><strong>Tournament setup</strong></div>
-        <label>Tournament name<input value={name} maxLength="80" required placeholder="Community Cup" onChange={(event) => setName(event.target.value)} /></label>
-        <div className="tournament-options">
-          <label>Team count<select value={size} onChange={(event) => changeSize(Number(event.target.value))}>{sizes.map((option) => <option key={option} value={option}>{option} teams</option>)}</select></label>
-          <label>Match format<select value={bestOf} onChange={(event) => setBestOf(Number(event.target.value))}><option value="1">Best of 1</option><option value="3">Best of 3</option><option value="5">Best of 5</option></select></label>
-          <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-        </div>
-        <div className="tournament-team-fields">
-          {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2, "0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
-        </div>
+      <section className="tournament-hub-workspace" aria-label="Tournament organizer">
+        <nav className="tournament-hub-tabs" aria-label="Tournament organizer views">
+          <button type="button" className={activeHubTab === "create" ? "is-active" : ""} aria-current={activeHubTab === "create" ? "page" : undefined} onClick={() => setActiveHubTab("create")}>Create tournament</button>
+          <button type="button" className={activeHubTab === "history" ? "is-active" : ""} aria-current={activeHubTab === "history" ? "page" : undefined} onClick={() => setActiveHubTab("history")}>History</button>
+        </nav>
+        <div className="tournament-hub-panel">
+        {activeHubTab === "create" ? <form className="tournament-form" onSubmit={submit}>
+        <section className="tournament-form-section" aria-labelledby="tournament-details-heading">
+          <header className="tournament-section-head"><span>01</span><div><h2 id="tournament-details-heading">Tournament details</h2><p>Name the event and choose how matches will run.</p></div></header>
+          <div className="tournament-basics-grid">
+            <label className="tournament-name-field">Tournament name<input value={name} maxLength="80" required placeholder="Community Cup" onChange={(event) => setName(event.target.value)} /></label>
+            <label>Team count<select value={size} onChange={(event) => changeSize(Number(event.target.value))}>{sizes.map((option) => <option key={option} value={option}>{option} teams</option>)}</select></label>
+            <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+            <label>Series length<select value={bestOf} onChange={(event) => setBestOf(Number(event.target.value))}><option value="1">Best of 1</option><option value="3">Best of 3</option><option value="5">Best of 5</option><option value="7">Best of 7</option></select></label>
+          </div>
+        </section>
+        <section className="tournament-form-section" aria-labelledby="tournament-teams-heading">
+          <header className="tournament-section-head"><span>02</span><div><h2 id="tournament-teams-heading">Seed the teams</h2><p>Seeds determine the opening matchups.</p></div><button className="tournament-shuffle" type="button" onClick={shuffleTeams}><ArrowsClockwise aria-hidden="true" />Shuffle</button></header>
+          <div className="tournament-team-fields">
+            {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2, "0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
+          </div>
+        </section>
         {error && <p className="tournament-error" role="alert">{error}</p>}
-        <button className="tournament-submit" type="submit" disabled={busy}>{busy ? "Creating bracket…" : "Create tournament"}</button>
-      </form>
+        <footer className="tournament-form-actions">
+          <p><strong>{size} teams</strong><span>{formatLabels[format]} · Best of {bestOf}</span></p>
+          <button className="tournament-submit" type="submit" disabled={busy}>{busy ? "Creating bracket…" : <>Create tournament<ArrowRight aria-hidden="true" weight="bold" /></>}</button>
+        </footer>
+        </form> : <MyTournaments />}
+        </div>
+      </section>
     </main>
     <PublicFooter />
   </div>;
@@ -198,6 +295,8 @@ function BracketConnectors({ boardRef, matches }) {
 }
 
 export default function TournamentPage({ slug }) {
+  // One-time upgrade of any pre-persistence sessionStorage tokens.
+  useEffect(() => { migrateTournamentStorage(); }, []);
   const queryToken = new URLSearchParams(window.location.search).get("key") || "";
   const [token] = useState(() => queryToken || tournamentToken(slug));
   const [data, setData] = useState(null);
@@ -219,6 +318,13 @@ export default function TournamentPage({ slug }) {
   }, [load, queryToken, slug]);
   useEffect(() => data?.id ? subscribeToTournament(data.id, load) : undefined, [data?.id, load]);
   useEffect(() => { if (data?.name) document.title = `${data.name} Bracket | Draftix`; }, [data?.name]);
+  // Keep the "My tournaments" registry in sync while the organizer is here:
+  // captures organizer-link visits on this machine and refreshes names on
+  // every bracket load (self-heal, skips writes when nothing changed).
+  useEffect(() => {
+    if (!token || !data?.name || !data.canManage) return;
+    registerMyTournament({ slug, name: data.name, token, format: data.format, teamCount: data.teamCount, createdAt: data.createdAt ? Date.parse(data.createdAt) : 0 });
+  }, [slug, token, data?.name, data?.canManage, data?.format, data?.teamCount, data?.createdAt]);
 
   const teams = useMemo(() => new Map((data?.teams || []).map((team) => [team.id, team])), [data?.teams]);
   const rounds = useMemo(() => {
@@ -248,7 +354,7 @@ export default function TournamentPage({ slug }) {
 
   if (!data) return <div className="sp-page tournament-page"><SiteHeader /><main className="tournament-loading"><p>{error || "Loading bracket…"}</p>{error && <a href="/tournaments">Create a tournament</a>}</main></div>;
   const maxRound = Math.max(...rounds.map(([round]) => round));
-  const formatLabel = { single_elimination: "Single elimination", double_elimination: "Double elimination", round_robin: "Round robin", swiss: "Swiss" }[data.format] || data.format;
+  const formatLabel = formatLabels[data.format] || data.format;
   const champion = teams.get(data.championTeamId);
   // Final result (elimination formats): the bracket final is the match with no next match
   const finalMatch = (data.format === "single_elimination" || data.format === "double_elimination")
@@ -265,8 +371,9 @@ export default function TournamentPage({ slug }) {
       <header className="tournament-view-head">
         <div><span className={`tournament-status ${data.status}`}>{data.status}</span><h1>{data.name}</h1><p>{data.teamCount} teams · {formatLabel} · Best of {data.bestOf}</p></div>
         <div className="tournament-share-actions">
-          <button type="button" onClick={() => copyText(shareUrl, setCopied)}>{copied ? "Copied" : "Copy public link"}</button>
-          {data.canManage && <button type="button" onClick={() => copyText(manageUrl, setCopied)}>Copy organizer link</button>}
+          <button type="button" onClick={() => copyText(shareUrl, setCopied)}>{copied ? <Check aria-hidden="true" weight="bold" /> : <Copy aria-hidden="true" />}<span>{copied ? "Copied" : "Public link"}</span></button>
+          {data.canManage && <button type="button" onClick={() => copyText(manageUrl, setCopied)}><ShieldCheck aria-hidden="true" /><span>Organizer link</span></button>}
+          {data.canManage && <a className="launch-drafting" href="/draft" target="_blank" rel="noreferrer" aria-label="Open the Draftix drafting room in a new tab">Launch drafting<ArrowRight aria-hidden="true" weight="bold" /></a>}
         </div>
       </header>
       {data.canManage && <p className="organizer-banner"><strong>Organizer mode</strong> Select a winner, enter the score, then save.</p>}
@@ -274,10 +381,7 @@ export default function TournamentPage({ slug }) {
       {champion && <section className="champion-banner" aria-label="Tournament champion">
         <div className="champion-banner-year" aria-hidden="true">
           <span>{new Date().getFullYear().toString().slice(0, 2)}</span>
-          <svg className="champion-banner-mark" viewBox="0 0 64 64" fill="currentColor">
-            <path d="M8 4 L32 25 L56 4 L45 4 L32 15 L19 4 Z" />
-            <path d="M8 60 L32 39 L56 60 L45 60 L32 49 L19 60 Z" />
-          </svg>
+          <Trophy className="champion-banner-mark" aria-hidden="true" weight="duotone" />
           <span>{new Date().getFullYear().toString().slice(2)}</span>
         </div>
         <h2 className="champion-banner-title">{data.name}</h2>
@@ -296,15 +400,18 @@ export default function TournamentPage({ slug }) {
           </tbody>
         </table>
       </section>}
-      <div className="bracket-scroll" aria-label={`${data.name} tournament bracket`}>
-        <div className="bracket-board" ref={boardRef}>
-          <BracketConnectors boardRef={boardRef} matches={data.matches} />
-          {rounds.map(([round, matches]) => <section className="bracket-round" key={round}>
-            <header><span>{String(round).padStart(2, "0")}</span><h2>{roundLabel(round, maxRound, data.format, data.totalRounds)}</h2></header>
-            <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
-          </section>)}
+      <section className="bracket-panel" aria-labelledby="bracket-heading">
+        <header className="bracket-panel-head"><div><h2 id="bracket-heading">Bracket</h2><p>{rounds.length} rounds · {data.matches.length} matches</p></div></header>
+        <div className="bracket-scroll" aria-label={`${data.name} tournament bracket`}>
+          <div className="bracket-board" ref={boardRef}>
+            <BracketConnectors boardRef={boardRef} matches={data.matches} />
+            {rounds.map(([round, matches]) => <section className="bracket-round" key={round}>
+              <header><span>{String(round).padStart(2, "0")}</span><h2>{roundLabel(round, maxRound, data.format, data.totalRounds)}</h2></header>
+              <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+            </section>)}
+          </div>
         </div>
-      </div>
+      </section>
     </main>
     <PublicFooter />
   </div>;

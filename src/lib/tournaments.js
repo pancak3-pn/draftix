@@ -14,7 +14,7 @@ function friendlyTournamentError(error) {
   if (message.includes("next match")) return "Clear the later match result before changing this winner.";
   if (message.includes("final series")) return "Enter the final series score (e.g. 3–1 in a best of 5). Partial scores can't be saved.";
   if (message.includes("clear later swiss")) return "Clear the later Swiss rounds before changing this result.";
-          if (message.includes("not ready")) return "Both teams must be decided before recording this match.";
+  if (message.includes("not ready")) return "Both teams must be decided before recording this match.";
   if (message.includes("already decided")) return "This match is already decided. Clear it first.";
   if (message.includes("valid live score")) return "Enter a valid live score (within the match format).";
   if (message.includes("non-tied score") || message.includes("higher score")) return "The selected winner must have the higher score.";
@@ -48,12 +48,110 @@ async function rpc(name, params, auth = false) {
   }
 }
 
+const TOKEN_PREFIX = "draftix:tournament:";
+const REGISTRY_KEY = "draftix:my-tournaments";
+const REGISTRY_LIMIT = 50;
+
+function safeGet(store, key) {
+  try { return store.getItem(key); } catch { return null; }
+}
+
+function safeSet(store, key, value) {
+  try { store.setItem(key, value); return true; } catch { return false; }
+}
+
+function safeRemove(store, key) {
+  try { store.removeItem(key); } catch { /* ignore */ }
+}
+
 export function tournamentToken(slug) {
-  return sessionStorage.getItem(`draftix:tournament:${slug}`) || "";
+  return safeGet(localStorage, `${TOKEN_PREFIX}${slug}`) || safeGet(sessionStorage, `${TOKEN_PREFIX}${slug}`) || "";
 }
 
 export function saveTournamentToken(slug, token) {
-  if (slug && token) sessionStorage.setItem(`draftix:tournament:${slug}`, token);
+  if (slug && token) {
+    if (safeSet(localStorage, `${TOKEN_PREFIX}${slug}`, token)) safeRemove(sessionStorage, `${TOKEN_PREFIX}${slug}`);
+  }
+}
+
+function readRegistry() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(REGISTRY_KEY) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((entry) => entry && typeof entry.slug === "string" && typeof entry.token === "string");
+  } catch {
+    return [];
+  }
+}
+
+function writeRegistry(entries) {
+  safeSet(localStorage, REGISTRY_KEY, JSON.stringify(entries.slice(0, REGISTRY_LIMIT)));
+}
+
+export function listMyTournaments() {
+  return readRegistry().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+export function registerMyTournament({ slug, name = "", token = "", format = "", teamCount = 0, createdAt = 0 }) {
+  if (!slug || !token) return;
+  const registry = readRegistry();
+  const previous = registry.find((entry) => entry.slug === slug);
+  const entry = {
+    slug,
+    name: name || previous?.name || "",
+    token,
+    format: format || previous?.format || "",
+    teamCount: teamCount || previous?.teamCount || 0,
+    createdAt: previous?.createdAt || createdAt || Date.now(),
+  };
+  // Callers run this on every bracket load (including the 30s fallback poll),
+  // so skip the write when nothing actually changed.
+  const unchanged = previous
+    && previous.name === entry.name
+    && previous.token === entry.token
+    && previous.format === entry.format
+    && previous.teamCount === entry.teamCount
+    && previous.createdAt === entry.createdAt;
+  if (unchanged) return;
+  writeRegistry([entry, ...registry.filter((item) => item.slug !== slug)]);
+  saveTournamentToken(slug, token);
+}
+
+export function removeMyTournament(slug) {
+  writeRegistry(readRegistry().filter((entry) => entry.slug !== slug));
+  safeRemove(localStorage, `${TOKEN_PREFIX}${slug}`);
+  safeRemove(sessionStorage, `${TOKEN_PREFIX}${slug}`);
+}
+
+// One-time rescue: copy any organizer tokens still living in sessionStorage
+// (pre-persistence tournaments whose tab is still open) into the registry.
+// Tokens from already-closed tabs are unrecoverable — the server only keeps
+// a hash — but this fixes the footgun for every still-open session.
+export function migrateTournamentStorage() {
+  try {
+    const rescued = [];
+    for (let index = 0; index < sessionStorage.length; index += 1) {
+      const key = sessionStorage.key(index);
+      if (!key || !key.startsWith(TOKEN_PREFIX)) continue;
+      const slug = key.slice(TOKEN_PREFIX.length);
+      const token = safeGet(sessionStorage, key);
+      if (!slug || !token) continue;
+      safeSet(localStorage, key, token);
+      rescued.push({ slug, token });
+    }
+    if (!rescued.length) return;
+    const registry = readRegistry();
+    for (const { slug, token } of rescued) {
+      if (registry.some((entry) => entry.slug === slug)) continue;
+      // Stub entry: createdAt 0 means "unknown" — the hub's status fetch
+      // self-heals name/format/teamCount and adopts the server-side
+      // creation date, and unknown-age entries sort to the bottom.
+      registry.push({ slug, name: "", token, format: "", teamCount: 0, createdAt: 0 });
+    }
+    writeRegistry(registry);
+  } catch {
+    // Storage unavailable (private mode etc.) — feature no-ops.
+  }
 }
 
 export const createTournament = (name, teams, bestOf, format = "single_elimination") =>
@@ -72,7 +170,17 @@ export const updateSeriesScore = (slug, token, matchId, scoreA, scoreB) =>
   rpc("draftix_update_series_score", { p_slug: slug, p_token: token, p_match_id: matchId, p_score_a: scoreA, p_score_b: scoreB }, true);
 
 export function subscribeToTournament(tournamentId, onChange) {
-  if (!tournamentId) return () => {};
-  const timer = window.setInterval(onChange, 5000);
-  return () => window.clearInterval(timer);
+  if (!tournamentId) return () => { };
+  // Safety net: the database trigger broadcast is instant, but a slow poll
+  // covers dropped sockets and self-hosted setups without realtime.
+  const fallback = window.setInterval(onChange, 30_000);
+  if (!supabase) return () => window.clearInterval(fallback);
+  const channel = supabase
+    .channel(`tournament:${tournamentId}`)
+    .on("broadcast", { event: "tournament_change" }, () => onChange())
+    .subscribe();
+  return () => {
+    window.clearInterval(fallback);
+    void supabase.removeChannel(channel);
+  };
 }

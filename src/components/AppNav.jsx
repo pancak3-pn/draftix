@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ArrowRight, CaretDown } from "@phosphor-icons/react";
 
 const variants = {
   landing: { element: "nav", shell: "dr-nav", brand: "dr-brand", links: "dr-nav-links", menu: "dr-menu" },
@@ -42,14 +41,14 @@ export default function AppNav({ variant = "support", homeHref = "/", links = []
       <div id={menuId} className={`site-nav-links ${config.links || ""} ${open ? "is-open" : ""}`} role={variant === "support" ? "navigation" : undefined} aria-label={variant === "support" ? "Page navigation" : undefined}>
         {links.map(({ label, children, ...link }) => children?.length
           ? <details className="nav-tools" key={`menu-${label}`}>
-              <summary><span>{label}</span><CaretDown aria-hidden="true" weight="bold" /></summary>
+              <summary><span>{label}</span><span className="nav-caret" aria-hidden="true" /></summary>
               <div className="nav-tools-menu">
                 {children.map((item) => <a href={item.href} key={item.href} onClick={close}>{item.label}</a>)}
               </div>
             </details>
           : <a {...link} key={`${link.href}-${label}`} onClick={close}>
               <span>{label}</span>
-              {link.className?.includes("dr-nav-cta") && <ArrowRight aria-hidden="true" weight="bold" />}
+              {link.className?.includes("dr-nav-cta") && <span className="nav-action-arrow" aria-hidden="true">→</span>}
             </a>)}
       </div>
     </>}
