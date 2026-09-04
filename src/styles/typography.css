@@ -774,6 +774,7 @@ small {
   }
 
   .site-nav-public .site-nav-menu {
+    margin-left: auto;
     border-color: rgba(15, 25, 35, .18);
     background: #fff;
   }
@@ -782,11 +783,28 @@ small {
     background: #0f1923;
   }
 
+  /* The shared ".site-nav .site-nav-links { display: flex }" inline rule
+     (0-2-0, later sheet) would keep the mobile dropdown permanently visible;
+     re-assert the burger-controlled toggle at higher specificity. */
+  .site-nav.site-nav-public .dr-nav-links {
+    display: none;
+  }
+
+  .site-nav.site-nav-public .dr-nav-links.is-open {
+    display: flex;
+  }
+
   .site-nav-public .dr-nav-links,
   .site-nav-public .dr-nav-links.is-open {
+    /* Re-assert absolute: the shared ".site-nav-public .site-nav-links
+       { position: relative }" layering rule would otherwise turn this
+       dropdown into an in-flow flex child of the 66px sticky bar, which
+       centers it vertically and clips the first items above the viewport. */
+    position: absolute;
     top: 65px;
     right: 10px;
     left: 10px;
+    margin: 0;
     border-color: rgba(15, 25, 35, .16) !important;
     background: #f3efe8 !important;
     box-shadow: 0 18px 40px rgba(15, 25, 35, .14);

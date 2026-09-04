@@ -566,7 +566,7 @@
 @media (max-width:560px) {
   .dr-brand img { width:28px; height:28px; }
   .dr-hero-label { margin-bottom:24px; }
-  .dr-hero h1 { font-size:clamp(3.25rem,16vw,4.8rem); }
+  .dr-hero h1 { font-size:clamp(2.6rem,13vw,4.3rem); }
   .dr-hero-copy > p { margin-top:24px; }
   .dr-actions { display:grid; margin-top:26px; }
   .dr-hero-visual { height:340px; }
@@ -721,7 +721,7 @@
 }
 
 @media (max-width:560px) {
-  .dr-site > .dr-hero h1 { font-size:clamp(3.25rem,16vw,4.8rem); }
+  .dr-site > .dr-hero h1 { font-size:clamp(2.6rem,13vw,4.3rem); }
   .dr-site > .dr-hero .dr-hero-visual { height:340px; }
 }
 
