@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 import { supabaseConfig } from "../lib/supabaseConfig.js";
@@ -14,11 +14,30 @@ const RATING_LABELS = {
   5: "Love it",
 };
 
+const MIN_RATING = 1;
+const MAX_RATING = 5;
+
 export default function FeedbackPage() {
   const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle"); // idle | sending | sent
   const [error, setError] = useState("");
+  const starRefs = useRef({});
+
+  // Keyboard support for the star radiogroup: arrow keys move the rating,
+  // Home/End jump to the extremes. The newly-selected star keeps focus so
+  // Tab continues from the group naturally.
+  function handleStarKeyDown(event) {
+    let next = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowUp") next = Math.min((rating || 0) + 1, MAX_RATING);
+    else if (event.key === "ArrowLeft" || event.key === "ArrowDown") next = Math.max((rating || MAX_RATING + 1) - 1, MIN_RATING);
+    else if (event.key === "Home") next = MIN_RATING;
+    else if (event.key === "End") next = MAX_RATING;
+    if (next === null) return;
+    event.preventDefault();
+    setRating(next);
+    starRefs.current[next]?.focus();
+  }
 
   const canSubmit = status === "idle" && rating >= 1 && message.trim().length >= MIN_MESSAGE;
 
@@ -96,12 +115,15 @@ export default function FeedbackPage() {
                   {[1, 2, 3, 4, 5].map((value) => (
                     <button
                       key={value}
+                      ref={(node) => { starRefs.current[value] = node; }}
                       type="button"
                       role="radio"
                       aria-checked={rating === value}
                       aria-label={`${value} star${value > 1 ? "s" : ""} — ${RATING_LABELS[value]}`}
                       className={value <= rating ? "feedback-star is-active" : "feedback-star"}
+                      tabIndex={rating === 0 || rating === value ? 0 : -1}
                       onClick={() => setRating(value)}
+                      onKeyDown={handleStarKeyDown}
                     >
                       ★
                     </button>

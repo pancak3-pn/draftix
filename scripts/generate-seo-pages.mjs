@@ -178,6 +178,24 @@ const pages = [
     socialDescription: "Follow a live shareable tournament bracket on Draftix.",
     robots: "noindex,follow,noarchive",
   },
+  {
+    // SPA admin console. Pre-rendered shell so /r works on Vercel without
+    // a catch-all rewrite; stays out of search results.
+    path: "/r",
+    title: "Draftix Admin",
+    description: "Draftix admin console.",
+    socialDescription: "Draftix admin console.",
+    robots: "noindex,nofollow",
+  },
+  {
+    // Served for any unmatched URL. Vercel picks up dist-react/404.html
+    // automatically; the Express server sends it with a real 404 status.
+    path: "/404",
+    title: "Page Not Found | Draftix",
+    description: "The page you were looking for doesn't exist. Head back to Draftix for the Valorant map veto, agent ban, and team balance tools.",
+    socialDescription: "Page not found on Draftix.",
+    robots: "noindex,follow",
+  },
 ];
 
 function escapeHtml(value) {

@@ -562,7 +562,7 @@ export default function DraftBoard({ session, client, connection }) {
   }, [musicMuted]);
 
   useEffect(() => {
-    const audio = new Audio("/music/bg-music.mp3");
+    const audio = new Audio("/music/bg-music.mp3?v=2393371");
     const agentWarning = new Audio("/music/choose-agent.mp3");
     const agentSelection = new Audio(
       "/music/choose-agent-selection.mp3?v=6253",

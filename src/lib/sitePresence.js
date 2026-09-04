@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { supabaseConfig } from "./supabaseConfig.js";
 
 // Site-wide live visitor presence. Runs on every page (mounted once in
@@ -13,6 +12,11 @@ import { supabaseConfig } from "./supabaseConfig.js";
 //
 // Deliberately dependency-light and failure-silent: if Supabase is not
 // configured or a ping fails, the badge simply keeps its last value.
+//
+// @supabase/supabase-js is imported dynamically: this module runs on every
+// page (App.jsx mounts it eagerly), and the SDK is only needed once the
+// first heartbeat fires — well after first paint. This keeps the SDK out
+// of the eager bundle and off the critical path.
 
 const HEARTBEAT_MS = 30_000;
 
@@ -21,10 +25,12 @@ let ready = null;
 let timer = null;
 let currentPage = "/";
 
-function getClient() {
+async function getClient() {
   if (client) return client;
   const cfg = supabaseConfig();
   if (!cfg) return null;
+  const { createClient } = await import("@supabase/supabase-js");
+  if (client) return client; // another concurrent call already won the race
   client = createClient(cfg.url, cfg.key, {
     auth: {
       persistSession: true,
@@ -65,25 +71,27 @@ async function ping() {
 }
 
 // Called on pagehide: tab close, navigation, refresh, mobile app switch.
-// keepalive lets the request complete after the page unloads.
-function leave() {
+// keepalive lets the request complete after the page unloads. The dynamic
+// import resolves from the module cache here (the first heartbeat loaded
+// it at startup), so the await is a microtask, not a network fetch.
+async function leave() {
   const cfg = supabaseConfig();
-  const supabase = getClient();
-  if (!cfg || !supabase) return;
+  if (!cfg) return;
   try {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) return;
-      void fetch(`${cfg.url}/rest/v1/rpc/draftix_visitor_leave`, {
-        method: "POST",
-        keepalive: true,
-        headers: {
-          "Content-Type": "application/json",
-          apikey: cfg.key,
-          Authorization: `Bearer ${data.session.access_token}`,
-        },
-        body: "{}",
-      }).catch(() => {});
-    }).catch(() => {});
+    const supabase = await getClient();
+    if (!supabase) return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    void fetch(`${cfg.url}/rest/v1/rpc/draftix_visitor_leave`, {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        apikey: cfg.key,
+        Authorization: `Bearer ${data.session.access_token}`,
+      },
+      body: "{}",
+    }).catch(() => { });
   } catch (_) { /* best effort */ }
 }
 

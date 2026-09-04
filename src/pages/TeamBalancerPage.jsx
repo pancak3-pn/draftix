@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 
@@ -19,6 +19,35 @@ const RANK_ICON_ROOT = "https://media.valorant-api.com/competitivetiers/03621f52
 const rankIcon = (rank) => `${RANK_ICON_ROOT}/${RANK_TIER_IDS[rank] ?? 0}/smallicon.png`;
 const newPlayer = (id) => ({ id, name: "", mmr: 12 });
 const total = (team) => team.reduce((sum, player) => sum + player.mmr, 0);
+
+const ROSTER_KEY = "draftix:balancer";
+const MAX_ROSTER_ROWS = 40;
+const defaultPlayers = () => Array.from({ length: 10 }, (_, index) => newPlayer(index + 1));
+
+function loadSaved() {
+  try {
+    const value = JSON.parse(localStorage.getItem(ROSTER_KEY) || "null");
+    if (!value || typeof value !== "object" || !Array.isArray(value.players) || value.players.length === 0) return null;
+    const seen = new Set();
+    const players = value.players.slice(0, MAX_ROSTER_ROWS).map((raw, index) => {
+      let id = Number.isInteger(raw?.id) ? raw.id : null;
+      if (id === null || seen.has(id)) { id = Date.now() + index; while (seen.has(id)) id += 1; }
+      seen.add(id);
+      return {
+        id,
+        name: typeof raw?.name === "string" ? raw.name.slice(0, 32) : "",
+        mmr: Number.isInteger(raw?.mmr) && raw.mmr >= 0 && raw.mmr < RANKS.length ? raw.mmr : 12,
+      };
+    });
+    return {
+      players,
+      perTeam: [2, 3, 4, 5].includes(value.perTeam) ? value.perTeam : 5,
+      strategy: value.strategy === "random" ? "random" : "rank",
+    };
+  } catch {
+    return null;
+  }
+}
 
 function snakeSplit(players) {
   const teamA = [], teamB = [];
@@ -73,12 +102,16 @@ function RankSelect({ value, label, onChange }) {
 }
 
 export default function TeamBalancerPage() {
-  const [players, setPlayers] = useState(() => Array.from({ length: 10 }, (_, index) => newPlayer(index + 1)));
-  const [perTeam, setPerTeam] = useState(5);
-  const [strategy, setStrategy] = useState("rank");
+  const [players, setPlayers] = useState(() => loadSaved()?.players || defaultPlayers());
+  const [perTeam, setPerTeam] = useState(() => loadSaved()?.perTeam ?? 5);
+  const [strategy, setStrategy] = useState(() => loadSaved()?.strategy ?? "rank");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const named = useMemo(() => players.filter((player) => player.name.trim()).map((player) => ({ ...player, name: player.name.trim() })), [players]);
+
+  useEffect(() => {
+    try { localStorage.setItem(ROSTER_KEY, JSON.stringify({ players, perTeam, strategy })); } catch { /* storage may be unavailable */ }
+  }, [players, perTeam, strategy]);
 
   const update = (id, field, value) => setPlayers((current) => current.map((player) => player.id === id ? { ...player, [field]: field === "mmr" ? Number(value) : value } : player));
   const run = () => {
@@ -112,7 +145,7 @@ export default function TeamBalancerPage() {
           <RankSelect value={player.mmr} label={`Player ${index + 1} rank`} onChange={(value) => update(player.id, "mmr", value)} />
           <button aria-label={`Remove player ${index + 1}`} disabled={players.length <= 5} onClick={() => setPlayers((current) => current.filter((item) => item.id !== player.id))}>Remove</button>
         </div>)}</div>
-        <button className="tb-clear" onClick={() => { setPlayers(Array.from({ length: 10 }, (_, index) => newPlayer(Date.now() + index))); setResult(null); }}>Clear roster</button>
+        <button className="tb-clear" onClick={() => { setPlayers(defaultPlayers()); setResult(null); }}>Clear roster</button>
       </section>
     </div>
     {result && <section className="tb-results" id="balanced-teams">

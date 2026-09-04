@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import SiteHeader from "../components/SiteHeader.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 import { clearMatchResult, createTournament, getTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore } from "../lib/tournaments.js";
+import { navigate } from "../lib/spaRouter.js";
 
 const sizes = Array.from({ length: 14 }, (_, index) => index + 3);
 const formats = [
@@ -57,7 +58,7 @@ export function TournamentHubPage() {
     try {
       const result = await createTournament(name, teams.map((team) => team.trim()), bestOf, format);
       saveTournamentToken(result.slug, result.organizerToken);
-      window.location.assign(`/t/${result.slug}`);
+      navigate(`/t/${result.slug}`);
     } catch (requestError) {
       setError(requestError.message);
       setBusy(false);
@@ -80,7 +81,7 @@ export function TournamentHubPage() {
           <label>Tournament format<select value={format} onChange={(event) => setFormat(event.target.value)}>{formats.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
         </div>
         <div className="tournament-team-fields">
-          {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2,"0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
+          {teams.map((team, index) => <label key={index}><span>{String(index + 1).padStart(2, "0")}</span><input value={team} maxLength="40" required aria-label={`Seed ${index + 1} team name`} onChange={(event) => setTeams((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
         </div>
         {error && <p className="tournament-error" role="alert">{error}</p>}
         <button className="tournament-submit" type="submit" disabled={busy}>{busy ? "Creating bracket…" : "Create tournament"}</button>
@@ -111,7 +112,7 @@ function MatchCard({ match, teams, canManage, bestOf = 1, onSave, onClear, onSco
     setWinner(match.winnerTeamId || "");
     setLocalError("");
   }, [savedScoresKey, match.scoreA, match.scoreB, match.winnerTeamId]);
-    const isDecided = Boolean(match.winnerTeamId);
+  const isDecided = Boolean(match.winnerTeamId);
   // Two modes:
   //  - Live score: for best-of-N matches (N>1) that aren't decided yet — the
   //    organizer picks a current leader + the running score, then saves it
@@ -143,20 +144,20 @@ function MatchCard({ match, teams, canManage, bestOf = 1, onSave, onClear, onSco
     if (seriesIncomplete) { setLocalError(`Best of ${bestOf} — the winner must score ${requiredWins} maps.`); return; }
     onSave(match.id, Number(scoreA), Number(scoreB), winner);
   }
-    return <article className={`bracket-match${isDecided ? " is-complete" : ""}${isBye ? " is-bye" : ""}`} data-match-id={match.id}>
+  return <article className={`bracket-match${isDecided ? " is-complete" : ""}${isBye ? " is-bye" : ""}`} data-match-id={match.id}>
     <div className="bracket-match-label">Match {match.position}</div>
     {[teamA, teamB].map((team, index) => {
       const teamId = index ? match.teamBId : match.teamAId;
       const value = index ? scoreB : scoreA;
       return <div className={`bracket-team${winner === teamId ? " is-winner" : ""}`} key={index}>
-                <button type="button" disabled={!canManage || !team || busy || isDecided} onClick={changeWinner(teamId)}><span>{team ? <><small>{team.seed}</small>{team.name}</> : isBye ? "Bye" : "TBD"}</span>{match.winnerTeamId === teamId && <b>W</b>}</button>
-                {canManage && teamA && teamB && !isDecided ? <input aria-label={`${team?.name || "Team"} score`} type="number" min="0" max={bestOf} value={value} onChange={changeScore(index ? setScoreB : setScoreA)} /> : <span className="bracket-score">{value === "" ? "—" : value}</span>}
+        <button type="button" disabled={!canManage || !team || busy || isDecided} onClick={changeWinner(teamId)}><span>{team ? <><small>{team.seed}</small>{team.name}</> : isBye ? "Bye" : "TBD"}</span>{match.winnerTeamId === teamId && <b>W</b>}</button>
+        {canManage && teamA && teamB && !isDecided ? <input aria-label={`${team?.name || "Team"} score`} type="number" min="0" max={bestOf} value={value} onChange={changeScore(index ? setScoreB : setScoreA)} /> : <span className="bracket-score">{value === "" ? "—" : value}</span>}
       </div>;
     })}
-        {canManage && teamA && teamB && !isDecided && <div className="bracket-actions">
+    {canManage && teamA && teamB && !isDecided && <div className="bracket-actions">
       {isLiveSeries && <button type="button" disabled={liveScoreInvalid} onClick={saveLive} className="is-outline">{wouldWinNow ? `Win series ${requiredWins}-${Math.max(0, Number(loserScore))}` : "Save live score"}</button>}
       <button type="button" disabled={finalInvalid} onClick={saveFinal}>{seriesIncomplete ? `Needs ${requiredWins} wins` : scoreMismatch ? "Winner needs higher score" : "Save final result"}</button>
-            {(match.scoreA !== null || match.scoreB !== null) ? <button type="button" disabled={busy} onClick={() => onScore(match.id, null, null)}>Clear score</button> : ""}
+      {(match.scoreA !== null || match.scoreB !== null) ? <button type="button" disabled={busy} onClick={() => onScore(match.id, null, null)}>Clear score</button> : ""}
     </div>}
     {canManage && teamA && teamB && localError && <p className="bracket-match-error" role="alert">{localError}</p>}
   </article>;
@@ -264,27 +265,27 @@ export default function TournamentPage({ slug }) {
       <header className="tournament-view-head">
         <div><span className={`tournament-status ${data.status}`}>{data.status}</span><h1>{data.name}</h1><p>{data.teamCount} teams · {formatLabel} · Best of {data.bestOf}</p></div>
         <div className="tournament-share-actions">
-          <button type="button" onClick={() => copyText(shareUrl,setCopied)}>{copied ? "Copied" : "Copy public link"}</button>
-          {data.canManage && <button type="button" onClick={() => copyText(manageUrl,setCopied)}>Copy organizer link</button>}
+          <button type="button" onClick={() => copyText(shareUrl, setCopied)}>{copied ? "Copied" : "Copy public link"}</button>
+          {data.canManage && <button type="button" onClick={() => copyText(manageUrl, setCopied)}>Copy organizer link</button>}
         </div>
       </header>
       {data.canManage && <p className="organizer-banner"><strong>Organizer mode</strong> Select a winner, enter the score, then save.</p>}
       {error && <p className="tournament-error" role="alert">{error}</p>}
       {champion && <section className="champion-banner" aria-label="Tournament champion">
-  <div className="champion-banner-year" aria-hidden="true">
-    <span>{new Date().getFullYear().toString().slice(0, 2)}</span>
-    <svg className="champion-banner-mark" viewBox="0 0 64 64" fill="currentColor">
-      <path d="M8 4 L32 25 L56 4 L45 4 L32 15 L19 4 Z" />
-      <path d="M8 60 L32 39 L56 60 L45 60 L32 49 L19 60 Z" />
-    </svg>
-    <span>{new Date().getFullYear().toString().slice(2)}</span>
-  </div>
-  <h2 className="champion-banner-title">{data.name}</h2>
-  <p className="champion-banner-sub">Champions</p>
-  <div className="champion-banner-team">{champion.name}</div>
-  {runnerUp && <span className="champion-banner-final">def. {runnerUp.name} {finalScore}</span>}
-  <span className="champion-banner-meta">{formatLabel} · Best of {data.bestOf}</span>
-</section>}
+        <div className="champion-banner-year" aria-hidden="true">
+          <span>{new Date().getFullYear().toString().slice(0, 2)}</span>
+          <svg className="champion-banner-mark" viewBox="0 0 64 64" fill="currentColor">
+            <path d="M8 4 L32 25 L56 4 L45 4 L32 15 L19 4 Z" />
+            <path d="M8 60 L32 39 L56 60 L45 60 L32 49 L19 60 Z" />
+          </svg>
+          <span>{new Date().getFullYear().toString().slice(2)}</span>
+        </div>
+        <h2 className="champion-banner-title">{data.name}</h2>
+        <p className="champion-banner-sub">Champions</p>
+        <div className="champion-banner-team">{champion.name}</div>
+        {runnerUp && <span className="champion-banner-final">def. {runnerUp.name} {finalScore}</span>}
+        <span className="champion-banner-meta">{formatLabel} · Best of {data.bestOf}</span>
+      </section>}
       {showStandings && <section className="tournament-standings" aria-label="Standings">
         <table>
           <thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>Diff</th><th>P</th></tr></thead>
@@ -299,8 +300,8 @@ export default function TournamentPage({ slug }) {
         <div className="bracket-board" ref={boardRef}>
           <BracketConnectors boardRef={boardRef} matches={data.matches} />
           {rounds.map(([round, matches]) => <section className="bracket-round" key={round}>
-            <header><span>{String(round).padStart(2,"0")}</span><h2>{roundLabel(round,maxRound,data.format,data.totalRounds)}</h2></header>
-                          <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+            <header><span>{String(round).padStart(2, "0")}</span><h2>{roundLabel(round, maxRound, data.format, data.totalRounds)}</h2></header>
+            <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
           </section>)}
         </div>
       </div>
