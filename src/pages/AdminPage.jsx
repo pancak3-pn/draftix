@@ -206,6 +206,7 @@ export default function AdminPage() {
   const [activeView, setActiveView] = useState(viewFromHash);
   const [feedback, setFeedback] = useState(null);
   const [errors, setErrors] = useState(null);
+  const [errorUpdatingId, setErrorUpdatingId] = useState(null);
 
 
   useEffect(() => {
@@ -341,6 +342,34 @@ export default function AdminPage() {
       if (!res.ok) return; // keep the last good feed; errors surface via stats banner
       setErrors(await res.json().catch(() => null));
     } catch (_) { /* transient */ }
+  }
+
+  async function setErrorResolved(entry, resolved) {
+    const cfg = supabaseConfig();
+    if (!cfg || errorUpdatingId !== null) return;
+    setErrorUpdatingId(entry.id);
+    setError("");
+    try {
+      const res = await fetch(`${cfg.url}/rest/v1/rpc/draftix_admin_set_error_resolved`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: cfg.key,
+          Authorization: `Bearer ${cfg.key}`,
+        },
+        body: JSON.stringify({ p_token: token, p_error_id: entry.id, p_resolved: resolved }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || payload?.ok === false) {
+        setError("Could not update that error. Please try again.");
+        return;
+      }
+      await loadErrors(token);
+    } catch (_) {
+      setError("Could not reach the admin service. Please try again.");
+    } finally {
+      setErrorUpdatingId(null);
+    }
   }
 
   function signIn(event) {
@@ -598,6 +627,8 @@ export default function AdminPage() {
                   </div>
                   <dl className="fb-facts">
                     <div><dt>Total</dt><dd>{fmtInt(errors?.total)}</dd></div>
+                    <div><dt>Open</dt><dd>{fmtInt(errors?.open)}</dd></div>
+                    <div><dt>Resolved</dt><dd>{fmtInt(errors?.resolved)}</dd></div>
                     <div><dt>Today</dt><dd>{fmtInt(errors?.today)}</dd></div>
                     <div><dt>7 days</dt><dd>{fmtInt(errors?.last7)}</dd></div>
                   </dl>
@@ -628,12 +659,15 @@ export default function AdminPage() {
                   {errors?.recent && errors.recent.length ? (
                     <div className="fb-feed-list" tabIndex={0} aria-label="Client error entries, scroll to browse">
                       {errors.recent.map((entry) => (
-                        <article key={entry.id} className="fb-entry err-entry">
+                        <article key={entry.id} className={`fb-entry err-entry${entry.resolved ? " is-resolved" : ""}`}>
                           <header className="fb-entry-head">
                             <span className={`err-kind err-k-${entry.kind}`}>{ERROR_KIND_LABELS[entry.kind] || entry.kind}</span>
-                            <time className="fb-entry-time" title={new Date(entry.createdAt).toLocaleString()}>
-                              {new Date(entry.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                            </time>
+                            <div className="err-entry-status">
+                              <span className={`err-status${entry.resolved ? " is-resolved" : ""}`}>{entry.resolved ? "Resolved" : "Open"}</span>
+                              <time className="fb-entry-time" title={new Date(entry.createdAt).toLocaleString()}>
+                                {new Date(entry.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                              </time>
+                            </div>
                           </header>
                           <p className="fb-entry-message">{entry.message}</p>
                           {entry.stack ? (
@@ -642,7 +676,12 @@ export default function AdminPage() {
                               <pre>{entry.stack}</pre>
                             </details>
                           ) : null}
-                          <footer className="fb-entry-foot">on <code>{entry.page}</code>{entry.userAgent ? <> · <code>{entry.userAgent}</code></> : null}</footer>
+                          <footer className="fb-entry-foot">
+                            <span>on <code>{entry.page}</code>{entry.userAgent ? <> · <code>{entry.userAgent}</code></> : null}</span>
+                            <button type="button" className="err-resolve-button" disabled={errorUpdatingId === entry.id} onClick={() => setErrorResolved(entry, !entry.resolved)}>
+                              {errorUpdatingId === entry.id ? "Saving…" : entry.resolved ? "Reopen" : "Mark as resolved"}
+                            </button>
+                          </footer>
                         </article>
                       ))}
                     </div>
