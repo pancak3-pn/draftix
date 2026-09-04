@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowRight } from "@phosphor-icons/react/ArrowRight";
 
 const variants = {
   landing: { element: "nav", shell: "dr-nav", brand: "dr-brand", links: "dr-nav-links", menu: "dr-menu" },
@@ -48,7 +49,7 @@ export default function AppNav({ variant = "support", homeHref = "/", links = []
             </details>
           : <a {...link} key={`${link.href}-${label}`} onClick={close}>
               <span>{label}</span>
-              {link.className?.includes("dr-nav-cta") && <span className="nav-action-arrow" aria-hidden="true">→</span>}
+              {link.className?.includes("dr-nav-cta") && <ArrowRight className="nav-action-arrow" aria-hidden="true" weight="bold" />}
             </a>)}
       </div>
     </>}

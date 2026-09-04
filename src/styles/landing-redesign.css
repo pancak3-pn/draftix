@@ -1323,11 +1323,16 @@
 }
 
 .dr-site > .dr-nav .dr-nav-links .dr-nav-cta::after {
-  content: "→";
-  position: static;
-  display: inline;
-  margin-left: 12px;
-  background: none;
+  display: none;
+  content: none;
+}
+
+.dr-site > .dr-nav .dr-nav-links .dr-nav-cta .nav-action-arrow {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0;
 }
 
 @media (max-width: 1180px) {

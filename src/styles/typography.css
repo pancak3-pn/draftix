@@ -719,12 +719,23 @@ small {
 }
 
 .site-nav-public .dr-nav-links .dr-nav-cta .nav-action-arrow {
-  display: inline-block;
-  width: 15px;
-  flex: 0 0 15px;
-  font-size: 1rem;
-  line-height: 1;
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
   transition: transform .18s ease;
+}
+
+.dr-site > .site-nav-landing.dr-nav .dr-nav-links .dr-nav-cta::after {
+  display: none;
+  content: none;
+}
+
+.dr-site > .site-nav-landing.dr-nav .dr-nav-links .dr-nav-cta .nav-action-arrow {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
 }
 
 .site-nav-public .dr-nav-links .dr-nav-cta:hover,
