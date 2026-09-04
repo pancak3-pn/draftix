@@ -1,9 +1,6 @@
-import PublicFooter from "../components/PublicFooter.jsx";
-
 export default function NotFoundPage() {
     return (
-        <>
-            <main className="sp-page notfound-page">
+        <main className="sp-page notfound-page">
                 <a className="nf-brand" href="/" aria-label="Draftix home">
                     <img src="/images/draftix.webp" alt="Draftix" />
                 </a>
@@ -26,8 +23,6 @@ export default function NotFoundPage() {
                         <img src="/images/Homepage/404-door.webp" alt="An open red-lit doorway marking a missing Draftix page" />
                     </div>
                 </section>
-            </main>
-            <PublicFooter />
-        </>
+        </main>
     );
 }

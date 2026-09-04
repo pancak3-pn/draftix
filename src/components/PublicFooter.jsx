@@ -69,24 +69,38 @@ export default function PublicFooter({ reveal = false }) {
           <LivePresence />
         </div>
 
-        <nav className="public-footer-primary" aria-label="Draftix tools">
-          <a href="/draft">Open Draftix</a>
-          <a href="/valorant-draft-tool">Draft guide</a>
+        <nav className="public-footer-col" aria-label="Draftix product">
+          <h2 className="public-footer-heading">Product</h2>
+          <a className="public-footer-featured" href="/draft">Open Draftix</a>
           <a href="/team-balance">Team balancer</a>
           <a href="/tournaments">Tournaments</a>
+        </nav>
+
+        <nav className="public-footer-col" aria-label="Valorant drafting guides">
+          <h2 className="public-footer-heading">Guides</h2>
+          <a href="/valorant-map-veto">Map veto guide</a>
+          <a href="/valorant-agent-ban">Agent bans guide</a>
+          <a href="/valorant-draft-tool">Draft tool guide</a>
+        </nav>
+
+        <nav className="public-footer-col" aria-label="Help and resources">
+          <h2 className="public-footer-heading">Resources</h2>
+          <a href="/status">System status</a>
+          <a href="/feedback">Send feedback</a>
+          <a className="public-footer-contact" href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech" target="_blank" rel="noreferrer">Email support</a>
         </nav>
       </div>
 
       <div className="public-footer-utility">
-        <small>{"©"} {new Date().getFullYear()} DRAFTIX</small>
-        <nav aria-label="Footer information">
-          <a href="/status">Status</a>
-          <a href="/feedback">Feedback</a>
+        <div className="public-footer-legal-note">
+          <small>{"©"} {new Date().getFullYear()} DRAFTIX</small>
+          <small>Not endorsed by Riot Games. Valorant and Riot Games are trademarks of Riot Games, Inc.</small>
+        </div>
+        <nav aria-label="Legal and site info">
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
-          <a className="public-footer-contact" href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40draftix.tech" target="_blank" rel="noreferrer">Email support</a>
-          <a className="public-footer-donate" href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer" aria-label="Clutch the server bill on Ko-fi">Clutch the server bill</a>
         </nav>
+        <a className="public-footer-donate" href="https://ko-fi.com/dartzski" target="_blank" rel="noreferrer" aria-label="Clutch the server bill on Ko-fi">Clutch the server bill</a>
       </div>
     </footer>
   );
