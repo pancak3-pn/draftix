@@ -300,7 +300,7 @@ export default function LandingPage() {
                 aria-label="Watch Draftix tutorial video"
               >
                 <Play size={13} weight="fill" aria-hidden="true" />
-                <span>WATCH TUTORIAL (1:45)</span>
+                <span>WATCH TUTORIAL</span>
               </button>
             </div>
           </div>
