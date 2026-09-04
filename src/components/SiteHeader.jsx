@@ -4,15 +4,23 @@ const primaryLinks = [
   { href: "/#process", label: "How it works" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/team-balance", label: "Team balancer" },
+  {
+    label: "Tools",
+    children: [
+      { href: "/draft", label: "Draft tool" },
+      { href: "/team-balance", label: "Team balancer" },
+      { href: "/tournaments", label: "Tournaments" },
+    ],
+  },
 ];
 
 export default function SiteHeader({ draftEntry = false }) {
   const links = [
     ...primaryLinks,
     draftEntry
-      ? { href: "/", label: "Back to home", className: "sp-open" }
-      : { href: "/draft", label: "Open Draftix", className: "sp-open" },
+      ? { href: "/", label: "Back to home", className: "dr-nav-cta" }
+      : { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
   ];
 
-  return <AppNav variant="support" links={links} />;
+  return <AppNav variant="public" links={links} />;
 }

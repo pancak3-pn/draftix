@@ -81,7 +81,7 @@ function StatCard({ label, value, sub, icon }) {
     <article className="ax-card">
       <div className="ax-card-top">
         <span className="ax-card-label">{label}</span>
-        <span className="ax-card-icon">{icon}</span>
+        <span className="ax-card-icon" aria-hidden="true">{icon}</span>
       </div>
       <div className="ax-card-value">{value}</div>
       {sub ? <div className="ax-card-sub">{sub}</div> : null}
@@ -99,7 +99,7 @@ function RankedList({ id, title, icon, pairs, emptyText, linkType }) {
   return (
     <section className="ax-panel" id={id}>
       <h3>
-        <span className="ax-panel-icon">{icon}</span>
+        <span className="ax-panel-icon" aria-hidden="true">{icon}</span>
         {title}
         {pairs?.length ? <span className="ax-panel-note">Top {pairs.length}</span> : null}
       </h3>
@@ -340,47 +340,37 @@ export default function AdminPage() {
 
   if (!token || !stats) {
     return (
-      <div className="ax-app">
-        <aside className="ax-side ax-login-side">
-          <div className="ax-login-brand">
-            <img src="/images/draftix.webp" alt="Draftix" />
-            <span className="ax-logo-word">
-              DRAFT<em>IX</em>
-            </span>
-          </div>
-          <div className="ax-login-context">
-            <span className="ax-kicker">Private workspace</span>
-            <h2>Keep the room<br /><span>running.</span></h2>
-            <p>Review traffic, room activity, and the pages players use most.</p>
-          </div>
-          <span className="ax-login-mark" aria-hidden="true">01</span>
-        </aside>
-        <main className="ax-main">
-          <header className="ax-topbar">
-            <div className="ax-topbar-title">
-              <span className="ax-topbar-icon">{Icon.clock}</span>
-              <div>
-                <h1>Admin console</h1>
-                <p>Private traffic and usage monitor for Draftix.</p>
-              </div>
-            </div>
-          </header>
-          <div className="ax-content">
-            <form className="ax-signin" onSubmit={signIn} aria-label="Draftix admin sign-in">
-              <img className="ax-minimal-brand" src="/images/draftix.webp" alt="Draftix" />
-              <span className="ax-kicker">Private access</span>
-              <h2>Admin access</h2>
-              <p className="ax-signin-intro">Enter the private admin token to continue.</p>
-              <label>
+      <div className="ax-app ax-login-app">
+        <span className="ax-login-side" hidden />
+        <header className="ax-login-header">
+          <a className="ax-login-home" href="/" aria-label="Return to Draftix home">
+            <img src="/images/draftix.webp" alt="" />
+            <span>DRAFT<em>IX</em></span>
+          </a>
+          <span className="ax-login-private">Private console</span>
+        </header>
+        <main className="ax-login-main">
+          <form className="ax-signin" onSubmit={signIn} aria-labelledby="ax-signin-title">
+              <span className="ax-kicker">Operator sign-in</span>
+              <h1 id="ax-signin-title">Admin access</h1>
+              <p className="ax-signin-intro" id="ax-signin-help">Enter your private token to open the Draftix dashboard.</p>
+              <label htmlFor="ax-admin-token">
                 <span>Admin token</span>
                 <div className="ax-token-field">
                   <input
+                    id="ax-admin-token"
+                    name="admin-token"
                     type={showToken ? "text" : "password"}
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      if (error) setError("");
+                    }}
                     placeholder="Paste your admin token"
                     autoComplete="current-password"
-                    autoFocus
+                    spellCheck={false}
+                    aria-describedby="ax-signin-help"
+                    aria-invalid={Boolean(error)}
                   />
                   <button type="button" className="ax-token-toggle" onClick={() => setShowToken((visible) => !visible)} aria-label={showToken ? "Hide admin token" : "Show admin token"}>
                     {showToken ? "Hide" : "Show"}
@@ -388,12 +378,12 @@ export default function AdminPage() {
                 </div>
               </label>
               <button type="submit" className="ax-button" disabled={!input.trim() || loading} aria-busy={loading}>
-                {loading ? "Checking..." : "Unlock dashboard"}
+                {loading ? "Verifying access…" : "Open dashboard"}
               </button>
-              {error ? <p className="ax-error" role="alert">{error}</p> : null}
-            </form>
-          </div>
+              {error ? <p className="ax-error" role="alert" aria-live="polite">{error}</p> : null}
+          </form>
         </main>
+        <footer className="ax-login-footer">Authorized access only</footer>
       </div>
     );
   }
@@ -407,32 +397,33 @@ export default function AdminPage() {
 
   return (
     <div className="ax-app">
+      <a className="ax-skip-link" href="#ax-main-content">Skip to dashboard content</a>
       <aside className="ax-side">
-        <div className="ax-logo">
-          <img className="ax-logo-image" src="/images/draftix.webp" alt="" />
+        <a className="ax-logo" href="/" aria-label="Draftix home">
+          <img className="ax-logo-image" src="/images/draftix.webp" alt="" width="32" height="32" />
           <span className="ax-logo-word">
             DRAFT<em>IX</em>
           </span>
-        </div>
+        </a>
         <nav className="ax-nav" aria-label="Admin sections">
           <button type="button" className={activeView === "overview" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("overview")} aria-current={activeView === "overview" ? "page" : undefined}>
-            <span className="ax-nav-icon">{Icon.grid}</span>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.grid}</span>
             Overview
           </button>
           <button type="button" className={activeView === "rooms" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("rooms")} aria-current={activeView === "rooms" ? "page" : undefined}>
-            <span className="ax-nav-icon">{Icon.door}</span>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.door}</span>
             Draft Rooms
           </button>
           <button type="button" className={activeView === "pages" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("pages")} aria-current={activeView === "pages" ? "page" : undefined}>
-            <span className="ax-nav-icon">{Icon.doc}</span>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.doc}</span>
             Top Pages
           </button>
           <button type="button" className={activeView === "referrers" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("referrers")} aria-current={activeView === "referrers" ? "page" : undefined}>
-            <span className="ax-nav-icon">{Icon.link}</span>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.link}</span>
             Referrers
           </button>
           <button type="button" className={activeView === "feedback" ? "ax-nav-active" : "ax-nav-item"} onClick={() => selectView("feedback")} aria-current={activeView === "feedback" ? "page" : undefined}>
-            <span className="ax-nav-icon">{Icon.chat}</span>
+            <span className="ax-nav-icon" aria-hidden="true">{Icon.chat}</span>
             Feedback
           </button>
         </nav>
@@ -447,10 +438,10 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="ax-main">
+      <main className="ax-main" id="ax-main-content" tabIndex="-1">
         <header className="ax-topbar">
           <div className="ax-topbar-title">
-            <span className="ax-topbar-icon">{Icon.clock}</span>
+            <span className="ax-topbar-icon" aria-hidden="true">{Icon.clock}</span>
             <div>
               <h1>{activeView === "overview" ? "Overview" : activeView === "rooms" ? "Draft Rooms" : activeView === "pages" ? "Top Pages" : activeView === "feedback" ? "User Feedback" : "Referrers"}</h1>
               <p>{activeView === "feedback" ? "Ratings and notes from Draftix players." : "Traffic and usage across Draftix."}</p>
@@ -466,15 +457,15 @@ export default function AdminPage() {
               onClick={() => loadStats(token)}
               disabled={loading}
             >
-              <span className="ax-btn-icon">{Icon.refresh}</span>
-              {loading ? "Refreshing..." : "Refresh"}
+              <span className="ax-btn-icon" aria-hidden="true">{Icon.refresh}</span>
+              {loading ? "Refreshing…" : "Refresh"}
             </button>
           </div>
         </header>
 
         <div className="ax-content">
-          {error ? <div className="ax-error ax-banner-error" role="alert"><span>{error}</span><button type="button" onClick={() => loadStats(token)}>Try again</button></div> : null}
-          {loading && !stats ? <div className="ax-loading" aria-live="polite"><span /><span /><span />Loading metrics...</div> : null}
+          {error ? <div className="ax-error ax-banner-error" role="alert" aria-live="polite"><span>{error}</span><button type="button" onClick={() => loadStats(token)}>Try again</button></div> : null}
+          {loading && !stats ? <div className="ax-loading" role="status" aria-live="polite"><span /><span /><span /><span className="ax-loading-label">Loading metrics…</span></div> : null}
 
           {stats ? (
             <>
@@ -491,7 +482,7 @@ export default function AdminPage() {
                 {stats.rooms ? (
                   <section className="ax-panel ax-rooms" id="ax-rooms">
                     <h3>
-                      <span className="ax-panel-icon">{Icon.door}</span>
+                      <span className="ax-panel-icon" aria-hidden="true">{Icon.door}</span>
                       Draft rooms
                     </h3>
                     <div className="ax-roomstat">
@@ -542,7 +533,7 @@ export default function AdminPage() {
 
                 <section className="fb-feed ax-panel" aria-label="Latest feedback">
                   <h3>
-                    <span className="ax-panel-icon">{Icon.chat}</span>
+                    <span className="ax-panel-icon" aria-hidden="true">{Icon.chat}</span>
                     Latest feedback
                     {feedback?.recent?.length ? <span className="ax-panel-note">{feedback.recent.length} most recent</span> : null}
                   </h3>

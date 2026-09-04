@@ -1334,6 +1334,463 @@
   }
 }
 
+/* Minimal operator login. Kept separate from the authenticated dashboard. */
+.ax-login-app {
+  --ad-bg: #f4f3ef;
+  --ad-text: #10151b;
+  --ad-muted: #626b73;
+  --ad-accent: #ff4655;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(16, 21, 27, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 21, 27, .035) 1px, transparent 1px),
+    var(--ad-bg);
+  background-size: 64px 64px;
+  color: var(--ad-text);
+  font-family: var(--font-ui, sans-serif);
+}
+
+.ax-login-app::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: min(48vw, 720px);
+  aspect-ratio: 1;
+  right: min(-18vw, -180px);
+  bottom: min(-26vw, -260px);
+  border: clamp(70px, 9vw, 140px) solid rgba(255, 70, 85, .045);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.ax-login-header,
+.ax-login-main,
+.ax-login-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.ax-login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 88px;
+  padding: 18px clamp(22px, 4.5vw, 72px);
+  border-bottom: 1px solid rgba(16, 21, 27, .1);
+}
+
+.ax-login-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ad-text);
+  text-decoration: none;
+}
+
+.ax-login-home img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.ax-login-home span {
+  font: 800 1rem/1 var(--font-display, sans-serif);
+  letter-spacing: .08em;
+}
+
+.ax-login-home em {
+  color: var(--ad-accent);
+  font-style: normal;
+}
+
+.ax-login-private {
+  color: #737a80;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ax-login-main {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: clamp(34px, 7vh, 72px) 20px;
+}
+
+.ax-login-app .ax-signin {
+  position: static;
+  display: grid;
+  width: min(460px, 100%);
+  margin: 0;
+  padding: clamp(30px, 4vw, 46px);
+  border: 1px solid #d2d1cc;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(30, 35, 40, .09);
+}
+
+.ax-login-app .ax-kicker {
+  color: var(--ad-accent);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.ax-login-app .ax-signin h1 {
+  margin: 12px 0 0;
+  color: var(--ad-text);
+  font: 750 clamp(2.2rem, 5vw, 2.85rem)/1.05 var(--font-ui, sans-serif);
+  letter-spacing: -.055em;
+}
+
+.ax-login-app .ax-signin-intro {
+  max-width: 36ch;
+  margin: 12px 0 0;
+  color: var(--ad-muted);
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+.ax-login-app .ax-signin label {
+  display: grid;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+.ax-login-app .ax-signin label > span {
+  color: #272d33;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.ax-login-app .ax-token-field {
+  position: relative;
+}
+
+.ax-login-app .ax-token-field input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 72px 0 15px;
+  border: 1px solid #aeb3b6;
+  border-radius: 9px;
+  outline: none;
+  background: #fff;
+  color: var(--ad-text);
+  font: 600 1rem/1 var(--font-ui, sans-serif);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ax-login-app .ax-token-field input::placeholder {
+  color: #7b838a;
+  font-weight: 500;
+  opacity: 1;
+}
+
+.ax-login-app .ax-token-field input:focus {
+  border-color: var(--ad-accent);
+  box-shadow: 0 0 0 3px rgba(255, 70, 85, .14);
+}
+
+.ax-login-app .ax-token-field input[aria-invalid="true"] {
+  border-color: #c52e3b;
+}
+
+.ax-login-app .ax-token-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: #be2f3c;
+  font: 800 .7rem/1 var(--font-ui, sans-serif);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.ax-login-app .ax-token-toggle:hover {
+  color: #8e202a;
+}
+
+.ax-login-app .ax-token-toggle:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--ad-text);
+  outline-offset: 1px;
+}
+
+.ax-login-app .ax-button {
+  min-height: 54px;
+  margin-top: 14px;
+  border: 1px solid var(--ad-accent);
+  border-radius: 9px;
+  background: var(--ad-accent);
+  color: #fff;
+  font: 800 .78rem/1 var(--font-ui, sans-serif);
+  letter-spacing: .045em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.ax-login-app .ax-button:hover:not(:disabled) {
+  border-color: #df3846;
+  background: #df3846;
+}
+
+.ax-login-app .ax-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ax-login-app .ax-button:focus-visible {
+  outline: 2px solid var(--ad-text);
+  outline-offset: 3px;
+}
+
+.ax-login-app .ax-button:disabled {
+  border-color: #dededb;
+  background: #dededb;
+  color: #777b7f;
+  cursor: not-allowed;
+}
+
+.ax-login-app .ax-error {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border: 1px solid #f1c3c7;
+  border-left: 3px solid #c52e3b;
+  border-radius: 6px;
+  background: #fff3f4;
+  color: #8e202a;
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.ax-login-footer {
+  padding: 16px clamp(22px, 4.5vw, 72px) 22px;
+  color: #777e84;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .ax-login-header {
+    min-height: 72px;
+    padding: 12px 16px;
+  }
+
+  .ax-login-home img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ax-login-private {
+    font-size: .64rem;
+  }
+
+  .ax-login-main {
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  .ax-login-app .ax-signin {
+    padding: 28px 22px;
+    border-radius: 12px;
+    box-shadow: 0 16px 42px rgba(30, 35, 40, .075);
+  }
+
+  .ax-login-app .ax-signin h1 {
+    font-size: clamp(2rem, 11vw, 2.5rem);
+  }
+
+  .ax-login-app .ax-signin label {
+    margin-top: 24px;
+  }
+
+  .ax-login-footer {
+    padding: 12px 16px 18px;
+    text-align: center;
+  }
+}
+
+@media (max-height: 620px) and (min-width: 561px) {
+  .ax-login-header {
+    min-height: 68px;
+    padding-block: 10px;
+  }
+
+  .ax-login-main {
+    padding-block: 20px;
+  }
+
+  .ax-login-app .ax-signin {
+    padding-block: 28px;
+  }
+
+  .ax-login-app .ax-signin label {
+    margin-top: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-login-app .ax-token-field input,
+  .ax-login-app .ax-button {
+    transition: none;
+  }
+}
+
+/* Dashboard accessibility and responsive interaction pass. */
+.ax-skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #0f1923;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 140ms ease;
+}
+
+.ax-skip-link:focus {
+  transform: translateY(0);
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-logo {
+  color: var(--ad-text);
+  text-decoration: none;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-logo:focus-visible,
+.ax-app:not(:has(.ax-login-side)) .ax-refresh:focus-visible,
+.ax-app:not(:has(.ax-login-side)) .ax-nav button:focus-visible,
+.ax-app:not(:has(.ax-login-side)) .ax-link:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--ad-accent);
+  outline-offset: 3px;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-main {
+  scroll-margin-top: 96px;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-side {
+  overscroll-behavior: contain;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-topbar-title,
+.ax-app:not(:has(.ax-login-side)) .ax-topbar-title > div,
+.ax-app:not(:has(.ax-login-side)) .ax-panel,
+.ax-app:not(:has(.ax-login-side)) .ax-list li > :first-child {
+  min-width: 0;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-topbar h1,
+.ax-app:not(:has(.ax-login-side)) .ax-panel h3 {
+  text-wrap: balance;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-card-value,
+.ax-app:not(:has(.ax-login-side)) .ax-roomstat-num,
+.ax-app:not(:has(.ax-login-side)) .ax-list strong,
+.ax-app:not(:has(.ax-login-side)) .fb-average-num,
+.ax-app:not(:has(.ax-login-side)) .fb-facts dd,
+.ax-app:not(:has(.ax-login-side)) .fb-dist-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.ax-app:not(:has(.ax-login-side)) .ax-loading-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .ax-app:not(:has(.ax-login-side)) {
+    display: block;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-side {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    width: 100%;
+    height: auto;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-main {
+    min-height: calc(100dvh - 64px);
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar {
+    align-items: center;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-content {
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar-title p,
+  .ax-app:not(:has(.ax-login-side)) .ax-updated {
+    display: none;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar {
+    flex-direction: row;
+    padding: 12px 14px;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-topbar h1 {
+    font-size: 1.25rem;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-refresh {
+    min-height: 40px;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-cards,
+  .ax-app:not(:has(.ax-login-side)) .ax-loading {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-app:not(:has(.ax-login-side)) .ax-card:first-child {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-skip-link {
+    transition: none;
+  }
+}
+
 /* ── Feedback view ───────────────────────────────────── */
 /* Two-column layout: summary rail (average, totals, rating
    distribution) + scrollable feed of latest entries. Uses the

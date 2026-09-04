@@ -15,10 +15,22 @@ const heroSlides = [
   { src: "/images/Homepage/result.webp", alt: "Draftix match result poster" },
 ];
 
+// Reversible homepage experiment. Switch to "workflow" to restore the
+// existing animated product slideshow without deleting either treatment.
+const HERO_VARIANT = "jett";
+
 const navigationLinks = [
   { href: "#process", label: "How it works" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/team-balance", label: "Team balancer" },
+  {
+    label: "Tools",
+    children: [
+      { href: "/draft", label: "Draft tool" },
+      { href: "/team-balance", label: "Team balancer" },
+      { href: "/tournaments", label: "Tournaments" },
+    ],
+  },
   { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
 ];
 
@@ -113,6 +125,21 @@ function HeroSlideshow() {
   </div>;
 }
 
+function HeroArtwork() {
+  return (
+    <figure className="dr-hero-jett" data-reveal>
+      <img
+        src="/images/Homepage/hero-bg.webp"
+        alt="Draftix Valorant hero key art"
+        width="1672"
+        height="941"
+        loading="eager"
+        fetchPriority="high"
+      />
+    </figure>
+  );
+}
+
 function BackToTop() {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -198,10 +225,10 @@ export default function LandingPage() {
   }, []);
 
   return <main className="dr-site">
-    <AppNav variant="landing" homeHref="#top" links={navigationLinks} />
+    <AppNav variant="public" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
       <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><DailyStat /></div>
-      <HeroSlideshow />
+      {HERO_VARIANT === "jett" ? <HeroArtwork /> : <HeroSlideshow />}
     </section>
     <section className="dr-agents" id="agents" data-reveal>
       <figure className="dr-agents-media">
