@@ -12,8 +12,9 @@ const pages = [
   {
     path: "/",
     title: "Valorant Map Veto & Agent Draft Tool | Draftix",
-    description: "Draftix is a free Valorant drafting and map veto platform trusted by 500+ players daily. Run live map bans, side picks, and agent bans for teams, scrims, and tournaments.",
+    description: "Draftix is a free Valorant map veto and agent draft tool trusted by 500+ players daily. Run live map bans, side picks, and agent bans in one room.",
     socialDescription: "Free Valorant drafting and map vetoes for teams, scrims, and tournaments.",
+    h1: "Draftix — Draft together. Play prepared.",
     schema: {
       "@context": "https://schema.org",
       "@graph": [
@@ -310,8 +311,24 @@ function seoBlock(page) {
     <!-- SEO:END -->`;
 }
 
+// Crawlers that skip JS see an empty <div id="root">, so ship a visually
+// hidden H1 in the static shell. React replaces the container's children on
+// mount, so the live page never shows two headings, and the inline sr-only
+// styles avoid any flash of text before hydration.
+function staticH1(page) {
+  const text = escapeHtml(page.h1 || page.title.replace(/ \| Draftix$/, ""));
+  return `<div id="root"><h1 style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;">${text}</h1></div>`;
+}
+
 for (const page of pages) {
-  const html = template.replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/, seoBlock(page));
+  // The 25-160 rule only matters for pages Bing will actually index; noindex
+  // utility pages (/r, /404) keep their short functional descriptions.
+  if (!page.robots && (page.description.length < 25 || page.description.length > 160)) {
+    console.warn(`Warning: description for ${page.path} is ${page.description.length} chars (Bing accepts 25-160).`);
+  }
+  const html = template
+    .replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/, seoBlock(page))
+    .replace("<div id=\"root\"></div>", staticH1(page));
   if (page.path === "/") {
     await writeFile(path.join(output, "index.html"), html);
     continue;
