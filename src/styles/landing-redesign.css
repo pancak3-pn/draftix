@@ -1175,6 +1175,7 @@
   .dr-site > .dr-hero .dr-hero-jett {
     height: calc(100dvh - 82px);
     max-height: 820px;
+    margin-right: calc((100vw - min(1480px, calc(100vw - 48px))) / -2);
   }
 
   .dr-site > .dr-hero .dr-hero-jett img {
@@ -1187,7 +1188,7 @@
   .dr-hero-jett {
     height: min(66dvh, 620px);
     min-height: 440px;
-    margin: -12px -16px 0;
+    margin: -12px calc((100vw - min(720px, calc(100vw - 32px))) / -2) 0;
   }
 
   .dr-hero-jett::after {
@@ -1210,7 +1211,6 @@
   .dr-hero-jett {
     height: min(62dvh, 530px);
     min-height: 380px;
-    margin-inline: -16px;
   }
 }
 
@@ -1822,7 +1822,7 @@
 }
 
 .dr-liveliness-choreographed .dr-agents .dr-agents-intro p {
-  color: #20272d;
+  color: #fff;
   font-weight: 600;
 }
 
