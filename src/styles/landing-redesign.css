@@ -1515,10 +1515,13 @@
 .dr-site > .dr-agents .dr-agents-intro {
   position:relative;
   z-index:1;
-  max-width:520px;
-  padding-right:max(24px,calc((100vw - 1480px)/2));
+  width:100%;
+  max-width:none;
+  min-width:0;
+  padding-right:clamp(24px,4vw,80px);
 }
 .dr-site > .dr-agents .dr-agents-intro h2 {
+  max-width:640px;
   margin:0;
   font-family:var(--font-display);
   font-size:clamp(3.4rem,6.2vw,6.4rem);
@@ -1529,6 +1532,7 @@
   color:#ece8e1;
 }
 .dr-site > .dr-agents .dr-agents-intro strong {
+  max-width:520px;
   display:block;
   margin:28px 0 0;
   font-family:var(--font-ui);
@@ -1539,12 +1543,15 @@
   color:#ece8e1;
 }
 .dr-site > .dr-agents .dr-agents-intro p {
+  max-width:520px;
   margin:12px 0 0;
   font-family:var(--font-ui);
   font-size:clamp(.9rem,.95vw,1rem);
   font-weight:500;
   line-height:1.6;
   color:#ece8e1;
+  overflow-wrap:normal;
+  word-break:normal;
 }
 .dr-site > .dr-agents .dr-agents-cta {
   min-width:190px;
