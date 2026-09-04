@@ -7,8 +7,8 @@ const TOPICS = {
     title: "Valorant map veto.",
     lead: "Ban maps, choose a side, and keep both captains on the same screen.",
     intro: "Draftix gives both teams one shared room for a scrim or tournament map veto. Every confirmed ban appears live, with no spreadsheet or chat log to manage.",
-    image: "/images/Homepage/step2-banmap.webp",
-    imageAlt: "Draftix map veto screen showing available Valorant maps",
+    image: "/images/map-veto.webp",
+    imageAlt: "Valorant map veto guide showing the competitive map selection process",
     steps: [
       "Create a room and choose the competitive preset.",
       "Share the code and assign both captains.",
@@ -25,8 +25,8 @@ const TOPICS = {
     title: "Valorant agent bans.",
     lead: "Set the ban count, follow captain turns, and record every decision live.",
     intro: "Draftix keeps the agent pool and turn order visible to both teams. The host sets the rules once, then each captain completes their ban in sequence.",
-    image: "/images/Homepage/step4-banagent.webp",
-    imageAlt: "Draftix agent ban screen with Valorant agent choices",
+    image: "/images/Homepage/drafting-tool.webp",
+    imageAlt: "Valorant agent ban guide showing the Draftix agent selection tool",
     steps: [
       "Enable agent bans in the room settings.",
       "Choose the ban limit and lock both captains.",

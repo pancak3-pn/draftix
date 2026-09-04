@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Play } from "@phosphor-icons/react/Play";
 import AppNav from "../components/AppNav.jsx";
 import PublicFooter from "../components/PublicFooter.jsx";
 
@@ -18,6 +19,10 @@ const heroSlides = [
 // Reversible homepage experiment. Switch to "workflow" to restore the
 // existing animated product slideshow without deleting either treatment.
 const HERO_VARIANT = "jett";
+
+// Reversible motion treatment. Change to "classic" to restore the previous
+// homepage pacing without removing either implementation.
+const LIVELINESS_VARIANT = "choreographed";
 
 const navigationLinks = [
   { href: "#process", label: "How it works" },
@@ -145,7 +150,7 @@ function BackToTop() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Updraft to top" title="Updraft to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.webp" alt="" /><span>Updraft to top</span></button>;
+  return <button className={`dr-back-to-top ${visible ? "is-visible" : ""}`} type="button" aria-label="Updraft to top" title="Updraft to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><img src="/images/button-to-up.webp" alt="" width="397" height="397" /><span>Updraft to top</span></button>;
 }
 
 function MapCarousel() {
@@ -176,7 +181,7 @@ function MapCarousel() {
     </div>
     <div className="dr-map-controls">
       <button type="button" onClick={() => select(activeIndex - 1)}>Previous</button>
-      <p><strong>{String(activeIndex + 1).padStart(2, "0")}</strong><span> / {String(mapPool.length).padStart(2, "0")}</span></p>
+      <p><strong key={activeIndex}>{String(activeIndex + 1).padStart(2, "0")}</strong><span> / {String(mapPool.length).padStart(2, "0")}</span></p>
       <button type="button" onClick={() => select(activeIndex + 1)}>Next</button>
     </div>
   </div>;
@@ -184,19 +189,35 @@ function MapCarousel() {
 
 function TutorialModal({ onClose }) {
   const videoRef = useRef(null);
+  const closeRef = useRef(null);
   useEffect(() => {
-    const onKey = (event) => { if (event.key === "Escape") onClose(); };
+    const previouslyFocused = document.activeElement;
+    const onKey = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key !== "Tab") return;
+      const focusable = [closeRef.current, videoRef.current].filter(Boolean);
+      if (!focusable.length) return;
+      const currentIndex = focusable.indexOf(document.activeElement);
+      const nextIndex = event.shiftKey
+        ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+        : (currentIndex + 1) % focusable.length;
+      event.preventDefault();
+      focusable[nextIndex].focus();
+    };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      previouslyFocused?.focus?.();
     };
   }, [onClose]);
-  return <div className="dr-tutorial-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Draftix tutorial video">
+  return <div className="dr-tutorial-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="dr-tutorial-title">
     <div className="dr-tutorial-modal" onClick={(event) => event.stopPropagation()}>
-      <button type="button" className="dr-tutorial-close" onClick={onClose} aria-label="Close tutorial">&times;</button>
-      <video ref={videoRef} src="/videos/draftix-tutorial.mp4" controls autoPlay playsInline />
+      <h2 className="sr-only" id="dr-tutorial-title">Draftix tutorial video</h2>
+      <button ref={closeRef} type="button" className="dr-tutorial-close" onClick={onClose} aria-label="Close tutorial">&times;</button>
+      <video ref={videoRef} src="/videos/draftix-tutorial.mp4" controls autoPlay playsInline preload="metadata" />
     </div>
   </div>;
 }
@@ -205,6 +226,17 @@ export default function LandingPage() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [activeToolIndex, setActiveToolIndex] = useState(0);
   const currentTool = competitiveTools[activeToolIndex];
+  const selectToolFromKeyboard = (event, index) => {
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % competitiveTools.length;
+    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + competitiveTools.length) % competitiveTools.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = competitiveTools.length - 1;
+    else return;
+    event.preventDefault();
+    setActiveToolIndex(nextIndex);
+    document.getElementById(`tool-tab-${competitiveTools[nextIndex].id}`)?.focus();
+  };
   useEffect(() => {
     document.body.classList.add("dr-page");
     const nodes = document.querySelectorAll("[data-reveal], [data-flow]");
@@ -221,7 +253,7 @@ export default function LandingPage() {
     return () => { observer.disconnect(); document.body.classList.remove("dr-page"); };
   }, []);
 
-  return <main className="dr-site">
+  return <main className={`dr-site${LIVELINESS_VARIANT === "choreographed" ? " dr-liveliness-choreographed" : ""}`}>
     <AppNav variant="public" homeHref="#top" links={navigationLinks} />
     <section className="dr-hero" id="top">
       <div className="dr-hero-copy" data-reveal><h1><span className="sr-only">Draftix — </span>Draft together.<br /><span>Play prepared.</span></h1><p>Draftix is a free Valorant drafting and map veto platform for teams, scrims, and tournaments.</p><div className="dr-actions"><a href="/draft" className="dr-button dr-button-primary">Open a room</a><a href="#process" className="dr-button dr-button-secondary">Watch the flow</a></div><DailyStat /></div>
@@ -229,7 +261,7 @@ export default function LandingPage() {
     </section>
     <section className="dr-agents" id="agents" data-reveal>
       <figure className="dr-agents-media">
-        <img src="/images/Homepage/hero-agents.webp" alt="Draftix agent key art" loading="lazy" />
+        <img src="/images/Homepage/hero-agents.webp" alt="Draftix agent key art" width="1254" height="1254" loading="lazy" />
       </figure>
       <div className="dr-agents-intro">
         <h2>Your agents</h2>
@@ -245,31 +277,32 @@ export default function LandingPage() {
         <a href="/draft" className="dr-button dr-button-primary">Open a room</a>
       </header>
       <figure className="dr-banner-media">
-        <img src="/images/Homepage/section-banner.webp" alt="Draftix squad key art" loading="lazy" />
+        <img src="/images/Homepage/section-banner.webp" alt="Draftix squad key art" width="1600" height="900" loading="lazy" />
       </figure>
     </section>
     <section className="dr-val-section" id="process" data-reveal>
       <div className="dr-val-showcase">
         <div className="dr-val-content">
-          <h2 className="dr-val-title">{currentTool.title}</h2>
-          <p className="dr-val-kicker">{currentTool.kicker}</p>
-          <p className="dr-val-desc">{currentTool.desc}</p>
+          {/* One keyed subtree replaces the previous tool cleanly and replays its entrance motion. */}
+          <div className="dr-val-copy" key={currentTool.id}>
+            <h2 className="dr-val-title">{currentTool.title}</h2>
+            <p className="dr-val-kicker">{currentTool.kicker}</p>
+            <p className="dr-val-desc">{currentTool.desc}</p>
 
-          <div className="dr-val-actions">
-            <a href={currentTool.href} className="dr-val-btn-primary">
-              <span>{currentTool.cta}</span>
-            </a>
-            <button
-              type="button"
-              className="dr-val-btn-secondary"
-              onClick={() => setShowTutorial(true)}
-              aria-label="Watch Draftix tutorial video"
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <polygon points="6 3 20 12 6 21 6 3" />
-              </svg>
-              <span>WATCH TUTORIAL (1:45)</span>
-            </button>
+            <div className="dr-val-actions">
+              <a href={currentTool.href} className="dr-val-btn-primary">
+                <span>{currentTool.cta}</span>
+              </a>
+              <button
+                type="button"
+                className="dr-val-btn-secondary"
+                onClick={() => setShowTutorial(true)}
+                aria-label="Watch Draftix tutorial video"
+              >
+                <Play size={13} weight="fill" aria-hidden="true" />
+                <span>WATCH TUTORIAL (1:45)</span>
+              </button>
+            </div>
           </div>
 
           <div className="dr-val-tabs" role="tablist" aria-label="Select tool format">
@@ -280,9 +313,13 @@ export default function LandingPage() {
                   key={tool.id}
                   type="button"
                   role="tab"
+                  id={`tool-tab-${tool.id}`}
+                  aria-controls="tool-showcase-panel"
                   aria-selected={isActive}
+                  tabIndex={isActive ? 0 : -1}
                   className={`dr-val-tab${isActive ? " is-active" : ""}`}
                   onClick={() => setActiveToolIndex(idx)}
+                  onKeyDown={(event) => selectToolFromKeyboard(event, idx)}
                 >
                   <span className="dr-val-tab-num">{tool.num}</span>
                   <span className="dr-val-tab-name">{tool.title}</span>
@@ -292,7 +329,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="dr-val-media-wrap">
+        <div className="dr-val-media-wrap" id="tool-showcase-panel" role="tabpanel" aria-labelledby={`tool-tab-${currentTool.id}`}>
           <div className="dr-val-media-frame">
             <span className="dr-val-corner dr-val-corner-tl" aria-hidden="true">■</span>
             <span className="dr-val-corner dr-val-corner-br" aria-hidden="true">■</span>
@@ -302,6 +339,8 @@ export default function LandingPage() {
                 src={currentTool.image}
                 alt={currentTool.alt}
                 className="dr-val-img"
+                width={currentTool.id === "drafting" ? 1906 : currentTool.id === "team-balance" ? 1858 : 2172}
+                height={currentTool.id === "drafting" ? 773 : currentTool.id === "team-balance" ? 870 : 724}
                 loading="lazy"
               />
             </a>

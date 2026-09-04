@@ -1619,3 +1619,250 @@
 .presence-text { color:#8a959e; font:500 .85rem/1 var(--font-ui, Inter, sans-serif); }
 .presence-text strong { color:#f0f3f5; font-weight:700; }
 
+/* ─── LANDING LIVELINESS LAYER ────────────────────────────────────────────
+   Ambient motion and micro-interactions. Every rule here animates only
+   transform/opacity (compositor-friendly, no layout thrash) and the whole
+   layer is disabled by the consolidated prefers-reduced-motion block at
+   the end. Visibility-gated rules key off the existing .is-visible class
+   the IntersectionObserver adds to [data-reveal] sections. */
+
+/* Hero copy: staggered entrance (h1 → lede → actions → proof strip). */
+.dr-hero-copy[data-reveal] > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1);
+}
+
+.dr-hero-copy[data-reveal].is-visible > * { opacity: 1; transform: none; }
+.dr-hero-copy[data-reveal].is-visible > :nth-child(2) { transition-delay: .09s; }
+.dr-hero-copy[data-reveal].is-visible > :nth-child(3) { transition-delay: .18s; }
+.dr-hero-copy[data-reveal].is-visible > :nth-child(4) { transition-delay: .27s; }
+
+/* Hero artwork: enters from the right, then drifts forever while a light
+   sheen periodically sweeps across the key art. */
+.dr-hero-jett[data-reveal] { transform: translateX(36px); transition-delay: .12s; }
+.dr-hero-jett[data-reveal].is-visible { transform: none; }
+.dr-hero-jett img { animation: dr-hero-drift 26s ease-in-out infinite alternate; }
+
+@keyframes dr-hero-drift {
+  from { transform: scale(1) translateX(0); }
+  to { transform: scale(1.05) translateX(-1.4%); }
+}
+
+.dr-hero-jett::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: -25%;
+  bottom: -25%;
+  left: -35%;
+  width: 38%;
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, .07) 42%, rgba(255, 255, 255, .14) 50%, rgba(255, 255, 255, .07) 58%, transparent 100%);
+  transform: skewX(-16deg) translateX(-160%);
+  animation: dr-hero-sheen 9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dr-hero-sheen {
+  0% { transform: skewX(-16deg) translateX(-160%); opacity: 0; }
+  6% { opacity: 1; }
+  20% { opacity: 1; }
+  26% { transform: skewX(-16deg) translateX(430%); opacity: 0; }
+  100% { transform: skewX(-16deg) translateX(430%); opacity: 0; }
+}
+
+/* Agents band: the key art breathes gently once the section is revealed. */
+.dr-agents.is-visible .dr-agents-media img { animation: dr-float 7s ease-in-out infinite alternate; }
+
+@keyframes dr-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
+}
+
+/* Operations banner: slow cinematic push-in behind the clip-path wipe. */
+.dr-operations.is-visible .dr-banner-media img { animation: dr-banner-zoom 16s ease-out forwards; }
+
+@keyframes dr-banner-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.07); }
+}
+
+/* Tool switcher: copy and preview crossfade whenever the active tab changes.
+   React remounts the keyed elements, replaying these entrance animations;
+   backwards-only fill keeps the resting state fully cascade-driven so the
+   existing hover zoom on .dr-val-img keeps working. */
+.dr-val-section.is-visible .dr-val-title { animation: dr-val-copy-in .5s cubic-bezier(.16, 1, .3, 1) backwards; }
+.dr-val-section.is-visible .dr-val-kicker { animation: dr-val-copy-in .5s cubic-bezier(.16, 1, .3, 1) .07s backwards; }
+.dr-val-section.is-visible .dr-val-desc { animation: dr-val-copy-in .5s cubic-bezier(.16, 1, .3, 1) .14s backwards; }
+.dr-val-section.is-visible .dr-val-btn-primary span { animation: dr-val-copy-in .4s cubic-bezier(.16, 1, .3, 1) .2s backwards; }
+.dr-val-section.is-visible .dr-val-img { animation: dr-val-img-in .6s cubic-bezier(.16, 1, .3, 1) .08s backwards; }
+
+@keyframes dr-val-copy-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes dr-val-img-in {
+  from { opacity: 0; transform: scale(1.045); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Primary CTA: light sweep on hover, matching the .dr-button treatment. */
+.dr-val-btn-primary { position: relative; overflow: hidden; }
+
+.dr-val-btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .38), transparent);
+  transform: translateX(-160%) skewX(-16deg);
+  transition: transform .55s ease;
+  pointer-events: none;
+}
+
+.dr-val-btn-primary:hover::after { transform: translateX(340%) skewX(-16deg); }
+.dr-val-tab:hover { transform: translateY(-1px); }
+
+/* Map carousel: the active slide gets a slow Ken Burns push, its name
+   lands just after the slide settles, and the counter pops on change. */
+.dr-pool.is-visible .dr-map-slide.is-active img { animation: dr-map-kenburns 9s ease-out forwards; }
+
+@keyframes dr-map-kenburns {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.08); }
+}
+
+.dr-pool.is-visible .dr-map-slide.is-active > span { animation: dr-map-name-in .55s cubic-bezier(.16, 1, .3, 1) .15s backwards; }
+
+@keyframes dr-map-name-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.dr-map-controls strong { display: inline-block; }
+.dr-pool.is-visible .dr-map-controls strong { animation: dr-map-count-in .35s cubic-bezier(.16, 1, .3, 1) backwards; }
+
+@keyframes dr-map-count-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Final CTA: staggered cascade matching the hero copy rhythm. */
+.dr-final[data-reveal] > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1);
+}
+
+.dr-final[data-reveal].is-visible > * { opacity: 1; transform: none; }
+.dr-final[data-reveal].is-visible > :nth-child(2) { transition-delay: .08s; }
+.dr-final[data-reveal].is-visible > :nth-child(3) { transition-delay: .16s; }
+.dr-final[data-reveal].is-visible > :nth-child(4) { transition-delay: .24s; }
+
+/* Consolidated reduced-motion kill switch for this entire layer. */
+@media (prefers-reduced-motion: reduce) {
+  .dr-hero-jett img,
+  .dr-hero-jett::before,
+  .dr-agents.is-visible .dr-agents-media img,
+  .dr-operations.is-visible .dr-banner-media img,
+  .dr-val-section.is-visible .dr-val-title,
+  .dr-val-section.is-visible .dr-val-kicker,
+  .dr-val-section.is-visible .dr-val-desc,
+  .dr-val-section.is-visible .dr-val-btn-primary span,
+  .dr-val-section.is-visible .dr-val-img,
+  .dr-pool.is-visible .dr-map-slide.is-active img,
+  .dr-pool.is-visible .dr-map-slide.is-active > span,
+  .dr-pool.is-visible .dr-map-controls strong { animation: none; }
+
+  .dr-hero-jett::before { display: none; }
+  .dr-hero-jett[data-reveal] { transform: none; transition: none; }
+
+  .dr-hero-copy[data-reveal] > *,
+  .dr-hero-copy[data-reveal].is-visible > *,
+  .dr-final[data-reveal] > *,
+  .dr-final[data-reveal].is-visible > * { opacity: 1; transform: none; transition: none; }
+
+  .dr-val-btn-primary::after { display: none; }
+}
+
+/* Reversible homepage choreography experiment.
+   Remove the .dr-liveliness-choreographed class (via LIVELINESS_VARIANT)
+   to restore the classic motion treatment without deleting these rules. */
+.dr-liveliness-choreographed .dr-val-btn-primary {
+  transition: background-color .2s ease, box-shadow .2s ease, transform .2s cubic-bezier(.16, 1, .3, 1);
+}
+
+.dr-liveliness-choreographed .dr-val-btn-secondary {
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s cubic-bezier(.16, 1, .3, 1);
+}
+
+.dr-liveliness-choreographed .dr-val-tab {
+  transition: border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.dr-liveliness-choreographed .dr-agents.is-visible .dr-agents-media img {
+  animation: none;
+}
+
+.dr-liveliness-choreographed .dr-agents .dr-agents-media {
+  transform: translateX(-34px);
+}
+
+.dr-liveliness-choreographed .dr-agents .dr-agents-intro > * {
+  transform: translateX(28px);
+}
+
+.dr-liveliness-choreographed .dr-agents.is-visible .dr-agents-media,
+.dr-liveliness-choreographed .dr-agents.is-visible .dr-agents-intro > * {
+  transform: none;
+}
+
+.dr-liveliness-choreographed .dr-agents .dr-agents-intro p {
+  color: #20272d;
+  font-weight: 600;
+}
+
+.dr-liveliness-choreographed .dr-operations.is-visible .dr-banner-media img {
+  animation-duration: 10s;
+}
+
+.dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-copy {
+  animation: dr-tool-panel-in .5s cubic-bezier(.16, 1, .3, 1) backwards;
+}
+
+.dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-title,
+.dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-kicker,
+.dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-desc,
+.dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-btn-primary span {
+  animation: none;
+}
+
+@keyframes dr-tool-panel-in {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: none; }
+}
+
+.dr-liveliness-choreographed .dr-pool.is-visible .dr-map-slide.is-active img {
+  animation-duration: 4.5s;
+  animation-iteration-count: 1;
+}
+
+.dr-liveliness-choreographed .dr-final[data-reveal] > * {
+  transform: none;
+  transition-duration: .45s;
+}
+
+.dr-liveliness-choreographed :is(.dr-button, .dr-val-btn-primary, .dr-val-btn-secondary, .dr-val-tab, .dr-map-controls button):active {
+  transform: translateY(1px) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-liveliness-choreographed .dr-val-section.is-visible .dr-val-copy {
+    animation: none;
+  }
+}
+
