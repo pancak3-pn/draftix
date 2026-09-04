@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import LandingPage from "./pages/LandingPage.jsx";
 import { trackPageview } from "./lib/analytics.js";
-import { startSitePresence, setSitePresencePage } from "./lib/sitePresence.js";
 import { subscribeToNavigation, currentLocation } from "./lib/spaRouter.js";
 // Lazy-load route pages so the initial bundle stays lean. Only the landing
 // page is loaded eagerly; everything else (draft shell, balancer, status,
@@ -76,12 +75,6 @@ export default function App() {
     isNotFound = true;
   }
 
-  useEffect(() => {
-    // Site-wide visitor presence: count this visitor on every page and
-    // keep their current path fresh for the "people viewing now" badge.
-    setSitePresencePage(path);
-    startSitePresence();
-  }, [path]);
   useEffect(() => {
     const titles = {
       "/draft": "Draft Room | Draftix",

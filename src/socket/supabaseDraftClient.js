@@ -24,7 +24,6 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
   let roomCode = "";
   let closed = false;
   let refreshTimer = null;
-  let heartbeatTimer = null;
 
   const ready = (async () => {
     const { data: sessionData } = await supabase.auth.getSession();
@@ -63,25 +62,6 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     refreshTimer = window.setTimeout(refresh, 35);
   }
 
-  // Keep the player's last_seen_at fresh while a room is open so the public
-  // presence counter (draftix_presence) counts them as "live now". Supabase
-  // realtime has no disconnect event, so a periodic heartbeat is what makes
-  // someone drop off the counter ~5 minutes after closing their tab.
-  function startHeartbeat() {
-    window.clearInterval(heartbeatTimer);
-    heartbeatTimer = window.setInterval(async () => {
-      if (!roomCode) return;
-      try {
-        await supabase.rpc("draftix_heartbeat", { p_code: roomCode });
-      } catch (_) { /* transient — next tick will retry */ }
-    }, 30_000);
-  }
-
-  function stopHeartbeat() {
-    window.clearInterval(heartbeatTimer);
-    heartbeatTimer = null;
-  }
-
   async function subscribe(state) {
     if (channel) await supabase.removeChannel(channel);
     const roomId = state._roomId;
@@ -106,7 +86,6 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     const state = await stateFor(roomCode);
     onState?.(state);
     await subscribe(state);
-    startHeartbeat();
     return state;
   }
 
@@ -142,7 +121,6 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
         if (!result.error && event !== "leaveSession") await refresh();
         if (!result.error && event === "leaveSession") {
           roomCode = "";
-          stopHeartbeat();
           if (channel) await supabase.removeChannel(channel);
           channel = null;
         }
@@ -168,7 +146,6 @@ export function createSupabaseDraftClient({ url, key, onState, onChat, onConnect
     close: async () => {
       closed = true;
       window.clearTimeout(refreshTimer);
-      stopHeartbeat();
       if (channel) await supabase.removeChannel(channel);
       onConnection?.("offline");
     },
