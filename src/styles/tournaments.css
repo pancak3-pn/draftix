@@ -1356,7 +1356,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 44px;
-    min-height: 108px;
     padding: 0 0 22px;
 }
 
@@ -1617,21 +1616,6 @@
     background:
         linear-gradient(rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 420px),
         #e9eef1;
-}
-
-.tournament-create-shell .tournament-intro > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: #526370;
-    font-weight: 650;
-}
-
-.tournament-create-shell .tournament-intro > span::before {
-    width: 24px;
-    height: 3px;
-    background: var(--accent);
-    content: "";
 }
 
 .tournament-create-shell .tournament-intro h1 {

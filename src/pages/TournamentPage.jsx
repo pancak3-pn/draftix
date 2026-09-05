@@ -181,7 +181,6 @@ export function TournamentHubPage() {
     <SiteHeader />
     <main className="tournament-create-shell">
       <header className="tournament-intro">
-        <span>Draftix Brackets</span>
         <h1>{tournamentSeo.heading}</h1>
         <p>{tournamentSeo.intro}</p>
       </header>
