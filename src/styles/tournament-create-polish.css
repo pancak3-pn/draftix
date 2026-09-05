@@ -1,0 +1,68 @@
+/* Small refinements to the original Draftix creation layout. */
+.tournament-create-shell .tournament-hub-workspace {
+    border-radius: 8px;
+    box-shadow: 0 14px 36px rgb(29 46 58 / .09);
+}
+
+.tournament-create-shell .tournament-hub-tabs {
+    gap: 8px;
+}
+
+.tournament-create-shell .tournament-hub-tabs button {
+    border-radius: 5px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+.tournament-create-shell .tournament-hub-tabs button.is-active {
+    background: #2a3d49;
+    box-shadow: inset 3px 0 #e54855;
+}
+
+.tournament-create-shell .tournament-form input,
+.tournament-create-shell .tournament-form select {
+    width: 100%;
+    min-width: 0;
+    border-radius: 6px;
+    color: #182a35;
+    background: #fbfcfd;
+}
+
+.tournament-create-shell .tournament-form input:focus-visible,
+.tournament-create-shell .tournament-form select:focus-visible {
+    outline: 2px solid #b93240;
+    outline-offset: 2px;
+    background: #fff;
+}
+
+.tournament-create-shell .tournament-team-fields label span {
+    color: #627582;
+    font-variant-numeric: tabular-nums;
+}
+
+.tournament-create-shell .tournament-shuffle {
+    min-height: 36px;
+    border-radius: 6px;
+    letter-spacing: .02em;
+}
+
+.tournament-create-shell .tournament-form-actions .tournament-submit {
+    border-radius: 6px;
+    background: #bc3443;
+    color: #fff;
+    letter-spacing: .04em;
+}
+
+.tournament-create-shell .tournament-form-actions .tournament-submit:hover:not(:disabled) {
+    background: #a92d3a;
+}
+
+@media (max-width: 520px) {
+    .tournament-create-shell .tournament-form-section { padding: 22px 16px; }
+    .tournament-create-shell .tournament-form-section .tournament-team-fields { grid-template-columns: minmax(0, 1fr); }
+    .tournament-create-shell .tournament-form-actions { flex-direction: column; align-items: stretch; gap: 14px; padding: 18px 16px; }
+    .tournament-create-shell .tournament-form-actions .tournament-submit { min-width: 0; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tournament-create-shell .tournament-hub-tabs button { transition: none; }
+}

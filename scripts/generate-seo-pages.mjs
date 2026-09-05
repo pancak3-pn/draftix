@@ -70,14 +70,16 @@ const pages = [
   {
     path: "/tournaments",
     title: "Free Tournament Bracket Maker | Draftix",
-    description: "Create a free shareable single-elimination tournament bracket for 3 to 16 teams. Automatic byes support uneven fields, with one public link for viewers.",
-    socialDescription: "Build and share a live tournament bracket with private organizer controls.",
+    description: "Create a free shareable tournament bracket for 3 to 16 entrants. Run elimination, round robin, or Swiss events with live results and automatic byes.",
+    socialDescription: "Build and share a live bracket for teams, individuals, clubs, sports, esports, and community events.",
+    keywords: "free tournament bracket maker, online bracket generator, elimination bracket, round robin tournament, swiss tournament, shareable tournament bracket",
+    imageAlt: "Draftix online tournament bracket maker",
     schema: {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       name: "Draftix Tournament Bracket Maker",
       url: `${origin}/tournaments`,
-      applicationCategory: "GameApplication",
+      applicationCategory: "UtilitiesApplication",
       operatingSystem: "Any",
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -280,6 +282,8 @@ function seoBlock(page) {
   const title = escapeHtml(page.title);
   const description = escapeHtml(page.description);
   const socialDescription = escapeHtml(page.socialDescription);
+  const keywords = escapeHtml(page.keywords || "draftix, valorant draft, valorant map veto, valorant agent ban, map ban tool, valorant team balancer, tournament bracket maker");
+  const imageAlt = escapeHtml(page.imageAlt || "Draftix - real-time Valorant map veto and agent draft tool");
   const robots = page.robots || "index,follow,max-image-preview:large";
   const mergedSchema = schemaFor(page, url);
   const schema = mergedSchema
@@ -288,7 +292,7 @@ function seoBlock(page) {
   return `<!-- SEO:START -->
     <title>${title}</title>
     <meta name="description" content="${description}" />
-    <meta name="keywords" content="draftix, valorant draft, valorant map veto, valorant agent ban, map ban tool, valorant team balancer, valorant custom match tool" />
+    <meta name="keywords" content="${keywords}" />
     <meta name="robots" content="${robots}" />
     <meta name="author" content="Draftix" />
     <link rel="canonical" href="${url}" />
@@ -302,12 +306,12 @@ function seoBlock(page) {
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />
+    <meta property="og:image:alt" content="${imageAlt}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${socialDescription}" />
     <meta name="twitter:image" content="${image}" />
-    <meta name="twitter:image:alt" content="Draftix - real-time Valorant map veto and agent draft tool" />${schema}
+    <meta name="twitter:image:alt" content="${imageAlt}" />${schema}
     <!-- SEO:END -->`;
 }
 

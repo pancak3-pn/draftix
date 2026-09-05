@@ -45,7 +45,7 @@ const competitiveTools = [
     num: "01",
     kicker: "LIVE MAP VETO & AGENT COMPOSITION",
     title: "DRAFTING",
-    desc: "Create dedicated tournament rooms with live map vetoes, side picks, agent bans, and match poster generation for competitive scrims and broadcasts.",
+    desc: "Create and share live brackets for teams or individuals across esports, sports, clubs, classrooms, game nights, and community events.",
     cta: "START DRAFTING",
     href: "/draft",
     image: "/images/Homepage/drafting-tool.webp",
