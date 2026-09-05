@@ -90,6 +90,28 @@ const pages = [
     },
   },
   {
+    path: "/tournament-bracket-maker",
+    title: "How to Make a Tournament Bracket (Free) | Draftix",
+    description: "Learn how to make a tournament bracket in minutes. Free bracket generator: single elim, double elim, round robin, and Swiss — share one public link.",
+    socialDescription: "Build a tournament bracket for 3 to 16 teams and share one live public link.",
+    h1: "Free tournament bracket maker.",
+    keywords: "tournament bracket maker, how to make a bracket, bracket generator, free tournament bracket, tournament bracket generator, esports bracket, single elimination bracket",
+    imageAlt: "Draftix tournament bracket maker with a single elimination bracket",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebPage", name: "How to Make a Tournament Bracket", url: `${origin}/tournament-bracket-maker`, description: "Step-by-step guide to building a free tournament bracket with live public sharing." },
+        {
+          "@type": "FAQPage", mainEntity: [
+            { "@type": "Question", name: "Is the bracket maker free?", acceptedAnswer: { "@type": "Answer", text: "Yes. You can create and share brackets without an account." } },
+            { "@type": "Question", name: "How many teams can a bracket hold?", acceptedAnswer: { "@type": "Answer", text: "Brackets support 3 to 16 teams or players, with automatic byes for uneven fields." } },
+            { "@type": "Question", name: "Can viewers follow the bracket live?", acceptedAnswer: { "@type": "Answer", text: "Yes. The public link shows every recorded result as it happens." } },
+          ]
+        },
+      ],
+    },
+  },
+  {
     path: "/valorant-map-veto",
     title: "Free Valorant Map Veto Tool | Draftix",
     description: "Run a live Valorant map veto with both captains. Ban maps, select the final map, choose starting sides, and share the result. Free, no signup.",

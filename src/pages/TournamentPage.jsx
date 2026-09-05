@@ -3,6 +3,7 @@ import { ArrowRight } from "@phosphor-icons/react/ArrowRight";
 import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
 import { ArrowsClockwise } from "@phosphor-icons/react/ArrowsClockwise";
 import { Check } from "@phosphor-icons/react/Check";
+import { ClockCounterClockwise } from "@phosphor-icons/react/ClockCounterClockwise";
 import { Copy } from "@phosphor-icons/react/Copy";
 import { CornersIn } from "@phosphor-icons/react/CornersIn";
 import { CornersOut } from "@phosphor-icons/react/CornersOut";
@@ -108,7 +109,7 @@ function MyTournaments() {
 
   if (!entries.length) return <section className="my-tournaments" aria-label="My tournaments">
     <header><strong>My tournaments</strong><span>Organizer access saved on this device</span></header>
-    <p className="my-tournaments-empty">No tournaments yet — create your first bracket and it will appear here for quick access.</p>
+    <p className="my-tournaments-empty"><ClockCounterClockwise size={20} aria-hidden="true" /><span>No tournaments yet</span></p>
   </section>;
   return <section className="my-tournaments" aria-label="My tournaments">
     <header><strong>My tournaments</strong><span>Organizer access saved on this device</span></header>

@@ -13,6 +13,7 @@ Live usage — the number of people currently on the site — is visible on the 
 - [Draftix home](https://www.draftix.tech/): Product overview and entry point for Draftix.
 - [Start drafting](https://www.draftix.tech/draft): Create or join a live Valorant drafting room.
 - [Tournament bracket maker](https://www.draftix.tech/tournaments): Create and manage single elimination, double elimination, Swiss, and round robin tournament brackets.
+- [How to make a tournament bracket](https://www.draftix.tech/tournament-bracket-maker): Step-by-step guide to building and sharing a live bracket.
 - [Valorant team balancer](https://www.draftix.tech/team-balance): Split a lobby into fair teams by competitive rank or at random.
 
 ## Valorant drafting guides

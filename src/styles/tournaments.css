@@ -881,10 +881,17 @@
 }
 
 .my-tournaments-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 0;
     padding: 16px 22px;
     color: var(--muted);
     font-size: .85rem;
+}
+
+.my-tournaments-empty > svg {
+    flex-shrink: 0;
 }
 
 .my-tournaments ul {

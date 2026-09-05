@@ -54,6 +54,26 @@ const TOPICS = {
       ["Is Draftix free?", "Yes. You can create a room without an account."],
     ],
   },
+  "/tournament-bracket-maker": {
+    label: "Draftix guide",
+    title: "Free tournament bracket maker.",
+    lead: "Build a bracket for 3 to 16 teams, share one public link, and update scores live.",
+    intro: "Draftix turns a team list into a ready-to-run bracket — single or double elimination, round robin, or Swiss — with byes handled automatically. Every recorded result appears on the public link in real time, so viewers follow along without refreshing.",
+    image: "/images/Homepage/tournament-tool.webp",
+    imageAlt: "Draftix tournament bracket maker showing a single elimination bracket",
+    ctaHref: "/tournaments",
+    ctaLabel: "Create a bracket",
+    steps: [
+      "Pick single elimination, double elimination, round robin, or Swiss.",
+      "Add 3 to 16 teams or players — uneven fields get automatic byes.",
+      "Record scores live and share the public bracket link.",
+    ],
+    faq: [
+      ["Is the bracket maker free?", "Yes. You can create and share brackets without an account."],
+      ["How many teams can a bracket hold?", "Brackets support 3 to 16 teams or players, with automatic byes for uneven fields."],
+      ["Can viewers follow the bracket live?", "Yes. The public link shows every recorded result as it happens."],
+    ],
+  },
 };
 
 export default function SeoTopicPage({ path }) {
@@ -67,7 +87,7 @@ export default function SeoTopicPage({ path }) {
           <p className="seo-topic-label">{topic.label}</p>
           <h1>{topic.title}</h1>
           <p className="seo-topic-lead">{topic.lead}</p>
-          <a href="/draft">Open a draft room</a>
+          <a href={topic.ctaHref || "/draft"}>{topic.ctaLabel || "Open a draft room"}</a>
         </header>
 
         <figure className="seo-topic-visual">
@@ -106,6 +126,7 @@ export default function SeoTopicPage({ path }) {
             <a href="/valorant-agent-ban">Agent bans</a>
             <a href="/valorant-draft-tool">Draft tool</a>
             <a href="/team-balance">Team balancer</a>
+            <a href="/tournaments">Bracket maker</a>
           </nav>
 
           <p className="seo-topic-disclaimer">Draftix is an independent community tool and is not endorsed by Riot Games.</p>
