@@ -26,7 +26,7 @@ const LIVELINESS_VARIANT = "choreographed";
 
 const navigationLinks = [
   { href: "#process", label: "How it works" },
-  { href: "/tournaments", label: "Tournaments" },
+  { href: "/tournaments", label: "Bracket maker" },
   { href: "/team-balance", label: "Team balancer" },
   { href: "/draft", label: "Open Draftix", className: "dr-nav-cta" },
 ];
@@ -58,7 +58,7 @@ const competitiveTools = [
     id: "tournaments",
     num: "03",
     kicker: "BRACKET & TOURNAMENT ENGINE",
-    title: "TOURNAMENTS",
+    title: "BRACKET MAKER",
     desc: "Build single and double elimination tournament brackets, track match progression, record scores, and crown a champion with live public share links.",
     cta: "CREATE BRACKET",
     href: "/tournaments",

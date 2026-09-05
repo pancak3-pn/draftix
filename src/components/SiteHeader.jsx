@@ -2,7 +2,7 @@ import AppNav from "./AppNav.jsx";
 
 const primaryLinks = [
   { href: "/#process", label: "How it works" },
-  { href: "/tournaments", label: "Tournaments" },
+  { href: "/tournaments", label: "Bracket maker" },
   { href: "/team-balance", label: "Team balancer" },
 ];
 

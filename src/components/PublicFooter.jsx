@@ -13,14 +13,15 @@ export default function PublicFooter({ reveal = false }) {
           <h2 className="public-footer-heading">Product</h2>
           <a className="public-footer-featured" href="/draft">Open Draftix</a>
           <a href="/team-balance">Team balancer</a>
-          <a href="/tournaments">Tournaments</a>
+          <a href="/tournaments">Bracket maker</a>
         </nav>
 
-        <nav className="public-footer-col" aria-label="Valorant drafting guides">
+        <nav className="public-footer-col" aria-label="Draftix guides">
           <h2 className="public-footer-heading">Guides</h2>
           <a href="/valorant-map-veto">Map veto guide</a>
           <a href="/valorant-agent-ban">Agent bans guide</a>
           <a href="/valorant-draft-tool">Draft tool guide</a>
+          <a href="/tournament-bracket-maker">Bracket maker guide</a>
         </nav>
 
         <nav className="public-footer-col" aria-label="Help and resources">

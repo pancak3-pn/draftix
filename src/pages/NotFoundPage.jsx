@@ -15,7 +15,7 @@ export default function NotFoundPage() {
                         </div>
                         <nav className="nf-suggestions" aria-label="Popular pages">
                             <a href="/team-balance">Team balancer</a>
-                            <a href="/tournaments">Tournaments</a>
+                            <a href="/tournaments">Bracket maker</a>
                             <a href="/status">Status</a>
                         </nav>
                     </div>
