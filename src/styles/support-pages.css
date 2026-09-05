@@ -208,6 +208,7 @@
 .tb-row input,
 .tb-row select {
   width: 100%;
+  min-width: 0;
   min-height: 40px;
   padding: 0 11px;
   border: 1px solid #303846;
@@ -215,6 +216,8 @@
   background: #080c12;
   color: #eef0f4;
 }
+
+.tb-rank-native { display: none; }
 
 .tb-rank-select {
   position: relative;
@@ -558,14 +561,27 @@
   }
 
   .tb-row {
-    grid-template-columns: 28px minmax(0, 1fr) 115px;
-    padding: 8px 0;
+    grid-template-columns: 24px minmax(0, 1fr) 64px;
+    gap: 8px;
+    padding: 12px 0;
   }
 
-  .tb-row button {
-    grid-column: 2 / -1;
-    justify-self: end;
+  .tb-row > span { grid-column: 1; grid-row: 1; }
+  .tb-row > input { grid-column: 2 / -1; grid-row: 1; }
+  .tb-row > .tb-rank-native { display: block; grid-column: 2; grid-row: 2; }
+  .tb-row > .tb-rank-select { display: none; }
+  .tb-row > button {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: stretch;
+    min-height: 44px;
+    padding: 0 4px;
   }
+  .tb-row > input,
+  .tb-row > select { min-height: 44px; font-size: 16px; }
+  .tb-roster > header,
+  .tb-results > header { gap: 12px; flex-wrap: wrap; }
+  .tb-team li b { overflow-wrap: anywhere; }
 
   .tb-results>div,
   .status-grid {
@@ -1225,9 +1241,15 @@
   }
 
   .tb-row {
-    grid-template-columns: 28px minmax(120px, 1fr) minmax(120px, 160px) 68px;
+    grid-template-columns: 24px minmax(0, 1fr) 64px;
     gap: 8px;
+    padding-block: 10px;
   }
+
+  .tb-row > span { grid-column: 1; grid-row: 1; }
+  .tb-row > input { grid-column: 2 / -1; grid-row: 1; }
+  .tb-row > .tb-rank-select { grid-column: 2; grid-row: 2; }
+  .tb-row > button { grid-column: 3; grid-row: 2; min-height: 44px; }
 
   .status-grid {
     grid-template-columns: repeat(2, 1fr);

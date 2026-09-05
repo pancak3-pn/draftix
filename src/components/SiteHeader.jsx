@@ -4,14 +4,6 @@ const primaryLinks = [
   { href: "/#process", label: "How it works" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/team-balance", label: "Team balancer" },
-  {
-    label: "Tools",
-    children: [
-      { href: "/draft", label: "Draft tool" },
-      { href: "/team-balance", label: "Team balancer" },
-      { href: "/tournaments", label: "Tournaments" },
-    ],
-  },
 ];
 
 export default function SiteHeader({ draftEntry = false }) {

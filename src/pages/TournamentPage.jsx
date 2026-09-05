@@ -15,8 +15,9 @@ import PublicFooter from "../components/PublicFooter.jsx";
 import { clearMatchResult, createTournament, getTournament, listMyTournaments, migrateTournamentStorage, registerMyTournament, removeMyTournament, saveTournamentToken, setMatchResult, subscribeToTournament, tournamentToken, updateSeriesScore, updateTournamentFormat } from "../lib/tournaments.js";
 import { navigate } from "../lib/spaRouter.js";
 // Tournament styles ride this lazy chunk instead of the entry bundle.
+// (Create-flow polish is merged at the end of tournaments.css.)
 import "../styles/tournaments.css";
-import "../styles/tournament-create-polish.css";
+import { tournamentSeo } from "../lib/tournaments.js";
 
 // One-time upgrade: rescue any organizer tokens still living in
 // sessionStorage (pre-persistence tournaments) into the persistent
@@ -180,8 +181,8 @@ export function TournamentHubPage() {
     <main className="tournament-create-shell">
       <header className="tournament-intro">
         <span>Draftix Brackets</span>
-        <h1>Run the competition.</h1>
-        <p>Set up the teams, choose a format, and share your bracket.</p>
+        <h1>{tournamentSeo.heading}</h1>
+        <p>{tournamentSeo.intro}</p>
       </header>
       <section className="tournament-hub-workspace" aria-label="Tournament organizer">
         <nav className="tournament-hub-tabs" aria-label="Tournament organizer views">
@@ -214,6 +215,9 @@ export function TournamentHubPage() {
             </footer>
           </form> : <MyTournaments />}
         </div>
+      </section>
+      <section className="tournament-create-help" aria-label="Bracket maker help">
+        {tournamentSeo.questions.map(({ title, answer }) => <details key={title}><summary>{title}</summary><p>{answer}</p></details>)}
       </section>
     </main>
     <PublicFooter />
@@ -348,6 +352,7 @@ export default function TournamentPage({ slug }) {
   const [formatBusy, setFormatBusy] = useState(false);
   const [pendingFormat, setPendingFormat] = useState("");
   const [competitionTab, setCompetitionTab] = useState("matches");
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
   const [bracketFullscreen, setBracketFullscreen] = useState(false);
   const [bracketZoom, setBracketZoom] = useState(null);
   const [bracketMetrics, setBracketMetrics] = useState({ width: 0, height: 0, autoScale: 1 });
@@ -373,7 +378,9 @@ export default function TournamentPage({ slug }) {
     const availableHeight = Math.max(0, viewport.clientHeight - 40);
     const widthScale = width ? availableWidth / width : 1;
     const heightScale = height ? availableHeight / height : 1;
-    const autoScale = Math.max(.35, Math.min(1, widthScale, heightScale));
+    // Keep mobile scoring readable; larger brackets pan within the canvas.
+    const minimumScale = window.matchMedia("(max-width: 620px)").matches ? .75 : .35;
+    const autoScale = Math.max(minimumScale, Math.min(1, widthScale, heightScale));
     if (bracketZoom === null && autoScale < 1) viewport.scrollLeft = 0;
     setBracketMetrics((current) => current.width === width && current.height === height && Math.abs(current.autoScale - autoScale) < .001
       ? current
@@ -560,81 +567,84 @@ export default function TournamentPage({ slug }) {
       </section>
     </div>}
     <main className="tournament-studio-shell">
-      <aside className="tournament-event-rail" aria-label="Tournament information">
+      <button type="button" className="tournament-mobile-details" aria-expanded={mobileDetailsOpen} aria-controls="tournament-event-details" onClick={() => setMobileDetailsOpen((open) => !open)}>Tournament details <span aria-hidden="true">{mobileDetailsOpen ? "−" : "+"}</span></button>
+      <aside id="tournament-event-details" className={`tournament-event-rail${mobileDetailsOpen ? " is-mobile-open" : ""}`} aria-label="Tournament information">
         <a className="tournament-studio-back" href="/tournaments"><ArrowLeft aria-hidden="true" /><span>Back to tournaments</span></a>
         <div className="tournament-event-status"><span className={`tournament-status ${data.status}`}>{data.status}</span><strong>{data.name}</strong></div>
         <dl className="tournament-event-facts">
           <div><dt>Activity</dt><dd>{data.activity || "General"}</dd></div>
           <div className="tournament-format-fact"><dt>Format</dt><dd>{data.canManage ? <select className="tournament-inline-format" value={formatDraft} disabled={formatBusy} onChange={(event) => changeTournamentFormat(event.target.value)} aria-label="Tournament format">{formats.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select> : formatLabel}</dd></div>
-          <div><dt>Entrants</dt><dd>{data.teamCount}</dd></div>
-          <div><dt>Series</dt><dd>Best of {data.bestOf}</dd></div>
+          <div className="tournament-fact-compact"><dt>Entrants</dt><dd>{data.teamCount}</dd></div>
+          <div className="tournament-fact-compact"><dt>Series</dt><dd>Best of {data.bestOf}</dd></div>
         </dl>
         {data.canManage && <div className="tournament-organizer-note"><span className="tournament-organizer-icon"><ShieldCheck aria-hidden="true" /></span><div><strong>Organizer mode</strong><p>Select a winner, enter the score, then save the result.</p></div></div>}
         <div className={`tournament-rail-champion${champion ? " is-decided" : ""}`}><Trophy aria-hidden="true" weight="duotone" /><span>Champion</span><strong>{champion?.name || "To be decided"}</strong>{runnerUp && <small>def. {runnerUp.name} {finalScore}</small>}</div>
       </aside>
       <section className="tournament-studio-canvas">
-      {error && <p className="tournament-error" role="alert">{error}</p>}
-      <section className={`bracket-panel bracket-theme-${bracketTheme}`} aria-labelledby="bracket-heading" ref={bracketPanelRef}>
-        <header className="bracket-panel-head">
-          <div className="bracket-panel-title"><div><h2 id="bracket-heading">{scheduleFormat ? "Match schedule" : "Bracket"}</h2><p>{rounds.length} rounds · {data.matches.length} matches</p></div>{showStandings && <nav className="tournament-view-tabs" aria-label="Tournament view"><button type="button" className={competitionTab === "matches" ? "is-active" : ""} onClick={() => setCompetitionTab("matches")}>Matches</button><button type="button" className={competitionTab === "standings" ? "is-active" : ""} onClick={() => setCompetitionTab("standings")}>Standings</button></nav>}</div>
-          <div className="bracket-view-controls">
-            <div className="bracket-zoom-controls" aria-label="Bracket zoom controls">
-              <button type="button" onClick={() => adjustBracketZoom(-.1)} aria-label="Zoom bracket out"><Minus aria-hidden="true" /></button>
-              <button type="button" className="bracket-fit-button" onClick={() => setBracketZoom(null)} aria-label="Fit bracket to screen">{Math.round(effectiveBracketScale * 100)}%</button>
-              <button type="button" onClick={() => adjustBracketZoom(.1)} aria-label="Zoom bracket in"><Plus aria-hidden="true" /></button>
-            </div>
-            <details className="bracket-theme-picker" ref={bracketThemeMenuRef}>
-              <summary><span>Theme</span><strong>{bracketThemes.find(([value]) => value === bracketTheme)?.slice(1).join(" ") || "Modern Light"}</strong></summary>
-              <div className="bracket-theme-menu" role="group" aria-label="Bracket theme">
-                <span className="bracket-theme-menu-title">Choose bracket theme</span>
-                <div className="bracket-theme-grid">
-                  {bracketThemes.map(([value, family, tone]) => <button type="button" key={value} className={bracketTheme === value ? "is-selected" : ""} aria-pressed={bracketTheme === value} onClick={() => changeBracketTheme(value)}>
-                    <span className={`bracket-theme-preview preview-${value}`} aria-hidden="true"><svg viewBox="0 0 160 90"><g className="preview-entries"><rect x="15" y="16" width="38" height="10" /><rect x="15" y="34" width="38" height="10" /><rect x="15" y="57" width="38" height="10" /><rect x="92" y="36" width="38" height="14" /></g><path className="preview-lines" d="M53 21 H68 V39 H92 M53 39 H68 M53 62 H78 V47 H92 M130 43 H146" /><circle className="preview-node" cx="68" cy="39" r="3" /><circle className="preview-node" cx="92" cy="43" r="3" /></svg></span>
-                    <span className="bracket-theme-name">{family} <small>({tone})</small></span>
-                  </button>)}
-                </div>
+        {error && <p className="tournament-error" role="alert">{error}</p>}
+        <section className={`bracket-panel bracket-theme-${bracketTheme}`} aria-labelledby="bracket-heading" ref={bracketPanelRef}>
+          <header className="bracket-panel-head">
+            <div className="bracket-panel-title"><div><h2 id="bracket-heading">{scheduleFormat ? "Match schedule" : "Bracket"}</h2><p>{rounds.length} rounds · {data.matches.length} matches</p></div>{showStandings && <nav className="tournament-view-tabs" aria-label="Tournament view"><button type="button" className={competitionTab === "matches" ? "is-active" : ""} onClick={() => setCompetitionTab("matches")}>Matches</button><button type="button" className={competitionTab === "standings" ? "is-active" : ""} onClick={() => setCompetitionTab("standings")}>Standings</button></nav>}</div>
+            <div className="bracket-view-controls">
+              <div className="bracket-zoom-controls" aria-label="Bracket zoom controls">
+                <button type="button" onClick={() => adjustBracketZoom(-.1)} aria-label="Zoom bracket out"><Minus aria-hidden="true" /></button>
+                <button type="button" className="bracket-fit-button" onClick={() => setBracketZoom(null)} aria-label="Fit bracket to screen">{Math.round(effectiveBracketScale * 100)}%</button>
+                <button type="button" onClick={() => adjustBracketZoom(.1)} aria-label="Zoom bracket in"><Plus aria-hidden="true" /></button>
               </div>
-            </details>
-            <button className="bracket-fullscreen-button" type="button" onClick={toggleBracketFullscreen} aria-label={bracketFullscreen ? "Exit bracket fullscreen" : "Open bracket fullscreen"}>
-              {bracketFullscreen ? <CornersIn aria-hidden="true" /> : <CornersOut aria-hidden="true" />}
-              <span>{bracketFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
-            </button>
-          </div>
-        </header>
-        {showStandings && competitionTab === "standings" ? <section className="tournament-standings tournament-standings-panel" aria-label="Standings">
-          <table>
-            <thead><tr><th>#</th><th>Entrant</th><th>W</th><th>L</th><th>Diff</th><th>P</th></tr></thead>
-            <tbody>{data.standings.map((row, index) => <tr key={row.teamId} className={index === 0 && data.status === "completed" ? "is-leader" : ""}><td>{index + 1}</td><td>{row.name}</td><td>{row.wins}</td><td>{row.losses}</td><td>{row.diff > 0 ? `+${row.diff}` : row.diff}</td><td>{row.played}</td></tr>)}</tbody>
-          </table>
-        </section> : <div className="bracket-scroll" aria-label={`${data.name} tournament bracket`} ref={bracketScrollRef}>
-          <div className="bracket-scale-stage" style={{ width: bracketMetrics.width * effectiveBracketScale, height: bracketMetrics.height * effectiveBracketScale }}>
-          <div className={`bracket-board format-${data.format}`} ref={boardRef} style={{ transform: `scale(${effectiveBracketScale})`, ...(data.format === "double_elimination" ? { "--double-columns": Math.max(doubleWinners.length, doubleLosers.length) + 2 } : {}) }}>
-            <BracketConnectors boardRef={boardRef} matches={data.matches} connectChampion={connectsToChampion} scale={effectiveBracketScale} />
-            {data.format === "double_elimination" ? <>
-              {doubleWinners.map(({ round, matches, label }, index) => <section className={`bracket-round ${roundLaneClass(label)}`} style={{ "--lane-column": index + 1, "--lane-row": 1 }} key={round}>
-                <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
-                <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
-              </section>)}
-              {doubleLosers.map(({ round, matches, label }, index) => <section className={`bracket-round ${roundLaneClass(label)}`} style={{ "--lane-column": index + 1, "--lane-row": 2 }} key={round}>
-                <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
-                <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
-              </section>)}
-              {doubleFinal && <section className={`bracket-round ${roundLaneClass(doubleFinal.label)}`} style={{ "--lane-column": Math.max(doubleWinners.length, doubleLosers.length) + 1, "--lane-row": 1, "--lane-span": 2 }} key={doubleFinal.round}>
-                <header><span>{String(doubleFinal.round).padStart(2, "0")}</span><h2>{doubleFinal.label}</h2></header>
-                <div className="bracket-round-matches">{doubleFinal.matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
-              </section>}
-            </> : rounds.map(([round, matches]) => { const label = roundLabel(round, maxRound, data.format, data.totalRounds); return <section className={`bracket-round ${roundLaneClass(label)}`} key={round}>
-              <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
-              <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
-            </section>; })}
-            <section className="bracket-round bracket-champion-round" style={data.format === "double_elimination" ? { "--lane-column": Math.max(doubleWinners.length, doubleLosers.length) + 2, "--lane-row": 1, "--lane-span": 2 } : undefined} data-champion-target>
-              <header><span>{String(rounds.length + 1).padStart(2, "0")}</span><h2>Champion</h2></header>
-              <div className="bracket-round-matches"><article className={`bracket-champion-card${champion ? " is-decided" : ""}`}><Trophy aria-hidden="true" weight="duotone" /><span>Tournament champion</span><strong>{champion?.name || "To be decided"}</strong></article></div>
-            </section>
-          </div>
-          </div>
-        </div>}
-      </section>
+              <details className="bracket-theme-picker" ref={bracketThemeMenuRef}>
+                <summary><span>Theme</span><strong>{bracketThemes.find(([value]) => value === bracketTheme)?.slice(1).join(" ") || "Modern Light"}</strong></summary>
+                <div className="bracket-theme-menu" role="group" aria-label="Bracket theme">
+                  <span className="bracket-theme-menu-title">Choose bracket theme</span>
+                  <div className="bracket-theme-grid">
+                    {bracketThemes.map(([value, family, tone]) => <button type="button" key={value} className={bracketTheme === value ? "is-selected" : ""} aria-pressed={bracketTheme === value} onClick={() => changeBracketTheme(value)}>
+                      <span className={`bracket-theme-preview preview-${value}`} aria-hidden="true"><svg viewBox="0 0 160 90"><g className="preview-entries"><rect x="15" y="16" width="38" height="10" /><rect x="15" y="34" width="38" height="10" /><rect x="15" y="57" width="38" height="10" /><rect x="92" y="36" width="38" height="14" /></g><path className="preview-lines" d="M53 21 H68 V39 H92 M53 39 H68 M53 62 H78 V47 H92 M130 43 H146" /><circle className="preview-node" cx="68" cy="39" r="3" /><circle className="preview-node" cx="92" cy="43" r="3" /></svg></span>
+                      <span className="bracket-theme-name">{family} <small>({tone})</small></span>
+                    </button>)}
+                  </div>
+                </div>
+              </details>
+              <button className="bracket-fullscreen-button" type="button" onClick={toggleBracketFullscreen} aria-label={bracketFullscreen ? "Exit bracket fullscreen" : "Open bracket fullscreen"}>
+                {bracketFullscreen ? <CornersIn aria-hidden="true" /> : <CornersOut aria-hidden="true" />}
+                <span>{bracketFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
+              </button>
+            </div>
+          </header>
+          {showStandings && competitionTab === "standings" ? <section className="tournament-standings tournament-standings-panel" aria-label="Standings">
+            <table>
+              <thead><tr><th>#</th><th>Entrant</th><th>W</th><th>L</th><th>Diff</th><th>P</th></tr></thead>
+              <tbody>{data.standings.map((row, index) => <tr key={row.teamId} className={index === 0 && data.status === "completed" ? "is-leader" : ""}><td>{index + 1}</td><td>{row.name}</td><td>{row.wins}</td><td>{row.losses}</td><td>{row.diff > 0 ? `+${row.diff}` : row.diff}</td><td>{row.played}</td></tr>)}</tbody>
+            </table>
+          </section> : <div className="bracket-scroll" aria-label={`${data.name} tournament bracket`} ref={bracketScrollRef}>
+            <div className="bracket-scale-stage" style={{ width: bracketMetrics.width * effectiveBracketScale, height: bracketMetrics.height * effectiveBracketScale }}>
+              <div className={`bracket-board format-${data.format}`} ref={boardRef} style={{ transform: `scale(${effectiveBracketScale})`, ...(data.format === "double_elimination" ? { "--double-columns": Math.max(doubleWinners.length, doubleLosers.length) + 2 } : {}) }}>
+                <BracketConnectors boardRef={boardRef} matches={data.matches} connectChampion={connectsToChampion} scale={effectiveBracketScale} />
+                {data.format === "double_elimination" ? <>
+                  {doubleWinners.map(({ round, matches, label }, index) => <section className={`bracket-round ${roundLaneClass(label)}`} style={{ "--lane-column": index + 1, "--lane-row": 1 }} key={round}>
+                    <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
+                    <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+                  </section>)}
+                  {doubleLosers.map(({ round, matches, label }, index) => <section className={`bracket-round ${roundLaneClass(label)}`} style={{ "--lane-column": index + 1, "--lane-row": 2 }} key={round}>
+                    <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
+                    <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+                  </section>)}
+                  {doubleFinal && <section className={`bracket-round ${roundLaneClass(doubleFinal.label)}`} style={{ "--lane-column": Math.max(doubleWinners.length, doubleLosers.length) + 1, "--lane-row": 1, "--lane-span": 2 }} key={doubleFinal.round}>
+                    <header><span>{String(doubleFinal.round).padStart(2, "0")}</span><h2>{doubleFinal.label}</h2></header>
+                    <div className="bracket-round-matches">{doubleFinal.matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+                  </section>}
+                </> : rounds.map(([round, matches]) => {
+                  const label = roundLabel(round, maxRound, data.format, data.totalRounds); return <section className={`bracket-round ${roundLaneClass(label)}`} key={round}>
+                    <header><span>{String(round).padStart(2, "0")}</span><h2>{label}</h2></header>
+                    <div className="bracket-round-matches">{matches.map((match) => <MatchCard key={match.id} match={match} teams={teams} bestOf={data.bestOf} canManage={data.canManage} busy={busyMatch === match.id} onSave={save} onClear={clear} onScore={updateScore} />)}</div>
+                  </section>;
+                })}
+                <section className="bracket-round bracket-champion-round" style={data.format === "double_elimination" ? { "--lane-column": Math.max(doubleWinners.length, doubleLosers.length) + 2, "--lane-row": 1, "--lane-span": 2 } : undefined} data-champion-target>
+                  <header><span>{String(rounds.length + 1).padStart(2, "0")}</span><h2>Champion</h2></header>
+                  <div className="bracket-round-matches"><article className={`bracket-champion-card${champion ? " is-decided" : ""}`}><Trophy aria-hidden="true" weight="duotone" /><span>Tournament champion</span><strong>{champion?.name || "To be decided"}</strong></article></div>
+                </section>
+              </div>
+            </div>
+          </div>}
+        </section>
       </section>
     </main>
   </div>;

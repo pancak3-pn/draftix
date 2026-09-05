@@ -1,0 +1,918 @@
+/* Site-wide navigation: shared command-bar contract, public nav, support header.
+   Extracted from typography.css — placement/split: see main.jsx import order. */
+/* Shared navbar contract. Variant classes control placement only. */
+.site-nav {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  width: min(1440px, calc(100% - 48px));
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 8px 6px 16px;
+  border: 1px solid rgba(15, 25, 35, .16) !important;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .94) !important;
+  box-shadow: 0 16px 42px rgba(1, 4, 9, .22), inset 0 1px 0 #fff, inset 0 -1px 0 rgba(15, 25, 35, .08) !important;
+  color: #0f1923;
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.site-nav::before,
+.site-nav::after {
+  display: none !important;
+}
+
+.site-nav-landing {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  left: 0;
+  margin-inline: auto;
+}
+
+.site-nav-support {
+  margin: 12px auto 0;
+}
+
+.site-nav-entry,
+.site-nav-app {
+  width: calc(100% - 24px);
+  height: 64px !important;
+  min-height: 64px !important;
+  margin: 0 12px;
+  padding-inline: 16px 8px;
+  border-radius: 0 0 14px 14px;
+  border-top: 0 !important;
+}
+
+.site-nav-app {
+  position: sticky;
+  top: 0;
+}
+
+.site-nav .site-brand {
+  display: inline-flex;
+  height: auto !important;
+  align-items: center;
+  gap: 10px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #0f1923 !important;
+  text-decoration: none;
+}
+
+.site-nav .site-brand img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.site-nav .site-brand strong {
+  color: #0f1923;
+}
+
+.site-nav .site-nav-center strong {
+  color: #0f1923;
+}
+
+.site-nav .site-nav-center span {
+  color: #626b73;
+}
+
+.site-nav .site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-nav .site-nav-links a {
+  padding: 11px 14px;
+  border-radius: 7px;
+  color: #3e4850;
+  font-family: var(--font-nav);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav .site-nav-links a:not(.dr-nav-cta):not(.sp-open):hover,
+.site-nav .site-nav-links a:not(.dr-nav-cta):not(.sp-open):focus-visible {
+  background: rgba(15, 25, 35, .07);
+  color: #0f1923;
+}
+
+.site-nav .dr-nav-cta,
+.site-nav .sp-open {
+  border: 1px solid #ff4655;
+  background: #ff4655;
+  color: #0f1923;
+}
+
+.site-nav .site-nav-actions>a,
+.site-nav .site-nav-actions>button {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid rgba(15, 25, 35, .24);
+  border-radius: 7px;
+  background: transparent;
+  color: #0f1923;
+}
+
+.site-nav .site-nav-actions>a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.site-nav .site-nav-actions>a:hover,
+.site-nav .site-nav-actions>button:hover {
+  border-color: rgba(15, 25, 35, .44);
+  background: rgba(15, 25, 35, .06);
+  color: #0f1923;
+}
+
+.site-nav a:focus-visible,
+.site-nav button:focus-visible {
+  outline: 3px solid #ff4655 !important;
+  outline-offset: 2px;
+}
+
+.site-nav a,
+.site-nav button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255, 70, 85, .18);
+}
+
+/* App variant: phase label + leave action. */
+.site-nav-app .site-nav-center strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.site-nav-app .site-nav-center span {
+  font-family: var(--font-data);
+  font-size: .7rem;
+  letter-spacing: .08em;
+}
+
+.site-nav-app .site-nav-actions>button {
+  border-color: #ff4655;
+  color: #ff4655;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.site-nav-app .site-nav-actions>button:hover {
+  border-color: #ff4655;
+  background: #ff4655;
+  color: #fff;
+}
+
+@media (max-width:820px) {
+  .site-nav {
+    width: calc(100% - 24px);
+    min-height: 58px;
+    padding-inline: 12px 8px;
+  }
+
+  .site-nav-landing {
+    top: 12px;
+  }
+
+  .site-nav-support {
+    margin-top: 8px;
+  }
+
+  .site-nav-entry,
+  .site-nav-app {
+    width: calc(100% - 16px);
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: 0 8px;
+  }
+
+  .site-nav-landing .site-nav-menu,
+  .site-nav-support .site-nav-menu {
+    display: grid;
+  }
+
+  .site-nav-landing .site-nav-links,
+  .site-nav-support .site-nav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px;
+    border: 1px solid rgba(15, 25, 35, .16);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(1, 4, 9, .24);
+  }
+
+  .site-nav-landing .site-nav-links.is-open,
+  .site-nav-support .site-nav-links.is-open {
+    display: flex;
+  }
+
+  .site-nav .site-nav-links a {
+    min-height: 44px;
+    padding: 13px 14px;
+  }
+
+  .site-nav .dr-nav-cta,
+  .site-nav .sp-open {
+    margin-top: 4px;
+    text-align: center;
+  }
+}
+
+/* Keep the homepage command bar light after the shared public-nav theme. */
+.dr-site>.site-nav-landing.dr-nav {
+  border-bottom-color: rgba(15, 25, 35, .2) !important;
+  background: #f3efe8 !important;
+  box-shadow: 0 8px 24px rgba(15, 25, 35, .1) !important;
+  color: #0f1923;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta) {
+  color: #20272d;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):hover,
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):focus-visible {
+  background: rgba(255, 255, 255, .72);
+  color: #b72634;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-menu {
+  border-color: rgba(15, 25, 35, .18);
+  background: #fff;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-menu span {
+  background: #0f1923;
+}
+
+@media (max-width: 900px) {
+
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links,
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links.is-open {
+    border-color: rgba(15, 25, 35, .16) !important;
+    background: #f3efe8 !important;
+    box-shadow: 0 18px 40px rgba(15, 25, 35, .14);
+  }
+}
+
+/* Public wordmark lock: outranks the legacy single-image brand treatment. */
+.site-nav.site-nav-public>a.site-brand.dr-brand {
+  display: inline-flex;
+  width: auto;
+  height: 58px !important;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 8px 0 !important;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.site-nav.site-nav-public>a.site-brand.dr-brand img {
+  display: block;
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px;
+  object-fit: contain !important;
+  object-position: center;
+}
+
+.site-nav.site-nav-public>a.site-brand.dr-brand strong {
+  display: inline-block;
+  flex: 0 0 auto;
+  color: #151c23;
+  font-family: var(--font-display) !important;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .site-nav.site-nav-public>a.site-brand.dr-brand {
+    height: 52px !important;
+    gap: 7px;
+  }
+
+  .site-nav.site-nav-public>a.site-brand.dr-brand img {
+    width: 36px !important;
+    height: 36px !important;
+    flex-basis: 36px;
+  }
+
+  .site-nav.site-nav-public>a.site-brand.dr-brand strong {
+    font-size: 1.25rem;
+  }
+}
+
+/* Shared visitor command bar. Product screens under /draft keep their own shell. */
+.site-nav-public {
+  position: sticky !important;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  height: 82px;
+  min-height: 82px;
+  margin: 0;
+  padding: 0 clamp(22px, 4vw, 70px);
+  overflow: visible;
+  border: 0 !important;
+  border-top: 1px solid rgba(15, 25, 35, .18) !important;
+  border-bottom: 0 !important;
+  border-radius: 0;
+  background: #f3efe8 !important;
+  box-shadow: none !important;
+  color: #0f1923;
+}
+
+.site-nav-public>*,
+.site-nav-public .site-nav-links {
+  position: relative;
+  z-index: 1;
+}
+
+.site-nav-public>.dr-brand {
+  display: inline-flex;
+  width: auto;
+  height: 58px !important;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding-block: 8px !important;
+  overflow: visible;
+}
+
+.site-nav-public>.dr-brand img {
+  display: block;
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px;
+  object-fit: contain !important;
+  object-position: center;
+}
+
+.site-nav-public>.dr-brand strong {
+  display: inline-block;
+  flex: 0 0 auto;
+  color: #151c23;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+}
+
+.site-nav-public>.dr-brand strong span {
+  color: #df3545;
+}
+
+.site-nav-public .dr-nav-links {
+  flex: 1 1 auto;
+  margin-left: clamp(20px, 2.4vw, 42px);
+  gap: clamp(4px, .55vw, 10px);
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.site-nav-public .dr-nav-motto {
+  margin-left: 16px;
+  padding: 2px 22px 2px 18px;
+  border-right: 1px solid rgba(15, 25, 35, .18);
+  border-left: 1px solid rgba(15, 25, 35, .18);
+  color: #323a41;
+  font-family: var(--font-tactical);
+  font-size: .51rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.site-nav-public .dr-nav-links a,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a {
+  position: relative;
+}
+
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta),
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta) {
+  padding: 12px clamp(13px, 1.3vw, 22px);
+  color: #18212a;
+  background: transparent;
+  font-family: var(--font-tactical);
+  font-size: .66rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta)::after,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta)::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 7px;
+  left: 14px;
+  height: 2px;
+  background: #df3545;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform .2s ease;
+}
+
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta):hover,
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta):focus-visible,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta):hover,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta):focus-visible {
+  background: transparent;
+  color: #c72434;
+}
+
+.site-nav-public .dr-nav-cta {
+  color: #fff !important;
+  text-shadow: 0 1px 1px rgba(15, 25, 35, .28);
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta {
+  display: inline-flex;
+  min-width: clamp(158px, 11vw, 180px);
+  min-height: 46px;
+  margin-left: auto;
+  padding: 0 22px;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: 2px;
+  font-family: var(--font-tactical);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta::after {
+  display: none;
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta .nav-action-arrow {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  transition: transform .18s ease;
+}
+
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links .dr-nav-cta::after {
+  display: none;
+  content: none;
+}
+
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links .dr-nav-cta .nav-action-arrow {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta:hover,
+.site-nav-public .dr-nav-links .dr-nav-cta:focus-visible {
+  border-color: #e93646;
+  background: #e93646;
+  box-shadow: 0 8px 20px rgba(119, 17, 29, .22);
+  transform: translateY(-1px);
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta:hover .nav-action-arrow,
+.site-nav-public .dr-nav-links .dr-nav-cta:focus-visible .nav-action-arrow {
+  transform: translateX(3px);
+}
+
+.site-nav-public .dr-nav-links .dr-nav-cta:active {
+  transform: translateY(1px);
+}
+
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta):hover::after,
+.site-nav-public .dr-nav-links a:not(.dr-nav-cta):focus-visible::after,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta):hover::after,
+.dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta):focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+@media (max-width: 900px) {
+  .site-nav-public {
+    height: 66px;
+    min-height: 66px;
+    padding: 0 10px 0 14px;
+    overflow: visible;
+  }
+
+  .site-nav-public .dr-nav-motto {
+    display: none !important;
+  }
+
+  .site-nav-public>.dr-brand {
+    height: 52px !important;
+    gap: 7px;
+  }
+
+  .site-nav-public>.dr-brand img {
+    width: 36px !important;
+    height: 36px !important;
+    flex-basis: 36px;
+  }
+
+  .site-nav-public>.dr-brand strong {
+    font-size: 1.25rem;
+  }
+
+  .site-nav-public .site-nav-menu {
+    margin-left: auto;
+    border-color: rgba(15, 25, 35, .18);
+    background: #fff;
+  }
+
+  .site-nav-public .site-nav-menu span {
+    background: #0f1923;
+  }
+
+  /* The shared ".site-nav .site-nav-links { display: flex }" inline rule
+     (0-2-0, later sheet) would keep the mobile dropdown permanently visible;
+     re-assert the burger-controlled toggle at higher specificity. */
+  .site-nav.site-nav-public .dr-nav-links {
+    display: none;
+  }
+
+  .site-nav.site-nav-public .dr-nav-links.is-open {
+    display: flex;
+  }
+
+  .site-nav-public .dr-nav-links,
+  .site-nav-public .dr-nav-links.is-open {
+    /* Re-assert absolute: the shared ".site-nav-public .site-nav-links
+       { position: relative }" layering rule would otherwise turn this
+       dropdown into an in-flow flex child of the 66px sticky bar, which
+       centers it vertically and clips the first items above the viewport. */
+    position: absolute;
+    top: 65px;
+    right: 10px;
+    left: 10px;
+    margin: 0;
+    border-color: rgba(15, 25, 35, .16) !important;
+    background: #f3efe8 !important;
+    box-shadow: 0 18px 40px rgba(15, 25, 35, .14);
+  }
+
+  .site-nav-public .dr-nav-links a:not(.dr-nav-cta)::after,
+  .dr-site>.site-nav-landing.dr-nav .dr-nav-links a:not(.dr-nav-cta)::after {
+    right: 14px;
+    bottom: 5px;
+    left: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .site-nav-public .dr-nav-links a::after,
+  .dr-site>.site-nav-landing.dr-nav .dr-nav-links a::after {
+    transition: none;
+  }
+}
+
+/* Homepage command bar: warm editorial surface from the active Jett direction. */
+.dr-site>.site-nav-landing.dr-nav {
+  height: 82px;
+  padding: 0 clamp(22px, 4vw, 70px);
+  overflow: hidden;
+  border-top: 1px solid rgba(15, 25, 35, .18);
+  border-bottom: 1px solid rgba(15, 25, 35, .2) !important;
+  background: #f3efe8 !important;
+  box-shadow: 0 8px 24px rgba(15, 25, 35, .1) !important;
+  color: #0f1923;
+}
+
+.dr-site>.site-nav-landing.dr-nav>.dr-brand {
+  display: inline-flex;
+  width: auto;
+  height: 58px;
+  align-items: center;
+  gap: 10px;
+  overflow: visible;
+}
+
+.dr-site>.site-nav-landing.dr-nav>.dr-brand img {
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px;
+  object-fit: contain !important;
+}
+
+.dr-site>.site-nav-landing.dr-nav>.dr-brand strong {
+  display: inline-block;
+  color: #151c23;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.015em;
+}
+
+.dr-site>.site-nav-landing.dr-nav>.dr-brand strong span {
+  color: #df3545;
+}
+
+.dr-site>.site-nav-landing.dr-nav .dr-nav-motto {
+  color: #5c6268;
+  border-left-color: rgba(15, 25, 35, .2);
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta) {
+  color: #20272d;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):hover,
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):focus-visible {
+  background: rgba(255, 255, 255, .72);
+  color: #b72634;
+}
+
+@media (max-width: 900px) {
+  .dr-site>.site-nav-landing.dr-nav {
+    height: 66px;
+    padding: 0 10px 0 14px;
+    overflow: visible;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav>.dr-brand {
+    height: 52px;
+    gap: 7px;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav>.dr-brand img {
+    width: 42px !important;
+    height: 42px !important;
+    flex-basis: 42px;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav>.dr-brand strong {
+    font-size: 1.25rem;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav .site-nav-menu {
+    border-color: rgba(15, 25, 35, .18);
+    background: #fff;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav .site-nav-menu span {
+    background: #0f1923;
+  }
+
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links,
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links.is-open {
+    top: 65px;
+    border-color: rgba(15, 25, 35, .16) !important;
+    background: #f3efe8 !important;
+    box-shadow: 0 18px 40px rgba(15, 25, 35, .14);
+  }
+}
+
+@media (max-width:560px) {
+  .site-nav-app .site-brand strong {
+    display: none;
+  }
+
+  .site-nav-app .site-brand img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .site-nav-app .site-nav-actions {
+    gap: 4px;
+  }
+
+  .site-nav-app .site-nav-actions>button {
+    min-height: 36px;
+    padding-inline: 9px;
+    font-size: .66rem;
+  }
+
+  .site-nav-app .site-nav-center {
+    max-width: 34vw;
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-transparency:reduce) {
+  .site-nav {
+    background: #fff !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* One brand asset everywhere: the image already includes the Draftix wordmark. */
+.site-nav .site-brand {
+  display: block;
+  width: 118px;
+  height: 58px;
+  flex: 0 0 118px;
+  overflow: hidden;
+}
+
+.site-nav .site-brand img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 50%;
+  filter: none;
+}
+
+.public-footer .site-brand {
+  display: block;
+  width: 130px;
+  height: 66px;
+  overflow: hidden;
+}
+
+.public-footer .site-brand img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 50%;
+  filter: none;
+}
+
+@media (max-width:560px) {
+  .site-nav .site-brand {
+    width: 78px;
+    height: 44px;
+    flex-basis: 78px;
+  }
+
+  .site-nav-app .site-brand img {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .public-footer .site-brand {
+    width: 108px;
+    height: 58px;
+  }
+}
+
+/* Public navigation uses the same black brand frame as the footer. */
+.site-nav-landing,
+.site-nav-support,
+.dr-site>.dr-nav,
+.sp-page>.sp-header {
+  border-bottom-color: #28313b !important;
+  background: #0b1017 !important;
+  box-shadow: 0 6px 22px rgba(1, 4, 9, .2) !important;
+  color: #f3f4f5;
+}
+
+.site-nav-landing .site-nav-links a:not(.dr-nav-cta),
+.site-nav-support .site-nav-links a:not(.sp-open),
+.sp-page>.sp-header .sp-nav-links a:not(.sp-open) {
+  color: #b8c0c8;
+}
+
+.site-nav-landing .site-nav-links a:not(.dr-nav-cta):not(.sp-open):hover,
+.site-nav-landing .site-nav-links a:not(.dr-nav-cta):not(.sp-open):focus-visible,
+.site-nav-support .site-nav-links a:not(.sp-open):hover,
+.site-nav-support .site-nav-links a:not(.sp-open):focus-visible,
+.sp-page>.sp-header .sp-nav-links a:not(.sp-open):hover,
+.sp-page>.sp-header .sp-nav-links a:not(.sp-open):focus-visible {
+  background: #ff4655;
+  color: #fff;
+}
+
+.site-nav-landing .site-nav-menu,
+.site-nav-support .site-nav-menu {
+  border-color: #303945;
+  background: #141b24;
+}
+
+.site-nav-landing .site-nav-menu span,
+.site-nav-support .site-nav-menu span {
+  background: #f3f4f5;
+}
+
+.site-nav-landing .dr-nav-cta,
+.site-nav-support .sp-open,
+.dr-site>.dr-nav .dr-nav-links .dr-nav-cta,
+.sp-page>.sp-header .sp-nav-links .sp-open {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid #ff4655;
+  border-radius: 7px;
+  background: #ff4655;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 -1px 0 rgba(15, 25, 35, .16);
+  color: #fff !important;
+  font-family: var(--font-nav);
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.site-nav-landing .dr-nav-cta:hover,
+.site-nav-landing .dr-nav-cta:focus-visible,
+.site-nav-support .sp-open:hover,
+.site-nav-support .sp-open:focus-visible {
+  border-color: #e93646;
+  background: #e93646;
+  color: #fff !important;
+}
+
+@media (max-width:820px) {
+
+  .site-nav-landing .site-nav-links,
+  .site-nav-support .site-nav-links,
+  .dr-site>.dr-nav .dr-nav-links,
+  .sp-page>.sp-header .sp-nav-links {
+    border-color: #28313b !important;
+    background: #0b1017 !important;
+    box-shadow: 0 18px 44px rgba(1, 4, 9, .3);
+  }
+}
+
+/* Final landing-only override: the homepage uses the cream command bar. */
+.dr-site>.site-nav-landing.dr-nav {
+  border-bottom-color: rgba(15, 25, 35, .2) !important;
+  background: #f3efe8 !important;
+  box-shadow: 0 8px 24px rgba(15, 25, 35, .1) !important;
+  color: #0f1923;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta) {
+  color: #20272d;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):hover,
+.dr-site>.site-nav-landing.dr-nav .site-nav-links a:not(.dr-nav-cta):focus-visible {
+  background: rgba(255, 255, 255, .72);
+  color: #b72634;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-menu {
+  border-color: rgba(15, 25, 35, .18);
+  background: #fff;
+}
+
+.dr-site>.site-nav-landing.dr-nav .site-nav-menu span {
+  background: #0f1923;
+}
+
+@media (max-width: 900px) {
+
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links,
+  .dr-site>.site-nav-landing.dr-nav .site-nav-links.is-open {
+    border-color: rgba(15, 25, 35, .16) !important;
+    background: #f3efe8 !important;
+    box-shadow: 0 18px 40px rgba(15, 25, 35, .14);
+  }
+}

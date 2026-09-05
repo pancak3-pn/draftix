@@ -7,12 +7,15 @@ import { purgeResumeTokens } from "./state/draftReducer.js";
 // Entry-critical styles only. Page-specific stylesheets are imported by their
 // lazy chunks (app-redesign.css -> SessionGate, tournaments.css ->
 // TournamentPage) so first paint on the landing page doesn't block on them.
+// site-nav.css must stay after typography.css — the shared navbar contract
+// overrides earlier sheets and originally rode at the end of typography.css.
 import "./styles/fonts.css";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/landing-redesign.css";
 import "./styles/support-pages.css";
 import "./styles/typography.css";
+import "./styles/site-nav.css";
 
 // Surface crashes outside React (event handlers, promises) to the admin
 // error feed. Runs before the first render so nothing is missed.

@@ -93,12 +93,14 @@ function RankSelect({ value, label, onChange }) {
     detailsRef.current?.removeAttribute("open");
   };
 
-  return <details className="tb-rank-select" ref={detailsRef} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) detailsRef.current?.removeAttribute("open"); }}>
+  return <><select className="tb-rank-native" value={value} aria-label={label} onChange={(event) => onChange(Number(event.target.value))}>
+    {RANKS.map((rank, index) => <option key={rank} value={index}>{rank}</option>)}
+  </select><details className="tb-rank-select" ref={detailsRef} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) detailsRef.current?.removeAttribute("open"); }}>
     <summary aria-label={`${label}: ${selected}`}><img src={rankIcon(selected)} alt="" loading="lazy" /><span>{selected}</span><i aria-hidden="true" /></summary>
     <div className="tb-rank-menu" role="listbox" aria-label={label}>
       {RANKS.map((rank, index) => <button type="button" role="option" aria-selected={index === value} className={index === value ? "is-selected" : ""} key={rank} onClick={() => choose(index)}><img src={rankIcon(rank)} alt="" loading="lazy" /><span>{rank}</span></button>)}
     </div>
-  </details>;
+  </details></>;
 }
 
 export default function TeamBalancerPage() {

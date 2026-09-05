@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { tournamentSeo } from "../src/lib/tournaments.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist-react");
@@ -70,7 +71,8 @@ const pages = [
   {
     path: "/tournaments",
     title: "Free Tournament Bracket Maker | Draftix",
-    description: "Create a free shareable tournament bracket for 3 to 16 entrants. Run elimination, round robin, or Swiss events with live results and automatic byes.",
+    description: tournamentSeo.description,
+    h1: tournamentSeo.heading,
     socialDescription: "Build and share a live bracket for teams, individuals, clubs, sports, esports, and community events.",
     keywords: "free tournament bracket maker, online bracket generator, elimination bracket, round robin tournament, swiss tournament, shareable tournament bracket",
     imageAlt: "Draftix online tournament bracket maker",
@@ -78,6 +80,8 @@ const pages = [
       "@context": "https://schema.org",
       "@type": "WebApplication",
       name: "Draftix Tournament Bracket Maker",
+      description: tournamentSeo.description,
+      featureList: ["Single elimination brackets", "Double elimination brackets", "Round robin schedules", "Swiss tournaments", "Live scores", "Public bracket links", "3 to 16 teams or players"],
       url: `${origin}/tournaments`,
       applicationCategory: "UtilitiesApplication",
       operatingSystem: "Any",
@@ -321,6 +325,10 @@ function seoBlock(page) {
 // styles avoid any flash of text before hydration.
 function staticH1(page) {
   const text = escapeHtml(page.h1 || page.title.replace(/ \| Draftix$/, ""));
+  if (page.path === "/tournaments") {
+    const help = tournamentSeo.questions.map(({ title, answer }) => `<details><summary>${escapeHtml(title)}</summary><p>${escapeHtml(answer)}</p></details>`).join("");
+    return `<div id="root"><main style="max-width:960px;margin:48px auto;padding:24px"><a href="/">Draftix</a><h1>${text}</h1><p>${escapeHtml(tournamentSeo.intro)}</p><noscript><p>Enable JavaScript to create and manage a bracket.</p></noscript><section aria-label="Bracket maker help">${help}</section></main></div>`;
+  }
   return `<div id="root"><h1 style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;">${text}</h1></div>`;
 }
 

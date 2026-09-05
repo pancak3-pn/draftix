@@ -1,7 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
-const key = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
+// Shared by the tournament page and the static SEO build.
+export const tournamentSeo = {
+  heading: "Free tournament bracket maker",
+  description: "Create a free tournament bracket for 3 to 16 teams or players. Choose single or double elimination, round robin, or Swiss. Track scores and share live results.",
+  intro: "Create brackets for 3 to 16 teams or players. Choose a format, track scores, and share live results.",
+  questions: [
+    { title: "How do I make a tournament bracket?", answer: "Name your event, choose a game or sport, and add your teams or players in seed order. Select a format and series length, then create your bracket. Share the public link so everyone can follow the results." },
+    { title: "Which tournament formats can I use?", answer: "Choose single elimination, double elimination, round robin, or Swiss. Single elimination removes an entrant after one loss. Round robin schedules every entrant against every other entrant. Swiss pairs entrants over successive rounds using their results." },
+    { title: "Is the bracket maker free and only for esports?", answer: "Draftix is free to use. Make brackets for sports, esports, chess, or your own activity using Other. Keep your organizer link private; use the public link to share your bracket." },
+  ],
+};
+
+const url = String(import.meta.env?.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
+const key = String(import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || "").trim();
 const supabase = url && key ? createClient(url, key, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   realtime: { params: { eventsPerSecond: 10 } },
