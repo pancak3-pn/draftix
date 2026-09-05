@@ -1,0 +1,9 @@
+# SPA routes without a static file (Render/Cloudflare Pages convention).
+# Vercel ignores this file and uses vercel.json instead.
+/t/*    /t.html    200
+
+# Legacy paths
+/admin      /r    301
+/app        /draft    301
+/app.html   /draft    301
+/t          /tournaments    301

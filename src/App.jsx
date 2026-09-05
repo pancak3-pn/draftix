@@ -4,21 +4,38 @@ import { trackPageview } from "./lib/analytics.js";
 import { subscribeToNavigation, currentLocation } from "./lib/spaRouter.js";
 
 const CHUNK_RECOVERY_KEY = "draftix:chunk-recovery";
+const CHUNK_RECOVERY_COOLDOWN_MS = 30_000;
 const isStaleChunkError = (error) => /failed to fetch dynamically imported module|loading chunk|chunkloaderror/i.test(String(error?.message || error));
+
+function lastChunkRecoveryAttempt() {
+  try { return Number(sessionStorage.getItem(CHUNK_RECOVERY_KEY)) || 0; } catch { return 0; }
+}
+
+function markChunkRecoveryAttempt() {
+  try { sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now())); } catch { /* storage unavailable */ }
+}
+
+function clearChunkRecoveryAttempt() {
+  try { sessionStorage.removeItem(CHUNK_RECOVERY_KEY); } catch { /* storage unavailable */ }
+}
 
 function lazyRoute(load) {
   return lazy(() => load().then((module) => {
-    sessionStorage.removeItem(CHUNK_RECOVERY_KEY);
+    clearChunkRecoveryAttempt();
     return module;
   }).catch((error) => {
-    if (isStaleChunkError(error) && !sessionStorage.getItem(CHUNK_RECOVERY_KEY)) {
-      sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()));
-      const freshUrl = new URL(window.location.href);
-      freshUrl.searchParams.set("refresh", String(Date.now()));
-      window.location.replace(freshUrl);
-      return new Promise(() => {});
-    }
-    throw error;
+    if (!isStaleChunkError(error)) throw error;
+    // A deploy replaced the hashed chunk this tab was about to load. Reload
+    // to pick up the fresh build instead of surfacing an error. The cooldown
+    // (instead of a one-shot session flag) keeps repeated deploys working for
+    // long-lived tabs while still preventing an infinite reload loop.
+    const now = Date.now();
+    if (now - lastChunkRecoveryAttempt() < CHUNK_RECOVERY_COOLDOWN_MS) throw error;
+    markChunkRecoveryAttempt();
+    const freshUrl = new URL(window.location.href);
+    freshUrl.searchParams.set("refresh", String(now));
+    window.location.replace(freshUrl);
+    return new Promise(() => {});
   }));
 }
 // Lazy-load route pages so the initial bundle stays lean. Only the landing
